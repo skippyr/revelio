@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <pwd.h>
 
 void print_error(const char *message)
 {
@@ -44,6 +45,31 @@ void reveal_directory(char directory_path[])
 		{
 			continue;
 		}
+		char directory_entry_path[PATH_MAX];
+		snprintf(
+			directory_entry_path,
+			sizeof(directory_entry_path),
+			"%s%s%s",
+			directory_path,
+			!strcmp(
+				directory_path,
+				"/"
+			) ?
+			"" :
+			"/",
+			directory_entry->d_name
+		);
+		struct stat directory_entry_status;
+		stat(
+			directory_entry_path,
+			&directory_entry_status
+		);
+		struct passwd *user_entry = getpwuid(directory_entry_status.st_uid);
+		if (user_entry == NULL)
+		{
+			print_error("could not identify user entry.\n");
+			exit(1);
+		}
 		printf(
 			"%5hu | ",
 			quantity_of_directory_entries + 1
@@ -82,16 +108,13 @@ void reveal_directory(char directory_path[])
 				break;
 		}
 		printf(
-			"   %s\n",
+			"   %s   %s\n",
+			user_entry->pw_name,
 			directory_entry->d_name
 		);
 		++ quantity_of_directory_entries;
 	}
 	closedir(directory_stream);
-	printf(
-		"Quantity of directory entries: %hu.\n",
-		quantity_of_directory_entries
-	);
 	return;
 }
 
