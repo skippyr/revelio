@@ -1,10 +1,9 @@
 #include <dirent.h>
-#include <dirent.h>
+#include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <pwd.h>
 
 void print_usage_instructions()
 {
