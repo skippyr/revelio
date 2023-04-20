@@ -6,6 +6,18 @@
 #include <sys/stat.h>
 #include <pwd.h>
 
+void print_usage_instructions()
+{
+	printf("Usage Instructions\n");
+	printf("\tSummary\n");
+	printf("\t\tReveals directory entries.\n");
+	printf("\tUsage\n");
+	printf("\t\tUse it in the following syntax:\n");
+	printf("\t\t\treveal <path>\n");
+	printf("\t\tIf no path is provided, it will consider your current directory.\n");
+	return;
+}
+
 void print_error(const char *message)
 {
 	fprintf(
@@ -108,7 +120,7 @@ void reveal_directory(char directory_path[])
 				break;
 		}
 		printf(
-			"   %s   %s\n",
+			"   %-15s   %s\n",
 			user_entry->pw_name,
 			directory_entry->d_name
 		);
@@ -127,7 +139,24 @@ int main(
 	char absolute_path[PATH_MAX];
 	if (quantity_of_arguments >= 2)
 	{
-		relative_path = arguments[1];
+		if (
+			!strcmp(
+				arguments[1],
+				"-h"
+			) ||
+			!strcmp(
+				arguments[1],
+				"--help"
+			)
+		)
+		{
+			print_usage_instructions();
+			return (0);
+		}
+		else
+		{
+			relative_path = arguments[1];
+		}
 	}
 	realpath(
 		relative_path,
