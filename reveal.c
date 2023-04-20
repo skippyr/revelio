@@ -5,8 +5,6 @@
 #include <string.h>
 #include <sys/stat.h>
 
-#define SOFTWARE_NAME "reveal"
-
 void print_error(const char *message)
 {
 	fprintf(
@@ -52,14 +50,29 @@ void reveal_directory(char directory_path[])
 		);
 		switch (directory_entry->d_type)
 		{
-			case 4:
-				printf("Directory");
+			case DT_DIR:
+				printf("Directory ");
 				break;
-			case 8:
-				printf("File     ");
+			case DT_REG:
+				printf("File      ");
 				break;
-			case 10:
-				printf("Symlink  ");
+			case DT_LNK:
+				printf("Symlink   ");
+				break;
+			case DT_FIFO:
+				printf("Fifo      ");
+				break;
+			case DT_SOCK:
+				printf("Socket    ");
+				break;
+			case DT_CHR:
+				printf("Character ");
+				break;
+			case DT_BLK:
+				printf("Block     ");
+				break;
+			case DT_UNKNOWN:
+				printf("Unknown   ");
 				break;
 			default:
 				printf(
@@ -88,7 +101,7 @@ int main(
 )
 {
 	char *relative_path = ".";
-	char absolute_path[PATH_MAX + 1];
+	char absolute_path[PATH_MAX];
 	if (quantity_of_arguments >= 2)
 	{
 		relative_path = arguments[1];
