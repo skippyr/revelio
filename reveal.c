@@ -5,7 +5,7 @@
 #include <string.h>
 #include <sys/stat.h>
 
-void print_usage_instructions()
+void print_usage_instructions(void)
 {
 	printf("Usage Instructions\n");
 	printf("\tSummary\n");
