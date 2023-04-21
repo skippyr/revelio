@@ -8,8 +8,8 @@
 void print_usage_instructions(void)
 {
 	printf("Usage Instructions\n");
-	printf("\tSummary\n");
-	printf("\t\tReveals directory entries and file contents.\n");
+	printf("\tStarting Point\n");
+	printf("\t\tReveal reveals directory entries and file contents.\n");
 	printf("\tUsage\n");
 	printf("\t\tUse it in the following syntax:\n");
 	printf("\t\t\treveal <path>\n");
