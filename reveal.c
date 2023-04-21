@@ -149,7 +149,7 @@ void reveal_file(char file_path[])
 		buffer,
 		sizeof(buffer),
 		file_stream
-	))
+	) != NULL)
 	{
 		printf(
 			"%s",

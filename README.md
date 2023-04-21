@@ -2,6 +2,7 @@
 	<h2>Starting Point</h2>
 		<p>Reveal is a simple tool to reveal directory entries and file contents.</p>
 		<img src="./images/image_0.png"/>
+		<img src="./images/image_1.png"/>
 	<h2>Installation And Usage</h2>
 		<p>Be aware that this software was build to run on Linux. I can not ensure that it will work for other systems.</p>
 		<ul>
