@@ -9,7 +9,7 @@ void print_usage_instructions(void)
 {
 	printf("Usage Instructions\n");
 	printf("\tSummary\n");
-	printf("\t\tReveals directory entries.\n");
+	printf("\t\tReveals directory entries and file contents.\n");
 	printf("\tUsage\n");
 	printf("\t\tUse it in the following syntax:\n");
 	printf("\t\t\treveal <path>\n");
@@ -29,16 +29,16 @@ void print_error(const char *message)
 
 void reveal_directory(char directory_path[])
 {
-	printf(
-		"Revealing directory: %s.\n",
-		directory_path
-	);
 	DIR *directory_stream = opendir(directory_path);
 	if (directory_stream == NULL)
 	{
 		print_error("the directory can not be read.\n");
 		exit(1);
 	}
+	printf(
+		"Revealing directory: %s.\n",
+		directory_path
+	);
 	struct dirent *directory_entry;
 	unsigned short int quantity_of_directory_entries = 0;
 	while((directory_entry = readdir(directory_stream)) != NULL)
@@ -129,6 +129,38 @@ void reveal_directory(char directory_path[])
 	return;
 }
 
+void reveal_file(char file_path[])
+{
+	FILE *file_stream = fopen(
+		file_path,
+		"r"
+	);
+	if (file_stream == NULL)
+	{
+		print_error("the file can not be read.\n");
+		exit(1);
+	}
+	printf(
+		"Revealing file: %s.\n\n",
+		file_path
+	);
+	char buffer[2];
+	while (fgets(
+		buffer,
+		sizeof(buffer),
+		file_stream
+	))
+	{
+		printf(
+			"%s",
+			buffer
+		);
+	}
+	printf("\n");
+	fclose(file_stream);
+	return;
+}
+
 int main(
 	int quantity_of_arguments,
 	char *arguments[]
@@ -169,6 +201,10 @@ int main(
 	if (S_ISDIR(absolute_path_status.st_mode))
 	{
 		reveal_directory(absolute_path);
+	}
+	else if (S_ISREG(absolute_path_status.st_mode))
+	{
+		reveal_file(absolute_path);
 	}
 	else
 	{
