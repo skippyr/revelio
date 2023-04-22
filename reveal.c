@@ -94,7 +94,7 @@ void print_size(
 	return;
 }
 
-void print_effects(struct stat *path_status)
+void print_permissions(struct stat *path_status)
 {
 	printf(
 		"%s%s%s",
@@ -113,11 +113,11 @@ void print_effects(struct stat *path_status)
 	{
 		chmod_value += 400;
 	}
-	else if (path_status->st_mode & S_IRGRP)
+	if (path_status->st_mode & S_IRGRP)
 	{
 		chmod_value += 40;
 	}
-	else if (path_status->st_mode & S_IROTH)
+	if (path_status->st_mode & S_IROTH)
 	{
 		chmod_value += 4;
 	}
@@ -125,11 +125,11 @@ void print_effects(struct stat *path_status)
 	{
 		chmod_value += 200;
 	}
-	else if (path_status->st_mode & S_IWGRP)
+	if (path_status->st_mode & S_IWGRP)
 	{
 		chmod_value += 20;
 	}
-	else if (path_status->st_mode & S_IWOTH)
+	if (path_status->st_mode & S_IWOTH)
 	{
 		chmod_value += 2;
 	}
@@ -137,11 +137,11 @@ void print_effects(struct stat *path_status)
 	{
 		chmod_value += 100;
 	}
-	else if (path_status->st_mode & S_IXGRP)
+	if (path_status->st_mode & S_IXGRP)
 	{
 		chmod_value += 10;
 	}
-	else if (path_status->st_mode & S_IXOTH)
+	if (path_status->st_mode & S_IXOTH)
 	{
 		chmod_value += 1;
 	}
@@ -251,7 +251,7 @@ void reveal_directory(char directory_path[])
 			directory_entry,
 			&directory_entry_status);
 		printf("   ");
-		print_effects(&directory_entry_status);
+		print_permissions(&directory_entry_status);
 		printf(
 			"   %-15s   %s\n",
 			user_entry->pw_name,
