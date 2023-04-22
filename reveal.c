@@ -32,7 +32,7 @@ void reveal_directory(char directory_path[])
 	DIR *directory_stream = opendir(directory_path);
 	if (directory_stream == NULL)
 	{
-		print_error("the directory can not be read.\n");
+		print_error("The directory can not be read.\n");
 		exit(1);
 	}
 	printf(
@@ -78,7 +78,7 @@ void reveal_directory(char directory_path[])
 		struct passwd *user_entry = getpwuid(directory_entry_status.st_uid);
 		if (user_entry == NULL)
 		{
-			print_error("could not identify user entry.\n");
+			print_error("Could not identify user entry.\n");
 			exit(1);
 		}
 		printf(
@@ -137,7 +137,7 @@ void reveal_file(char file_path[])
 	);
 	if (file_stream == NULL)
 	{
-		print_error("the file can not be read.\n");
+		print_error("The file can not be read.\n");
 		exit(1);
 	}
 	printf(
@@ -168,15 +168,19 @@ int main(
 {
 	char *relative_path = ".";
 	char absolute_path[PATH_MAX];
-	if (quantity_of_arguments >= 2)
+	for (
+		unsigned short int iterator = 0;
+		iterator != quantity_of_arguments;
+		++ iterator
+	)
 	{
 		if (
 			!strcmp(
-				arguments[1],
+				arguments[iterator],
 				"-h"
 			) ||
 			!strcmp(
-				arguments[1],
+				arguments[iterator],
 				"--help"
 			)
 		)
@@ -184,20 +188,28 @@ int main(
 			print_usage_instructions();
 			return (0);
 		}
-		else
+		else if (iterator > 0)
 		{
 			relative_path = arguments[1];
 		}
 	}
-	realpath(
+	if (realpath(
 		relative_path,
 		absolute_path
-	);
+	) == NULL)
+	{
+		print_error("Could not define absolute path of given path.\n");
+		return (1);
+	}
 	struct stat absolute_path_status;
-	stat(
+	if (stat(
 		absolute_path,
 		&absolute_path_status
-	);
+	) != 0)
+	{
+		print_error("Could not stat given path.\n");
+		return (1);
+	}
 	if (S_ISDIR(absolute_path_status.st_mode))
 	{
 		reveal_directory(absolute_path);
@@ -208,7 +220,7 @@ int main(
 	}
 	else
 	{
-		print_error("can not reveal given path type.\n");
+		print_error("Can not reveal given path type.\n");
 		return (1);
 	}
 	return (0);
