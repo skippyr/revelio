@@ -5,6 +5,10 @@
 #include <string.h>
 #include <sys/stat.h>
 
+#define ONE_GIGABYTE_IN_BYTES 1e+9
+#define ONE_MEGABYTE_IN_BYTES 1e+6
+#define ONE_KILOBYTE_IN_BYTES 1e+3
+
 void print_usage_instructions(void)
 {
 	printf("Usage Instructions\n");
@@ -24,6 +28,63 @@ void print_error(const char *message)
 		"Opsie! %s",
 		message
 	);
+	return;
+}
+
+double convert_bytes_to_gigabytes(long bytes)
+{
+	return (bytes / ONE_GIGABYTE_IN_BYTES);
+}
+
+double convert_bytes_to_megabytes(long bytes)
+{
+	return (bytes / ONE_MEGABYTE_IN_BYTES);
+}
+
+double convert_bytes_to_kilobytes(long bytes)
+{
+	return (bytes / ONE_KILOBYTE_IN_BYTES);
+}
+
+void print_size(struct stat *path_status)
+{
+	if (S_ISDIR(path_status->st_mode))
+	{
+		printf("      -");
+		return;
+	}
+	double
+		size_in_gigabytes = convert_bytes_to_gigabytes(path_status->st_size),
+		size_in_megabytes = convert_bytes_to_megabytes(path_status->st_size),
+		size_in_kilobytes = convert_bytes_to_kilobytes(path_status->st_size);
+	if ((int) size_in_gigabytes > 0)
+	{
+		printf(
+			"%5.1lfGB",
+			size_in_gigabytes
+		);
+	}
+	else if ((int) size_in_megabytes > 0)
+	{
+		printf(
+			"%5.1lfMB",
+			size_in_megabytes
+		);
+	}
+	else if ((int) size_in_kilobytes > 0)
+	{
+		printf(
+			"%5.1lfKB",
+			size_in_kilobytes
+		);
+	}
+	else
+	{
+		printf(
+			" %5ldB",
+			path_status->st_size
+		);
+	}
 	return;
 }
 
@@ -118,6 +179,8 @@ void reveal_directory(char directory_path[])
 				);
 				break;
 		}
+		printf("  ");
+		print_size(&directory_entry_status);
 		printf(
 			"   %-15s   %s\n",
 			user_entry->pw_name,
