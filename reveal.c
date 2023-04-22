@@ -88,6 +88,23 @@ void print_size(struct stat *path_status)
 	return;
 }
 
+void print_effects(struct stat *path_status)
+{
+	printf(
+		"%s%s%s",
+		path_status->st_mode & S_IRUSR ?
+		"r" :
+		"-",
+		path_status->st_mode & S_IWUSR ?
+		"w" :
+		"-",
+		path_status->st_mode & S_IXUSR ?
+		"x" :
+		"-"
+	);
+	return;
+}
+
 void reveal_directory(char directory_path[])
 {
 	DIR *directory_stream = opendir(directory_path);
@@ -182,8 +199,10 @@ void reveal_directory(char directory_path[])
 				);
 				break;
 		}
-		printf("  ");
+		printf("   ");
 		print_size(&directory_entry_status);
+		printf("   ");
+		print_effects(&directory_entry_status);
 		printf(
 			"   %-15s   %s\n",
 			user_entry->pw_name,
