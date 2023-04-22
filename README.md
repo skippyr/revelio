@@ -11,6 +11,7 @@
 			<pre><code>git clone --depth 1 https://github.com/skippyr/reveal</code></pre>
 			<p>This command will clone this repository to the directory <code>reveal</code> in your current directory, but feel free to change to whatever directory you want to by adding its path in the end of the command. The flag <code>--depth</code> with value <code>1</code> specifies to <code>git</code> that you only want to download the latest commit instead of the whole commit tree.</p>
 			<p>If you do not have <code>git</code> installed, you can download this repository from its page on GitHub. Access that page, click on the <code>Code</code> button on the top of the page, then click on <code>Download ZIP</code>. This will download a ZIP file containing the repository, you just have to unzip it and move to the path you want it to be.</p>
+			<li>Access the repository's directory.</li>
 			<li>Install <code>gcc</code>, standard C libraries and make utils:</li>
 			<p>Those are the compiler, libraries needed to compile the source code and utilities to help build the source files.</p>
 			<li>Compile the source files using <code>make</code>:</li>
@@ -24,7 +25,7 @@
 			<pre><code>export PATH="${PATH}:${HOME}/.local/bin"</code></pre>
 			<p>Here are other references that you can use to learn more about it.</p>
 				<ul>
-					<li><a href="https://www.freecodecamp.org/news/how-to-set-an-environment-variable-in-linux/">(FreeCodeCamp) How To Set An Environment Variable</a>.</li>
+					<li><a href="https://www.freecodecamp.org/news/how-to-set-an-environment-variable-in-linux/">(FreeCodeCamp) How To Set An Environment Variable In Linux</a>.</li>
 				</ul>
 		</ul>
 	<h2>Issues And Contributions</h2>
