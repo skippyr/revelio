@@ -46,9 +46,15 @@ double convert_bytes_to_kilobytes(long bytes)
 	return (bytes / ONE_KILOBYTE_IN_BYTES);
 }
 
-void print_size(struct stat *path_status)
+void print_size(
+	struct dirent *path_entry,
+	struct stat *path_status
+)
 {
-	if (S_ISDIR(path_status->st_mode))
+	if (
+		!S_ISREG(path_status->st_mode) ||
+		path_entry->d_type == DT_LNK
+	)
 	{
 		printf("      -");
 		return;
@@ -200,7 +206,9 @@ void reveal_directory(char directory_path[])
 				break;
 		}
 		printf("   ");
-		print_size(&directory_entry_status);
+		print_size(
+			directory_entry,
+			&directory_entry_status);
 		printf("   ");
 		print_effects(&directory_entry_status);
 		printf(
