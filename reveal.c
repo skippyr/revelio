@@ -16,7 +16,9 @@ void print_usage_instructions(void)
 	printf("\t\tReveal reveals directory entries and file contents.\n");
 	printf("\tUsage\n");
 	printf("\t\tUse it in the following syntax:\n");
-	printf("\t\t\treveal <path>\n");
+	printf("\t\t\treveal [flags] <path>\n");
+	printf("\t\tThe flags it can accept are:\n");
+	printf("\t\t\t-h or --help: show these usage instructions.\n");
 	printf("\t\tIf no path is provided, it will consider your current directory.\n");
 	return;
 }
