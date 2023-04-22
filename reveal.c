@@ -132,10 +132,13 @@ void reveal_directory(char directory_path[])
 			directory_entry->d_name
 		);
 		struct stat directory_entry_status;
-		stat(
+		if (stat(
 			directory_entry_path,
 			&directory_entry_status
-		);
+		) != 0)
+		{
+			continue;
+		}
 		struct passwd *user_entry = getpwuid(directory_entry_status.st_uid);
 		if (user_entry == NULL)
 		{
