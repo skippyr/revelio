@@ -108,6 +108,47 @@ void print_effects(struct stat *path_status)
 		"x" :
 		"-"
 	);
+	unsigned short int chmod_value = 0;
+	if (path_status->st_mode & S_IRUSR)
+	{
+		chmod_value += 400;
+	}
+	else if (path_status->st_mode & S_IRGRP)
+	{
+		chmod_value += 40;
+	}
+	else if (path_status->st_mode & S_IROTH)
+	{
+		chmod_value += 4;
+	}
+	if (path_status->st_mode & S_IWUSR)
+	{
+		chmod_value += 200;
+	}
+	else if (path_status->st_mode & S_IWGRP)
+	{
+		chmod_value += 20;
+	}
+	else if (path_status->st_mode & S_IWOTH)
+	{
+		chmod_value += 2;
+	}
+	if (path_status->st_mode & S_IXUSR)
+	{
+		chmod_value += 100;
+	}
+	else if (path_status->st_mode & S_IXGRP)
+	{
+		chmod_value += 10;
+	}
+	else if (path_status->st_mode & S_IXOTH)
+	{
+		chmod_value += 1;
+	}
+	printf(
+		" (%hu)",
+		chmod_value
+	);
 	return;
 }
 
