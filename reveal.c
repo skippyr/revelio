@@ -72,6 +72,38 @@ void concatenate_paths(
 	return;
 }
 
+void print_directory_entry_type(struct dirent *directory_entry)
+{
+	switch (directory_entry->d_type)
+	{
+		case DT_DIR:
+			printf("Directory ");
+			break;
+		case DT_REG:
+			printf("File      ");
+			break;
+		case DT_LNK:
+			printf("Symlink   ");
+			break;
+		case DT_FIFO:
+			printf("Fifo      ");
+			break;
+		case DT_SOCK:
+			printf("Socket    ");
+			break;
+		case DT_CHR:
+			printf("Character ");
+			break;
+		case DT_BLK:
+			printf("Block     ");
+			break;
+		default:
+			printf("Unknown   ");
+			break;
+	}
+	return;
+}
+
 void print_directory_entry_size(
 	struct dirent *directory_entry,
 	struct stat *directory_entry_status
@@ -120,42 +152,42 @@ void print_directory_entry_size(
 	return;
 }
 
-unsigned short int calculate_chmod_permissions(unsigned int directory_entry_mode)
+unsigned short int calculate_chmod_permissions(struct stat *directory_entry_status)
 {
 	unsigned short int chmod_permissions = 0;
-	if (directory_entry_mode & S_IRUSR)
+	if (directory_entry_status->st_mode & S_IRUSR)
 	{
 		chmod_permissions += 400;
 	}
-	if (directory_entry_mode & S_IRGRP)
+	if (directory_entry_status->st_mode & S_IRGRP)
 	{
 		chmod_permissions += 40;
 	}
-	if (directory_entry_mode & S_IROTH)
+	if (directory_entry_status->st_mode & S_IROTH)
 	{
 		chmod_permissions += 4;
 	}
-	if (directory_entry_mode & S_IWUSR)
+	if (directory_entry_status->st_mode & S_IWUSR)
 	{
 		chmod_permissions += 200;
 	}
-	if (directory_entry_mode & S_IWGRP)
+	if (directory_entry_status->st_mode & S_IWGRP)
 	{
 		chmod_permissions += 20;
 	}
-	if (directory_entry_mode & S_IWOTH)
+	if (directory_entry_status->st_mode & S_IWOTH)
 	{
 		chmod_permissions += 2;
 	}
-	if (directory_entry_mode & S_IXUSR)
+	if (directory_entry_status->st_mode & S_IXUSR)
 	{
 		chmod_permissions += 100;
 	}
-	if (directory_entry_mode & S_IXGRP)
+	if (directory_entry_status->st_mode & S_IXGRP)
 	{
 		chmod_permissions += 10;
 	}
-	if (directory_entry_mode & S_IXOTH)
+	if (directory_entry_status->st_mode & S_IXOTH)
 	{
 		chmod_permissions += 1;
 	}
@@ -176,7 +208,7 @@ void print_directory_entry_permissions(struct stat *directory_entry_status)
 		"x" :
 		"-"
 	);
-	unsigned short int chmod_permissions = calculate_chmod_permissions(directory_entry_status->st_mode);
+	unsigned short int chmod_permissions = calculate_chmod_permissions(directory_entry_status);
 	printf(
 		" (%hu)",
 		chmod_permissions
@@ -238,33 +270,7 @@ void reveal_directory(char directory_path[])
 			"%5hu | ",
 			quantity_of_directory_entries + 1
 		);
-		switch (directory_entry->d_type)
-		{
-			case DT_DIR:
-				printf("Directory ");
-				break;
-			case DT_REG:
-				printf("File      ");
-				break;
-			case DT_LNK:
-				printf("Symlink   ");
-				break;
-			case DT_FIFO:
-				printf("Fifo      ");
-				break;
-			case DT_SOCK:
-				printf("Socket    ");
-				break;
-			case DT_CHR:
-				printf("Character ");
-				break;
-			case DT_BLK:
-				printf("Block     ");
-				break;
-			default:
-				printf("Unknown   ");
-				break;
-		}
+		print_directory_entry_type(directory_entry);
 		printf("   ");
 		print_directory_entry_size(
 			directory_entry,
