@@ -252,7 +252,8 @@ void reveal_directory(char directory_path[])
 		printf("   ");
 		print_size(
 			directory_entry,
-			&directory_entry_status);
+			&directory_entry_status
+		);
 		printf("   ");
 		print_permissions(&directory_entry_status);
 		printf(
