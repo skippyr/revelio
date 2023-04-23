@@ -168,6 +168,7 @@ void reveal_directory(char directory_path[])
 	);
 	struct dirent *directory_entry;
 	unsigned short int quantity_of_directory_entries = 0;
+	printf("Index | Type            Size   Permissions   Owner             Name\n");
 	while((directory_entry = readdir(directory_stream)) != NULL)
 	{
 		if (
@@ -255,7 +256,7 @@ void reveal_directory(char directory_path[])
 		printf("   ");
 		print_permissions(&directory_entry_status);
 		printf(
-			"   %-15s   %s\n",
+			"     %-15s   %s\n",
 			user_entry->pw_name,
 			directory_entry->d_name
 		);
