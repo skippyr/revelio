@@ -72,23 +72,23 @@ void concatenate_paths(
 	return;
 }
 
-void print_size(
-	struct dirent *path_entry,
-	struct stat *path_status
+void print_directory_entry_size(
+	struct dirent *directory_entry,
+	struct stat *directory_entry_status
 )
 {
 	if (
-		!S_ISREG(path_status->st_mode) ||
-		path_entry->d_type == DT_LNK
+		!S_ISREG(directory_entry_status->st_mode) ||
+		directory_entry->d_type == DT_LNK
 	)
 	{
 		printf("      -");
 		return;
 	}
 	double
-		size_in_gigabytes = convert_bytes_to_gigabytes(path_status->st_size),
-		size_in_megabytes = convert_bytes_to_megabytes(path_status->st_size),
-		size_in_kilobytes = convert_bytes_to_kilobytes(path_status->st_size);
+		size_in_gigabytes = convert_bytes_to_gigabytes(directory_entry_status->st_size),
+		size_in_megabytes = convert_bytes_to_megabytes(directory_entry_status->st_size),
+		size_in_kilobytes = convert_bytes_to_kilobytes(directory_entry_status->st_size);
 	if ((int) size_in_gigabytes > 0)
 	{
 		printf(
@@ -114,7 +114,7 @@ void print_size(
 	{
 		printf(
 			" %5ldB",
-			path_status->st_size
+			directory_entry_status->st_size
 		);
 	}
 	return;
@@ -260,7 +260,7 @@ void reveal_directory(char directory_path[])
 				break;
 		}
 		printf("   ");
-		print_size(
+		print_directory_entry_size(
 			directory_entry,
 			&directory_entry_status
 		);
