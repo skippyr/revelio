@@ -339,7 +339,7 @@ int main(
 		absolute_path
 	) == NULL)
 	{
-		print_error("Could not define absolute path of given path.\n");
+		print_error("Could not find given path.\n");
 		return (1);
 	}
 	struct stat absolute_path_status;
