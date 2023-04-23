@@ -120,60 +120,66 @@ void print_directory_entry_size(
 	return;
 }
 
-void print_permissions(struct stat *path_status)
+unsigned short int calculate_chmod_permissions(unsigned int directory_entry_mode)
+{
+	unsigned short int chmod_permissions = 0;
+	if (directory_entry_mode & S_IRUSR)
+	{
+		chmod_permissions += 400;
+	}
+	if (directory_entry_mode & S_IRGRP)
+	{
+		chmod_permissions += 40;
+	}
+	if (directory_entry_mode & S_IROTH)
+	{
+		chmod_permissions += 4;
+	}
+	if (directory_entry_mode & S_IWUSR)
+	{
+		chmod_permissions += 200;
+	}
+	if (directory_entry_mode & S_IWGRP)
+	{
+		chmod_permissions += 20;
+	}
+	if (directory_entry_mode & S_IWOTH)
+	{
+		chmod_permissions += 2;
+	}
+	if (directory_entry_mode & S_IXUSR)
+	{
+		chmod_permissions += 100;
+	}
+	if (directory_entry_mode & S_IXGRP)
+	{
+		chmod_permissions += 10;
+	}
+	if (directory_entry_mode & S_IXOTH)
+	{
+		chmod_permissions += 1;
+	}
+	return (chmod_permissions);
+}
+
+void print_directory_entry_permissions(struct stat *directory_entry_status)
 {
 	printf(
 		"%s%s%s",
-		path_status->st_mode & S_IRUSR ?
+		directory_entry_status->st_mode & S_IRUSR ?
 		"r" :
 		"-",
-		path_status->st_mode & S_IWUSR ?
+		directory_entry_status->st_mode & S_IWUSR ?
 		"w" :
 		"-",
-		path_status->st_mode & S_IXUSR ?
+		directory_entry_status->st_mode & S_IXUSR ?
 		"x" :
 		"-"
 	);
-	unsigned short int chmod_value = 0;
-	if (path_status->st_mode & S_IRUSR)
-	{
-		chmod_value += 400;
-	}
-	if (path_status->st_mode & S_IRGRP)
-	{
-		chmod_value += 40;
-	}
-	if (path_status->st_mode & S_IROTH)
-	{
-		chmod_value += 4;
-	}
-	if (path_status->st_mode & S_IWUSR)
-	{
-		chmod_value += 200;
-	}
-	if (path_status->st_mode & S_IWGRP)
-	{
-		chmod_value += 20;
-	}
-	if (path_status->st_mode & S_IWOTH)
-	{
-		chmod_value += 2;
-	}
-	if (path_status->st_mode & S_IXUSR)
-	{
-		chmod_value += 100;
-	}
-	if (path_status->st_mode & S_IXGRP)
-	{
-		chmod_value += 10;
-	}
-	if (path_status->st_mode & S_IXOTH)
-	{
-		chmod_value += 1;
-	}
+	unsigned short int chmod_permissions = calculate_chmod_permissions(directory_entry_status->st_mode);
 	printf(
 		" (%hu)",
-		chmod_value
+		chmod_permissions
 	);
 	return;
 }
@@ -265,7 +271,7 @@ void reveal_directory(char directory_path[])
 			&directory_entry_status
 		);
 		printf("   ");
-		print_permissions(&directory_entry_status);
+		print_directory_entry_permissions(&directory_entry_status);
 		printf(
 			"     %-15s   %s",
 			user_entry->pw_name,
