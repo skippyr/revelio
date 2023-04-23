@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/stat.h>
 
 #define ONE_GIGABYTE_IN_BYTES 1e+9
@@ -250,10 +251,29 @@ void reveal_directory(char directory_path[])
 		printf("   ");
 		print_permissions(&directory_entry_status);
 		printf(
-			"     %-15s   %s\n",
+			"     %-15s   %s",
 			user_entry->pw_name,
 			directory_entry->d_name
 		);
+		if (directory_entry->d_type == DT_LNK)
+		{
+			char symbolic_link_path[PATH_MAX];
+			ssize_t transposed_bytes = readlink(
+				directory_entry_path,
+				symbolic_link_path,
+				sizeof(symbolic_link_path)
+			);
+			if (transposed_bytes == -1)
+			{
+				continue;
+			}
+			symbolic_link_path[transposed_bytes] = '\0';
+			printf(
+				" -> %s",
+				symbolic_link_path
+			);
+		}
+		printf("\n");
 		++ quantity_of_directory_entries;
 	}
 	closedir(directory_stream);
