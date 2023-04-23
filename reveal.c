@@ -279,20 +279,30 @@ void reveal_file(char file_path[])
 		exit(1);
 	}
 	printf(
-		"Revealing file: %s.\n\n",
+		"Revealing file: %s.\n",
 		file_path
 	);
-	char buffer[2];
-	while (fgets(
-		buffer,
-		sizeof(buffer),
-		file_stream
-	) != NULL)
+	char character;
+	unsigned short int quantity_of_lines = 0;
+	unsigned short int last_character_was_a_line_break = 0;
+	while ((character = fgetc(file_stream)) != EOF)
 	{
+		if (
+			quantity_of_lines == 0 ||
+			last_character_was_a_line_break
+		)
+		{
+			++ quantity_of_lines;
+			printf(
+				"%5hu | ",
+				quantity_of_lines
+			);
+		}
 		printf(
-			"%s",
-			buffer
+			"%c",
+			character
 		);
+		last_character_was_a_line_break = character == '\n';
 	}
 	printf("\n");
 	fclose(file_stream);
