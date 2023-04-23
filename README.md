@@ -2,17 +2,19 @@
 	<h2>Starting Point</h2>
 		<p>Reveal is a simple tool to reveal directory entries and file contents.</p>
 		<img src="./images/preview.gif">
+		<p>Different from other utilities tools, Reveal only show data in one way, without flags to change it. This means that it is not a good tool for scripting. However, this makes it really simple, easy to learn and easier to customize it by modifing its source code.</p>
 	<h2>Installation And Usage</h2>
 		<p>Be aware that this software was build to run on Linux. I can not ensure that it will work for other systems.</p>
 		<ul>
+			<li>Install <code>gcc</code>, standard C libraries and make utils:</li>
+			<p>Those are the compiler, libraries needed to compile the source code and utilities to help build the source files.</p>
 			<li>Download this repository to a directory in your machine:</li>
 			<p>If you have <code>git</code> installed, you can use it in the following command:</p>
 			<pre><code>git clone --depth 1 https://github.com/skippyr/reveal</code></pre>
 			<p>This command will clone this repository to the directory <code>reveal</code> in your current directory, but feel free to change to whatever directory you want to by adding its path in the end of the command. The flag <code>--depth</code> with value <code>1</code> specifies to <code>git</code> that you only want to download the latest commit instead of the whole commit tree.</p>
 			<p>If you do not have <code>git</code> installed, you can download this repository from its page on GitHub. Access that page, click on the <code>Code</code> button on the top of the page, then click on <code>Download ZIP</code>. This will download a ZIP file containing the repository, you just have to unzip it and move to the path you want it to be.</p>
 			<li>Access the repository's directory.</li>
-			<li>Install <code>gcc</code>, standard C libraries and make utils:</li>
-			<p>Those are the compiler, libraries needed to compile the source code and utilities to help build the source files.</p>
+			<pre><code>cd reveal</code></pre>
 			<li>Compile the source files using <code>make</code>:</li>
 			<pre><code>make</code></pre>
 			<li>Execute the built binary. Use <code>-h</code> or <code>--help</code> to obtain usage instructions.</li>
