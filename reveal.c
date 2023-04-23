@@ -209,8 +209,7 @@ void reveal_directory(char directory_path[])
 		struct passwd *user_entry = getpwuid(directory_entry_status.st_uid);
 		if (user_entry == NULL)
 		{
-			print_error("Could not identify user entry.\n");
-			exit(1);
+			continue;
 		}
 		printf(
 			"%5hu | ",
@@ -239,14 +238,8 @@ void reveal_directory(char directory_path[])
 			case DT_BLK:
 				printf("Block     ");
 				break;
-			case DT_UNKNOWN:
-				printf("Unknown   ");
-				break;
 			default:
-				printf(
-					"%d",
-					directory_entry->d_type
-				);
+				printf("Unknown   ");
 				break;
 		}
 		printf("   ");
