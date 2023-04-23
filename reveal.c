@@ -49,6 +49,29 @@ double convert_bytes_to_kilobytes(long bytes)
 	return (bytes / ONE_KILOBYTE_IN_BYTES);
 }
 
+void concatenate_paths(
+	char *parent_path,
+	char *child_path,
+	char path_buffer[],
+	size_t path_buffer_size
+)
+{
+	snprintf(
+		path_buffer,
+		path_buffer_size,
+		"%s%s%s",
+		parent_path,
+		!strcmp(
+			parent_path,
+			"/"
+		) ?
+		"" :
+		"/",
+		child_path
+	);
+	return;
+}
+
 void print_size(
 	struct dirent *path_entry,
 	struct stat *path_status
@@ -186,18 +209,11 @@ void reveal_directory(char directory_path[])
 			continue;
 		}
 		char directory_entry_path[PATH_MAX];
-		snprintf(
-			directory_entry_path,
-			sizeof(directory_entry_path),
-			"%s%s%s",
+		concatenate_paths(
 			directory_path,
-			!strcmp(
-				directory_path,
-				"/"
-			) ?
-			"" :
-			"/",
-			directory_entry->d_name
+			directory_entry->d_name,
+			directory_entry_path,
+			sizeof(directory_entry_path)
 		);
 		struct stat directory_entry_status;
 		if (stat(
