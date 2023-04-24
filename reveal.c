@@ -210,7 +210,7 @@ void print_directory_entry_permissions(struct stat *directory_entry_status)
 	);
 	unsigned short int chmod_permissions = calculate_chmod_permissions(directory_entry_status);
 	printf(
-		" (%hu)",
+		" (%3hu)",
 		chmod_permissions
 	);
 	return;
