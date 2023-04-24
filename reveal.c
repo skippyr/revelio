@@ -197,7 +197,7 @@ unsigned short int calculate_chmod_permissions(struct stat *directory_entry_stat
 void print_directory_entry_permissions(struct stat *directory_entry_status)
 {
 	printf(
-		"%s%s%s",
+		"%s%s%s%s%s%s%s%s%s",
 		directory_entry_status->st_mode & S_IRUSR ?
 		"r" :
 		"-",
@@ -205,6 +205,24 @@ void print_directory_entry_permissions(struct stat *directory_entry_status)
 		"w" :
 		"-",
 		directory_entry_status->st_mode & S_IXUSR ?
+		"x" :
+		"-",
+		directory_entry_status->st_mode & S_IRGRP ?
+		"r" :
+		"-",
+		directory_entry_status->st_mode & S_IWGRP ?
+		"w" :
+		"-",
+		directory_entry_status->st_mode & S_IXGRP ?
+		"x" :
+		"-",
+		directory_entry_status->st_mode & S_IROTH ?
+		"r" :
+		"-",
+		directory_entry_status->st_mode & S_IWOTH ?
+		"w" :
+		"-",
+		directory_entry_status->st_mode & S_IXOTH ?
 		"x" :
 		"-"
 	);
@@ -230,7 +248,7 @@ void reveal_directory(char directory_path[])
 	);
 	struct dirent *directory_entry;
 	unsigned short int quantity_of_directory_entries = 0;
-	printf("Index | Type            Size   Permissions   Owner             Name\n");
+	printf("Index | Type            Size   Permissions       Owner             Name\n");
 	while((directory_entry = readdir(directory_stream)) != NULL)
 	{
 		if (
@@ -279,7 +297,7 @@ void reveal_directory(char directory_path[])
 		printf("   ");
 		print_directory_entry_permissions(&directory_entry_status);
 		printf(
-			"     %-15s   %s",
+			"   %-15s   %s",
 			user_entry->pw_name,
 			directory_entry->d_name
 		);
