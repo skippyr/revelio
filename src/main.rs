@@ -3,10 +3,18 @@ use std::{
 	process::exit,
 	fs::{
 		canonicalize,
-		Metadata
+		Metadata,
+		read_dir,
+		ReadDir,
+		DirEntry
 	},
 	path::PathBuf
 };
+
+struct DirectoryEntry
+{
+	name: String
+}
 
 fn print_error(message: &str)
 {
@@ -34,6 +42,70 @@ fn print_help_instructions()
 
 fn reveal_directory(directory_path: &PathBuf)
 {
+	let directory_stream: ReadDir = match read_dir(directory_path)
+	{
+		Ok(directory_stream) =>
+		{
+			directory_stream
+		}
+		Err(_) =>
+		{
+			print_error("Could not read directory.");
+			exit(1);
+		}
+	};
+	let mut directory_entries: Vec<DirectoryEntry> = Vec::new();
+	eprintln!(
+		"Revealing directory: {:?}.",
+		directory_path
+	);
+	for directory_entry in directory_stream
+	{
+		let directory_entry: DirEntry = match directory_entry
+		{
+			Ok(directory_entry) =>
+			{
+				directory_entry
+			}
+			Err(_) =>
+			{
+				continue;
+			}
+		};
+		let directory_entry_path: PathBuf = directory_entry.path();
+		let directory_entry_name_as_osstr = match directory_entry_path.file_name()
+		{
+			Some(directory_entry_name_as_osstr) =>
+			{
+				directory_entry_name_as_osstr
+			}
+			None =>
+			{
+				continue;
+			}
+		};
+		let directory_entry_name: String = match directory_entry_name_as_osstr.to_str()
+		{
+			Some(directory_entry_name)=>
+			{
+				String::from(directory_entry_name)
+			}
+			None =>
+			{
+				continue;
+			}
+		};
+		directory_entries.push(DirectoryEntry {
+			name: directory_entry_name
+		});
+	}
+	for directory_entry in directory_entries
+	{
+		println!(
+			"{}",
+			directory_entry.name
+		);
+	}
 	return;
 }
 
@@ -68,10 +140,7 @@ fn main()
 		}
 		Err(_) =>
 		{
-			print_error(&format!(
-				"Could not find given path: \"{}\".",
-				relative_path
-			));
+			print_error("Could not find given path.");
 			exit(1);
 		}
 	};
@@ -83,10 +152,7 @@ fn main()
 		}
 		Err(_) =>
 		{
-			print_error(&format!(
-				"Could not get metadata of given path: \"{}\".",
-				relative_path
-			));
+			print_error("Could not get metadata of given path.");
 			exit(1);
 		}
 	};
@@ -96,10 +162,7 @@ fn main()
 	}
 	else
 	{
-		print_error(&format!(
-			"Could not reveal file type of given path: \"{}\".",
-			relative_path
-		));
+		print_error("Could not reveal file type of given path.");
 		exit(1);
 	}
 	return;
