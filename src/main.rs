@@ -6,16 +6,21 @@ use std::{
 		Metadata,
 		read_dir,
 		ReadDir,
-		DirEntry
+		DirEntry,
+		FileType
 	},
 	path::PathBuf,
-	os::unix::prelude::MetadataExt
+	os::unix::prelude::{
+		MetadataExt,
+		FileTypeExt
+	}
 };
 
 struct DirectoryEntry
 {
 	name: String,
-	size_in_bytes: u64
+	size_in_bytes: u64,
+	file_type: FileType
 }
 
 fn print_error(message: &str)
@@ -40,6 +45,36 @@ fn print_help_instructions()
 	eprintln!("\t\tIf no path is given, the current directory one will be considered.");
 	eprintln!("\t\tIf multiple paths are given, only the last one will be revealed.");
 	return;
+}
+
+fn covert_file_type_to_human_readable_string(file_type: &FileType) -> String
+{
+	let mut human_readable_string: String = String::from("Unknown");
+	if file_type.is_file()
+	{
+		human_readable_string = String::from("File");
+	}
+	else if file_type.is_symlink()
+	{
+		human_readable_string = String::from("Symlink");
+	}
+	else if file_type.is_dir()
+	{
+		human_readable_string = String::from("Directory");
+	}
+	else if file_type.is_char_device()
+	{
+		human_readable_string = String::from("Character");
+	}
+	else if file_type.is_socket()
+	{
+		human_readable_string = String::from("Socket");
+	}
+	else if file_type.is_block_device()
+	{
+		human_readable_string = String::from("Block");
+	}
+	return human_readable_string;
 }
 
 fn convert_size_in_bytes_to_human_readable_string(size_in_bytes: u64) -> String
@@ -152,16 +187,19 @@ fn reveal_directory(directory_path: &PathBuf)
 		{
 			0
 		};
+		let directory_entry_file_type: FileType = directory_entry_metadata.file_type();
 		directory_entries.push(DirectoryEntry {
 			name: directory_entry_name,
-			size_in_bytes: directory_entry_size_in_bytes
+			size_in_bytes: directory_entry_size_in_bytes,
+			file_type: directory_entry_file_type
 		});
 	}
 	for directory_entry_iterator in 0..directory_entries.len()
 	{
 		println!(
-			"{:>4} | {:>8}   {}",
+			"{:>4} | {:<9}   {:>8}   {}",
 			directory_entry_iterator + 1,
+			covert_file_type_to_human_readable_string(&directory_entries[directory_entry_iterator].file_type),
 			convert_size_in_bytes_to_human_readable_string(directory_entries[directory_entry_iterator].size_in_bytes),
 			directory_entries[directory_entry_iterator].name
 		);
