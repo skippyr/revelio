@@ -1,6 +1,11 @@
 use std::{
 	env::args,
-	process::exit
+	process::exit,
+	fs::{
+		canonicalize,
+		Metadata
+	},
+	path::PathBuf
 };
 
 fn print_error(message: &str)
@@ -27,6 +32,11 @@ fn print_help_instructions()
 	return;
 }
 
+fn reveal_directory(directory_path: &PathBuf)
+{
+	return;
+}
+
 fn main()
 {
 	let arguments: Vec<String> = args().collect();
@@ -49,6 +59,48 @@ fn main()
 		{
 			relative_path = arguments[arguments_iterator].clone();
 		}
+	}
+	let absolute_path: PathBuf = match canonicalize(&relative_path)
+	{
+		Ok(absolute_path) =>
+		{
+			absolute_path
+		}
+		Err(_) =>
+		{
+			print_error(&format!(
+				"Could not find given path: \"{}\".",
+				relative_path
+			));
+			exit(1);
+		}
+	};
+	let absolute_path_metadata: Metadata = match absolute_path.metadata()
+	{
+		Ok(absolute_path_metadata) =>
+		{
+			absolute_path_metadata
+		}
+		Err(_) =>
+		{
+			print_error(&format!(
+				"Could not get metadata of given path: \"{}\".",
+				relative_path
+			));
+			exit(1);
+		}
+	};
+	if absolute_path_metadata.is_dir()
+	{
+		reveal_directory(&absolute_path);
+	}
+	else
+	{
+		print_error(&format!(
+			"Could not reveal file type of given path: \"{}\".",
+			relative_path
+		));
+		exit(1);
 	}
 	return;
 }
