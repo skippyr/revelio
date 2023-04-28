@@ -7,12 +7,14 @@ use std::{
 		read_dir,
 		ReadDir,
 		DirEntry,
-		FileType
+		FileType,
+		Permissions
 	},
 	path::PathBuf,
 	os::unix::prelude::{
 		MetadataExt,
-		FileTypeExt
+		FileTypeExt,
+		PermissionsExt
 	}
 };
 
@@ -20,7 +22,8 @@ struct DirectoryEntry
 {
 	name: String,
 	size_in_bytes: u64,
-	file_type: FileType
+	file_type: FileType,
+	permissions: Permissions
 }
 
 fn print_error(message: &str)
@@ -114,6 +117,81 @@ fn convert_size_in_bytes_to_human_readable_string(size_in_bytes: u64) -> String
 	return human_readable_string;
 }
 
+fn convert_permissions_to_human_readable_string(permissions: &Permissions) -> String
+{
+	let mut human_readable_string: String = String::new();
+	let mut bit_permissions: u32 = 0;
+	let permissions_mode: u32 = permissions.mode();
+	/* Verifying Reading Permissions For Owner (S_IRUSR) */
+	if permissions_mode & 0o400 != 0 {
+		human_readable_string.push('r');
+		bit_permissions += 400;
+	} else {
+		human_readable_string.push('-');
+	}
+	/* Verifying Writing Permissions For Owner (S_IWUSR) */
+	if permissions_mode & 0o200 != 0 {
+		human_readable_string.push('w');
+		bit_permissions += 200;
+	} else {
+		human_readable_string.push('-');
+	}
+	/* Verifying Execution Permissions For Owner (S_IXUSR) */
+	if permissions_mode & 0o100 != 0 {
+		human_readable_string.push('x');
+		bit_permissions += 100;
+	} else {
+		human_readable_string.push('-');
+	}
+	/* Verifying Reading Permissions For Group (S_IRGRP) */
+	if permissions_mode & 0o40 != 0 {
+		human_readable_string.push('r');
+		bit_permissions += 40;
+	} else {
+		human_readable_string.push('-');
+	}
+	/* Verifying Writing Permissions For Group (S_IWGRP) */
+	if permissions_mode & 0o20 != 0 {
+		human_readable_string.push('w');
+		bit_permissions += 20;
+	} else {
+		human_readable_string.push('-');
+	}
+	/* Verifying Execution Permissions For Group (S_IXGRP) */
+	if permissions_mode & 0o10 != 0 {
+		human_readable_string.push('x');
+		bit_permissions += 10;
+	} else {
+		human_readable_string.push('-');
+	}
+	/* Verifying Reading Permissions For Others (S_IROTH) */
+	if permissions_mode & 0o4 != 0 {
+		human_readable_string.push('r');
+		bit_permissions += 4;
+	} else {
+		human_readable_string.push('-');
+	}
+	/* Verifying Writing Permissions For Others (S_IWOTH) */
+	if permissions_mode & 0o2 != 0 {
+		human_readable_string.push('w');
+		bit_permissions += 2;
+	} else {
+		human_readable_string.push('-');
+	}
+	/* Verifying Execution Permissions For Others (S_IXOTH) */
+	if permissions_mode & 0o1 != 0 {
+		human_readable_string.push('x');
+		bit_permissions += 1;
+	} else {
+		human_readable_string.push('-');
+	}
+	human_readable_string.push_str(&format!(
+		" ({})",
+		bit_permissions
+	));
+	return human_readable_string;
+}
+
 fn reveal_directory(directory_path: &PathBuf)
 {
 	let directory_stream: ReadDir = match read_dir(directory_path)
@@ -188,19 +266,22 @@ fn reveal_directory(directory_path: &PathBuf)
 			0
 		};
 		let directory_entry_file_type: FileType = directory_entry_metadata.file_type();
+		let directory_entry_permissions: Permissions = directory_entry_metadata.permissions();
 		directory_entries.push(DirectoryEntry {
 			name: directory_entry_name,
 			size_in_bytes: directory_entry_size_in_bytes,
-			file_type: directory_entry_file_type
+			file_type: directory_entry_file_type,
+			permissions: directory_entry_permissions
 		});
 	}
 	for directory_entry_iterator in 0..directory_entries.len()
 	{
 		println!(
-			"{:>4} | {:<9}   {:>8}   {}",
+			"{:>4} | {:<9}   {:>8}   {}   {}",
 			directory_entry_iterator + 1,
 			covert_file_type_to_human_readable_string(&directory_entries[directory_entry_iterator].file_type),
 			convert_size_in_bytes_to_human_readable_string(directory_entries[directory_entry_iterator].size_in_bytes),
+			convert_permissions_to_human_readable_string(&directory_entries[directory_entry_iterator].permissions),
 			directory_entries[directory_entry_iterator].name
 		);
 	}
