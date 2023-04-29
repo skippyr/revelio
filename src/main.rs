@@ -293,7 +293,7 @@ fn reveal_directory(directory_path: &PathBuf)
 		exit(1);
 	});
 	let mut directory_entries: Vec<DirectoryEntry> = Vec::new();
-	eprintln!(
+	println!(
 		"Revealing directory: {:?}.",
 		directory_path
 	);
@@ -411,15 +411,12 @@ fn reveal_directory(directory_path: &PathBuf)
 			symlink_path: directory_entry_symlink_path
 		});
 	}
-	eprintln!("Index | Type             Size   Permissions       Owner        Name");
+	println!("Index | Type             Size   Permissions       Owner        Name");
 	for directory_entry_iterator in 0..directory_entries.len()
 	{
-		eprint!(
-			"{:>5} | ",
-			directory_entry_iterator + 1
-		);
 		println!(
-			"{:<10}   {:>8}   {}   {:<10}   {}{}",
+			"{:>5} | {:<10}   {:>8}   {}   {:<10}   {}{}",
+			directory_entry_iterator + 1,
 			convert_file_type_to_human_readable_string(
 				directory_entries[directory_entry_iterator].is_symlink,
 				&directory_entries[directory_entry_iterator].file_type
@@ -457,7 +454,7 @@ fn reveal_file(file_path: &PathBuf)
 	});
 	let file_reader: BufReader<File> = BufReader::new(file);
 	let mut line_number: u32 = 1;
-	eprintln!(
+	println!(
 		"Revealing file: {:?}.",
 		file_path
 	);
@@ -467,12 +464,9 @@ fn reveal_file(file_path: &PathBuf)
 			print_error("Could not read lines of file.");
 			exit(1);
 		});
-		eprint!(
-			"{:>5} | ",
-			line_number
-		);
 		println!(
-			"{}",
+			"{:>5} | {}",
+			line_number,
 			line
 		);
 		line_number += 1;
