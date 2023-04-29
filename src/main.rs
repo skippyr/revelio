@@ -8,13 +8,17 @@ use std::{
 		ReadDir,
 		DirEntry,
 		FileType,
-		Permissions
+		Permissions, File
 	},
 	path::PathBuf,
 	os::unix::prelude::{
 		MetadataExt,
 		FileTypeExt,
 		PermissionsExt
+	},
+	io::{
+		BufRead,
+		BufReader
 	}
 };
 use users::{
@@ -393,6 +397,52 @@ fn reveal_directory(directory_path: &PathBuf)
 	return;
 }
 
+fn reveal_file(file_path: &PathBuf)
+{
+	let file: File = match File::open(file_path)
+	{
+		Ok(file) =>
+		{
+			file
+		}
+		Err(_) =>
+		{
+			print_error("Could not open file.");
+			exit(1);
+		}
+	};
+	let file_reader: BufReader<File> = BufReader::new(file);
+	let mut line_number: u32 = 1;
+	eprintln!(
+		"Revealing file: {:?}.",
+		file_path
+	);
+	for line in file_reader.lines()
+	{
+		let line: String = match line
+		{
+			Ok(line) =>
+			{
+				line
+			}
+			Err(_) =>
+			{
+				print_error("Could not read lines of file.");
+				exit(1);
+			}
+		};
+		eprint!(
+			"{:>5} | ",
+			line_number
+		);
+		println!(
+			"{}",
+			line
+		);
+		line_number += 1;
+	}
+}
+
 fn main()
 {
 	let arguments: Vec<String> = args().collect();
@@ -438,6 +488,10 @@ fn main()
 	if absolute_path_metadata.is_dir()
 	{
 		reveal_directory(&absolute_path);
+	}
+	else if absolute_path_metadata.is_file()
+	{
+		reveal_file(&absolute_path);
 	}
 	else
 	{
