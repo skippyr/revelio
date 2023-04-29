@@ -275,18 +275,10 @@ fn convert_permissions_to_human_readable_string(permissions: &Permissions) -> St
 
 fn reveal_directory(directory_path: &PathBuf)
 {
-	let directory_stream: ReadDir = match read_dir(directory_path)
-	{
-		Ok(directory_stream) =>
-		{
-			directory_stream
-		}
-		Err(_) =>
-		{
-			print_error("Could not read directory.");
-			exit(1);
-		}
-	};
+	let directory_stream: ReadDir = read_dir(directory_path).unwrap_or_else(|_| {
+		print_error("Could not read directory.");
+		exit(1);
+	});
 	let mut directory_entries: Vec<DirectoryEntry> = Vec::new();
 	eprintln!(
 		"Revealing directory: {:?}.",
@@ -399,18 +391,10 @@ fn reveal_directory(directory_path: &PathBuf)
 
 fn reveal_file(file_path: &PathBuf)
 {
-	let file: File = match File::open(file_path)
-	{
-		Ok(file) =>
-		{
-			file
-		}
-		Err(_) =>
-		{
-			print_error("Could not open file.");
-			exit(1);
-		}
-	};
+	let file: File = File::open(file_path).unwrap_or_else(|_| {
+		print_error("Could not open file.");
+		exit(1);
+	});
 	let file_reader: BufReader<File> = BufReader::new(file);
 	let mut line_number: u32 = 1;
 	eprintln!(
@@ -419,18 +403,10 @@ fn reveal_file(file_path: &PathBuf)
 	);
 	for line in file_reader.lines()
 	{
-		let line: String = match line
-		{
-			Ok(line) =>
-			{
-				line
-			}
-			Err(_) =>
-			{
-				print_error("Could not read lines of file.");
-				exit(1);
-			}
-		};
+		let line: String = line.unwrap_or_else(|_| {
+			print_error("Could not read lines of file.");
+			exit(1);
+		});
 		eprint!(
 			"{:>5} | ",
 			line_number
@@ -461,30 +437,14 @@ fn main()
 			relative_path = arguments[arguments_iterator].clone();
 		}
 	}
-	let absolute_path: PathBuf = match canonicalize(&relative_path)
-	{
-		Ok(absolute_path) =>
-		{
-			absolute_path
-		}
-		Err(_) =>
-		{
-			print_error("Could not find given path.");
-			exit(1);
-		}
-	};
-	let absolute_path_metadata: Metadata = match absolute_path.metadata()
-	{
-		Ok(absolute_path_metadata) =>
-		{
-			absolute_path_metadata
-		}
-		Err(_) =>
-		{
-			print_error("Could not get metadata of given path.");
-			exit(1);
-		}
-	};
+	let absolute_path: PathBuf = canonicalize(&relative_path).unwrap_or_else(|_| {
+		print_error("Could not find given path.");
+		exit(1);
+	});
+	let absolute_path_metadata: Metadata = absolute_path.metadata().unwrap_or_else(|_| {
+		print_error("Could not get metadata of given path.");
+		exit(1);
+	});
 	if absolute_path_metadata.is_dir()
 	{
 		reveal_directory(&absolute_path);
