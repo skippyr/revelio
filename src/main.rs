@@ -10,7 +10,9 @@ use std::{
 		FileType,
 		Permissions,
 		File,
-		symlink_metadata
+		symlink_metadata,
+		metadata,
+		read_link
 	},
 	path::PathBuf,
 	os::unix::prelude::{
@@ -35,7 +37,8 @@ struct DirectoryEntry
 	is_symlink: bool,
 	file_type: FileType,
 	permissions: Permissions,
-	user_owner_name: String
+	user_owner_name: String,
+	symlink_path: Option<PathBuf>
 }
 
 fn print_error(message: &str)
@@ -330,7 +333,7 @@ fn reveal_directory(directory_path: &PathBuf)
 				continue;
 			}
 		};
-		let directory_entry_symlink_metadata: Metadata = match symlink_metadata(directory_entry_path)
+		let directory_entry_symlink_metadata: Metadata = match symlink_metadata(&directory_entry_path)
 		{
 			Ok(directory_entry_symlink_metadata) =>
 			{
@@ -341,17 +344,28 @@ fn reveal_directory(directory_path: &PathBuf)
 				continue;
 			}
 		};
-		let directory_entry_size_in_bytes: u64 = if directory_entry_symlink_metadata.is_file()
+		let directory_entry_metadata: Metadata = match metadata(&directory_entry_path)
 		{
-			directory_entry_symlink_metadata.size()
+			Ok(directory_entry_metadata) =>
+			{
+				directory_entry_metadata
+			}
+			Err(_) =>
+			{
+				continue;
+			}
+		};
+		let directory_entry_size_in_bytes: u64 = if directory_entry_metadata.is_file()
+		{
+			directory_entry_metadata.size()
 		}
 		else
 		{
 			0
 		};
-		let directory_entry_file_type: FileType = directory_entry_symlink_metadata.file_type();
-		let directory_entry_permissions: Permissions = directory_entry_symlink_metadata.permissions();
-		let directory_entry_user_owner_uid: u32 = directory_entry_symlink_metadata.uid();
+		let directory_entry_file_type: FileType = directory_entry_metadata.file_type();
+		let directory_entry_permissions: Permissions = directory_entry_metadata.permissions();
+		let directory_entry_user_owner_uid: u32 = directory_entry_metadata.uid();
 		let directory_entry_user_owner: User = match get_user_by_uid(directory_entry_user_owner_uid)
 		{
 			Some(user) =>
@@ -376,20 +390,32 @@ fn reveal_directory(directory_path: &PathBuf)
 				continue;
 			}
 		};
+		let directory_entry_symlink_path: Option<PathBuf> = match read_link(&directory_entry_path)
+		{
+			Ok(directory_entry_symlink_path) =>
+			{
+				Some(directory_entry_symlink_path)
+			}
+			Err(_) =>
+			{
+				None
+			}
+		};
 		directory_entries.push(DirectoryEntry {
 			name: directory_entry_name,
 			size_in_bytes: directory_entry_size_in_bytes,
 			is_symlink: directory_entry_symlink_metadata.is_symlink(),
 			file_type: directory_entry_file_type,
 			permissions: directory_entry_permissions,
-			user_owner_name: directory_entry_user_owner_name
+			user_owner_name: directory_entry_user_owner_name,
+			symlink_path: directory_entry_symlink_path
 		});
 	}
 	eprintln!("Index | Type            Size   Permissions       Owner        Name");
 	for directory_entry_iterator in 0..directory_entries.len()
 	{
 		println!(
-			"{:>5} | {:<10}   {:>8}   {}   {:<10}   {}",
+			"{:>5} | {:<10}   {:>8}   {}   {:<10}   {}{}",
 			directory_entry_iterator + 1,
 			convert_file_type_to_human_readable_string(
 				directory_entries[directory_entry_iterator].is_symlink,
@@ -398,7 +424,23 @@ fn reveal_directory(directory_path: &PathBuf)
 			convert_size_in_bytes_to_human_readable_string(directory_entries[directory_entry_iterator].size_in_bytes),
 			convert_permissions_to_human_readable_string(&directory_entries[directory_entry_iterator].permissions),
 			directory_entries[directory_entry_iterator].user_owner_name,
-			directory_entries[directory_entry_iterator].name
+			directory_entries[directory_entry_iterator].name,
+			match directory_entries[directory_entry_iterator]
+				.symlink_path
+				.clone()
+			{
+				Some(symlink_path) =>
+				{
+					format!(
+						" -> {}",
+						symlink_path.display()
+					)
+				}
+				None =>
+				{
+					String::new()
+				}
+			}
 		);
 	}
 	return;
