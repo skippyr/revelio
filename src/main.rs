@@ -30,6 +30,16 @@ use users::{
 	User
 };
 
+const OWNER_READING_PERMISSION_BIT: u32 = 400;
+const OWNER_WRITTING_PERMISSIONS_BIT: u32 = 200;
+const OWNER_EXECUTION_PERMISSIONS_BIT: u32 = 100;
+const GROUP_READING_PERMISSIONS_BIT: u32 = 40;
+const GROUP_WRITTING_PERMISSIONS_BIT: u32 = 20;
+const GROUP_EXECUTION_PERMISSIONS_BIT: u32 = 10;
+const OTHERS_READING_PERMISSIONS_BIT: u32 = 4;
+const OTHERS_WRITTING_PERMISSIONS_BIT: u32 = 2;
+const OTHERS_EXECUTION_PERMISSIONS_BIT: u32 = 1;
+
 struct DirectoryEntry
 {
 	name: String,
@@ -48,7 +58,7 @@ fn print_error(message: &str)
 		"\treveal: {}",
 		message
 	);
-	eprintln!("\tUse the -h or --help flags to print help instructions.");
+	eprintln!("\tUse the -h or --help flag to print help instructions.");
 	return;
 }
 
@@ -189,15 +199,6 @@ fn convert_permissions_to_human_readable_string(permissions: &Permissions) -> St
 	let mut human_readable_string: String = String::new();
 	let mut bit_permissions_sum: u32 = 0;
 	let permissions_mode: u32 = permissions.mode();
-	const OWNER_READING_PERMISSION_BIT: u32 = 400;
-	const OWNER_WRITTING_PERMISSIONS_BIT: u32 = 200;
-	const OWNER_EXECUTION_PERMISSIONS_BIT: u32 = 100;
-	const GROUP_READING_PERMISSIONS_BIT: u32 = 40;
-	const GROUP_WRITTING_PERMISSIONS_BIT: u32 = 20;
-	const GROUP_EXECUTION_PERMISSIONS_BIT: u32 = 10;
-	const OTHERS_READING_PERMISSIONS_BIT: u32 = 4;
-	const OTHERS_WRITTING_PERMISSIONS_BIT: u32 = 2;
-	const OTHERS_EXECUTION_PERMISSIONS_BIT: u32 = 1;
 	if does_the_owner_has_reading_permissions(permissions_mode)
 	{
 		human_readable_string.push('r');
