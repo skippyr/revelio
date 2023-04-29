@@ -117,72 +117,135 @@ fn convert_size_in_bytes_to_human_readable_string(size_in_bytes: u64) -> String
 	return human_readable_string;
 }
 
+fn does_the_owner_has_reading_permissions(permissions_mode: u32) -> bool
+{
+	return permissions_mode & 0o400 != 0;
+}
+
+fn does_the_owner_has_writting_permissions(permissions_mode: u32) -> bool
+{
+	return permissions_mode & 0o200 != 0;
+}
+
+fn does_the_owner_has_execution_permissions(permissions_mode: u32) -> bool
+{
+	return permissions_mode & 0o100 != 0;
+}
+
+fn does_the_group_has_reading_permissions(permissions_mode: u32) -> bool
+{
+	return permissions_mode & 0o40 != 0;
+}
+
+fn does_the_group_has_writting_permissions(permissions_mode: u32) -> bool
+{
+	return permissions_mode & 0o20 != 0
+}
+
+fn does_the_group_has_execution_permissions(permissions_mode: u32) -> bool
+{
+	return permissions_mode & 0o10 != 0;
+}
+
+fn does_others_have_reading_permissions(permissions_mode: u32) -> bool
+{
+	return permissions_mode & 0o4 != 0;
+}
+
+fn does_others_have_writting_permissions(permissions_mode: u32) -> bool
+{
+	return permissions_mode & 0o2 != 0;
+}
+
+fn does_others_have_execution_permissions(permissions_mode: u32) -> bool
+{
+	return permissions_mode & 0o1 != 0;
+}
+
 fn convert_permissions_to_human_readable_string(permissions: &Permissions) -> String
 {
 	let mut human_readable_string: String = String::new();
 	let mut bit_permissions: u32 = 0;
 	let permissions_mode: u32 = permissions.mode();
-	/* Verifying Reading Permissions For Owner (S_IRUSR) */
-	if permissions_mode & 0o400 != 0 {
+	if does_the_owner_has_reading_permissions(permissions_mode)
+	{
 		human_readable_string.push('r');
 		bit_permissions += 400;
-	} else {
+	}
+	else
+	{
 		human_readable_string.push('-');
 	}
-	/* Verifying Writing Permissions For Owner (S_IWUSR) */
-	if permissions_mode & 0o200 != 0 {
+	if does_the_owner_has_writting_permissions(permissions_mode)
+	{
 		human_readable_string.push('w');
 		bit_permissions += 200;
-	} else {
+	}
+	else
+	{
 		human_readable_string.push('-');
 	}
-	/* Verifying Execution Permissions For Owner (S_IXUSR) */
-	if permissions_mode & 0o100 != 0 {
+	if does_the_owner_has_execution_permissions(permissions_mode)
+	{
 		human_readable_string.push('x');
 		bit_permissions += 100;
-	} else {
+	}
+	else
+	{
 		human_readable_string.push('-');
 	}
-	/* Verifying Reading Permissions For Group (S_IRGRP) */
-	if permissions_mode & 0o40 != 0 {
+	if does_the_group_has_reading_permissions(permissions_mode)
+	{
 		human_readable_string.push('r');
 		bit_permissions += 40;
-	} else {
+	}
+	else
+	{
 		human_readable_string.push('-');
 	}
-	/* Verifying Writing Permissions For Group (S_IWGRP) */
-	if permissions_mode & 0o20 != 0 {
+	if does_the_group_has_writting_permissions(permissions_mode)
+	{
 		human_readable_string.push('w');
 		bit_permissions += 20;
-	} else {
+	}
+	else
+	{
 		human_readable_string.push('-');
 	}
-	/* Verifying Execution Permissions For Group (S_IXGRP) */
-	if permissions_mode & 0o10 != 0 {
+	if does_the_group_has_execution_permissions(permissions_mode)
+	{
 		human_readable_string.push('x');
 		bit_permissions += 10;
-	} else {
+	}
+	else
+	{
 		human_readable_string.push('-');
 	}
-	/* Verifying Reading Permissions For Others (S_IROTH) */
-	if permissions_mode & 0o4 != 0 {
+	if does_others_have_reading_permissions(permissions_mode)
+	{
 		human_readable_string.push('r');
 		bit_permissions += 4;
-	} else {
+	}
+	else
+	{
 		human_readable_string.push('-');
 	}
-	/* Verifying Writing Permissions For Others (S_IWOTH) */
-	if permissions_mode & 0o2 != 0 {
+	if does_others_have_writting_permissions(permissions_mode)
+	{
 		human_readable_string.push('w');
 		bit_permissions += 2;
-	} else {
+	}
+	else
+	{
 		human_readable_string.push('-');
 	}
-	/* Verifying Execution Permissions For Others (S_IXOTH) */
-	if permissions_mode & 0o1 != 0 {
+	if does_others_have_execution_permissions(permissions_mode)
+	{
 		human_readable_string.push('x');
 		bit_permissions += 1;
-	} else {
+	}
+	else
+	{
 		human_readable_string.push('-');
 	}
 	human_readable_string.push_str(&format!(
