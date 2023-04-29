@@ -8,7 +8,9 @@ use std::{
 		ReadDir,
 		DirEntry,
 		FileType,
-		Permissions, File
+		Permissions,
+		File,
+		symlink_metadata
 	},
 	path::PathBuf,
 	os::unix::prelude::{
@@ -30,6 +32,7 @@ struct DirectoryEntry
 {
 	name: String,
 	size_in_bytes: u64,
+	is_symlink: bool,
 	file_type: FileType,
 	permissions: Permissions,
 	user_owner_name: String
@@ -59,32 +62,39 @@ fn print_help_instructions()
 	return;
 }
 
-fn covert_file_type_to_human_readable_string(file_type: &FileType) -> String
+fn convert_file_type_to_human_readable_string(
+	is_symlink: bool,
+	file_type: &FileType
+) -> String
 {
-	let mut human_readable_string: String = String::from("Unknown");
+	let mut human_readable_string: String = String::from("");
+	if is_symlink
+	{
+		human_readable_string.push('@');
+	}
 	if file_type.is_file()
 	{
-		human_readable_string = String::from("File");
-	}
-	else if file_type.is_symlink()
-	{
-		human_readable_string = String::from("Symlink");
+		human_readable_string.push_str("File");
 	}
 	else if file_type.is_dir()
 	{
-		human_readable_string = String::from("Directory");
+		human_readable_string.push_str("Directory");
 	}
 	else if file_type.is_char_device()
 	{
-		human_readable_string = String::from("Character");
+		human_readable_string.push_str("Character");
 	}
 	else if file_type.is_socket()
 	{
-		human_readable_string = String::from("Socket");
+		human_readable_string.push_str("Socket");
 	}
 	else if file_type.is_block_device()
 	{
-		human_readable_string = String::from("Block");
+		human_readable_string.push_str("Block");
+	}
+	else
+	{
+		human_readable_string.push_str("Unknown");
 	}
 	return human_readable_string;
 }
@@ -320,27 +330,28 @@ fn reveal_directory(directory_path: &PathBuf)
 				continue;
 			}
 		};
-		let directory_entry_metadata: Metadata = match directory_entry_path.metadata() {
-			Ok(directory_entry_metadata) =>
+		let directory_entry_symlink_metadata: Metadata = match symlink_metadata(directory_entry_path)
+		{
+			Ok(directory_entry_symlink_metadata) =>
 			{
-				directory_entry_metadata
+				directory_entry_symlink_metadata
 			}
 			Err(_) =>
 			{
 				continue;
 			}
 		};
-		let directory_entry_size_in_bytes: u64 = if directory_entry_metadata.is_file()
+		let directory_entry_size_in_bytes: u64 = if directory_entry_symlink_metadata.is_file()
 		{
-			directory_entry_metadata.size()
+			directory_entry_symlink_metadata.size()
 		}
 		else
 		{
 			0
 		};
-		let directory_entry_file_type: FileType = directory_entry_metadata.file_type();
-		let directory_entry_permissions: Permissions = directory_entry_metadata.permissions();
-		let directory_entry_user_owner_uid: u32 = directory_entry_metadata.uid();
+		let directory_entry_file_type: FileType = directory_entry_symlink_metadata.file_type();
+		let directory_entry_permissions: Permissions = directory_entry_symlink_metadata.permissions();
+		let directory_entry_user_owner_uid: u32 = directory_entry_symlink_metadata.uid();
 		let directory_entry_user_owner: User = match get_user_by_uid(directory_entry_user_owner_uid)
 		{
 			Some(user) =>
@@ -368,6 +379,7 @@ fn reveal_directory(directory_path: &PathBuf)
 		directory_entries.push(DirectoryEntry {
 			name: directory_entry_name,
 			size_in_bytes: directory_entry_size_in_bytes,
+			is_symlink: directory_entry_symlink_metadata.is_symlink(),
 			file_type: directory_entry_file_type,
 			permissions: directory_entry_permissions,
 			user_owner_name: directory_entry_user_owner_name
@@ -377,9 +389,12 @@ fn reveal_directory(directory_path: &PathBuf)
 	for directory_entry_iterator in 0..directory_entries.len()
 	{
 		println!(
-			"{:>5} | {:<9}   {:>8}   {}   {:<10}   {}",
+			"{:>5} | {:<10}   {:>8}   {}   {:<10}   {}",
 			directory_entry_iterator + 1,
-			covert_file_type_to_human_readable_string(&directory_entries[directory_entry_iterator].file_type),
+			convert_file_type_to_human_readable_string(
+				directory_entries[directory_entry_iterator].is_symlink,
+				&directory_entries[directory_entry_iterator].file_type
+			),
 			convert_size_in_bytes_to_human_readable_string(directory_entries[directory_entry_iterator].size_in_bytes),
 			convert_permissions_to_human_readable_string(&directory_entries[directory_entry_iterator].permissions),
 			directory_entries[directory_entry_iterator].user_owner_name,
