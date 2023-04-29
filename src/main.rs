@@ -355,11 +355,6 @@ fn main()
 {
 	let arguments: Vec<String> = args().collect();
 	let mut relative_path: String = String::from(".");
-	if arguments.len() == 1
-	{
-		print_error("Not enough arguments.");
-		exit(1);
-	}
 	for arguments_iterator in 1..arguments.len()
 	{
 		if
