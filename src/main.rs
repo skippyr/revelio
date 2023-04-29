@@ -147,17 +147,17 @@ fn does_the_group_has_execution_permissions(permissions_mode: u32) -> bool
 	return permissions_mode & 0o10 != 0;
 }
 
-fn does_others_have_reading_permissions(permissions_mode: u32) -> bool
+fn do_others_have_reading_permissions(permissions_mode: u32) -> bool
 {
 	return permissions_mode & 0o4 != 0;
 }
 
-fn does_others_have_writting_permissions(permissions_mode: u32) -> bool
+fn do_others_have_writting_permissions(permissions_mode: u32) -> bool
 {
 	return permissions_mode & 0o2 != 0;
 }
 
-fn does_others_have_execution_permissions(permissions_mode: u32) -> bool
+fn do_others_have_execution_permissions(permissions_mode: u32) -> bool
 {
 	return permissions_mode & 0o1 != 0;
 }
@@ -221,7 +221,7 @@ fn convert_permissions_to_human_readable_string(permissions: &Permissions) -> St
 	{
 		human_readable_string.push('-');
 	}
-	if does_others_have_reading_permissions(permissions_mode)
+	if do_others_have_reading_permissions(permissions_mode)
 	{
 		human_readable_string.push('r');
 		bit_permissions += 4;
@@ -230,7 +230,7 @@ fn convert_permissions_to_human_readable_string(permissions: &Permissions) -> St
 	{
 		human_readable_string.push('-');
 	}
-	if does_others_have_writting_permissions(permissions_mode)
+	if do_others_have_writting_permissions(permissions_mode)
 	{
 		human_readable_string.push('w');
 		bit_permissions += 2;
@@ -239,7 +239,7 @@ fn convert_permissions_to_human_readable_string(permissions: &Permissions) -> St
 	{
 		human_readable_string.push('-');
 	}
-	if does_others_have_execution_permissions(permissions_mode)
+	if do_others_have_execution_permissions(permissions_mode)
 	{
 		human_readable_string.push('x');
 		bit_permissions += 1;
