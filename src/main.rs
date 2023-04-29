@@ -412,6 +412,11 @@ fn reveal_directory(directory_path: &PathBuf)
 		});
 	}
 	println!("Index | Type             Size   Permissions       Owner        Name");
+	directory_entries.sort_by_key(|directory_entry| {
+		directory_entry
+			.name
+			.clone()
+	});
 	for directory_entry_iterator in 0..directory_entries.len()
 	{
 		println!(
