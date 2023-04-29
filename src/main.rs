@@ -165,12 +165,21 @@ fn do_others_have_execution_permissions(permissions_mode: u32) -> bool
 fn convert_permissions_to_human_readable_string(permissions: &Permissions) -> String
 {
 	let mut human_readable_string: String = String::new();
-	let mut bit_permissions: u32 = 0;
+	let mut bit_permissions_sum: u32 = 0;
 	let permissions_mode: u32 = permissions.mode();
+	const OWNER_READING_PERMISSION_BIT: u32 = 400;
+	const OWNER_WRITTING_PERMISSIONS_BIT: u32 = 200;
+	const OWNER_EXECUTION_PERMISSIONS_BIT: u32 = 100;
+	const GROUP_READING_PERMISSIONS_BIT: u32 = 40;
+	const GROUP_WRITTING_PERMISSIONS_BIT: u32 = 20;
+	const GROUP_EXECUTION_PERMISSIONS_BIT: u32 = 10;
+	const OTHERS_READING_PERMISSIONS_BIT: u32 = 4;
+	const OTHERS_WRITTING_PERMISSIONS_BIT: u32 = 2;
+	const OTHERS_EXECUTION_PERMISSIONS_BIT: u32 = 1;
 	if does_the_owner_has_reading_permissions(permissions_mode)
 	{
 		human_readable_string.push('r');
-		bit_permissions += 400;
+		bit_permissions_sum += OWNER_READING_PERMISSION_BIT;
 	}
 	else
 	{
@@ -179,7 +188,7 @@ fn convert_permissions_to_human_readable_string(permissions: &Permissions) -> St
 	if does_the_owner_has_writting_permissions(permissions_mode)
 	{
 		human_readable_string.push('w');
-		bit_permissions += 200;
+		bit_permissions_sum += OWNER_WRITTING_PERMISSIONS_BIT;
 	}
 	else
 	{
@@ -188,7 +197,7 @@ fn convert_permissions_to_human_readable_string(permissions: &Permissions) -> St
 	if does_the_owner_has_execution_permissions(permissions_mode)
 	{
 		human_readable_string.push('x');
-		bit_permissions += 100;
+		bit_permissions_sum += OWNER_EXECUTION_PERMISSIONS_BIT;
 	}
 	else
 	{
@@ -197,7 +206,7 @@ fn convert_permissions_to_human_readable_string(permissions: &Permissions) -> St
 	if does_the_group_has_reading_permissions(permissions_mode)
 	{
 		human_readable_string.push('r');
-		bit_permissions += 40;
+		bit_permissions_sum += GROUP_READING_PERMISSIONS_BIT;
 	}
 	else
 	{
@@ -206,7 +215,7 @@ fn convert_permissions_to_human_readable_string(permissions: &Permissions) -> St
 	if does_the_group_has_writting_permissions(permissions_mode)
 	{
 		human_readable_string.push('w');
-		bit_permissions += 20;
+		bit_permissions_sum += GROUP_WRITTING_PERMISSIONS_BIT;
 	}
 	else
 	{
@@ -215,7 +224,7 @@ fn convert_permissions_to_human_readable_string(permissions: &Permissions) -> St
 	if does_the_group_has_execution_permissions(permissions_mode)
 	{
 		human_readable_string.push('x');
-		bit_permissions += 10;
+		bit_permissions_sum += GROUP_EXECUTION_PERMISSIONS_BIT;
 	}
 	else
 	{
@@ -224,7 +233,7 @@ fn convert_permissions_to_human_readable_string(permissions: &Permissions) -> St
 	if do_others_have_reading_permissions(permissions_mode)
 	{
 		human_readable_string.push('r');
-		bit_permissions += 4;
+		bit_permissions_sum += OTHERS_READING_PERMISSIONS_BIT;
 	}
 	else
 	{
@@ -233,7 +242,7 @@ fn convert_permissions_to_human_readable_string(permissions: &Permissions) -> St
 	if do_others_have_writting_permissions(permissions_mode)
 	{
 		human_readable_string.push('w');
-		bit_permissions += 2;
+		bit_permissions_sum += OTHERS_WRITTING_PERMISSIONS_BIT;
 	}
 	else
 	{
@@ -242,7 +251,7 @@ fn convert_permissions_to_human_readable_string(permissions: &Permissions) -> St
 	if do_others_have_execution_permissions(permissions_mode)
 	{
 		human_readable_string.push('x');
-		bit_permissions += 1;
+		bit_permissions_sum += OTHERS_EXECUTION_PERMISSIONS_BIT;
 	}
 	else
 	{
@@ -250,7 +259,7 @@ fn convert_permissions_to_human_readable_string(permissions: &Permissions) -> St
 	}
 	human_readable_string.push_str(&format!(
 		" ({})",
-		bit_permissions
+		bit_permissions_sum
 	));
 	return human_readable_string;
 }
