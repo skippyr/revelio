@@ -411,12 +411,15 @@ fn reveal_directory(directory_path: &PathBuf)
 			symlink_path: directory_entry_symlink_path
 		});
 	}
-	eprintln!("Index | Type            Size   Permissions       Owner        Name");
+	eprintln!("Index | Type             Size   Permissions       Owner        Name");
 	for directory_entry_iterator in 0..directory_entries.len()
 	{
+		eprint!(
+			"{:>5} | ",
+			directory_entry_iterator + 1
+		);
 		println!(
-			"{:>5} | {:<10}   {:>8}   {}   {:<10}   {}{}",
-			directory_entry_iterator + 1,
+			"{:<10}   {:>8}   {}   {:<10}   {}{}",
 			convert_file_type_to_human_readable_string(
 				directory_entries[directory_entry_iterator].is_symlink,
 				&directory_entries[directory_entry_iterator].file_type
