@@ -17,13 +17,18 @@ use std::{
 		PermissionsExt
 	}
 };
+use users::{
+	get_user_by_uid,
+	User
+};
 
 struct DirectoryEntry
 {
 	name: String,
 	size_in_bytes: u64,
 	file_type: FileType,
-	permissions: Permissions
+	permissions: Permissions,
+	user_owner_name: String
 }
 
 fn print_error(message: &str)
@@ -339,21 +344,49 @@ fn reveal_directory(directory_path: &PathBuf)
 		};
 		let directory_entry_file_type: FileType = directory_entry_metadata.file_type();
 		let directory_entry_permissions: Permissions = directory_entry_metadata.permissions();
+		let directory_entry_user_owner_uid: u32 = directory_entry_metadata.uid();
+		let directory_entry_user_owner: User = match get_user_by_uid(directory_entry_user_owner_uid)
+		{
+			Some(user) =>
+			{
+				user
+			}
+			None =>
+			{
+				continue;
+			}
+		};
+		let directory_entry_user_owner_name: String = match directory_entry_user_owner
+			.name()
+			.to_str()
+		{
+			Some(directory_entry_user_owner_name) =>
+			{
+				String::from(directory_entry_user_owner_name)
+			}
+			None =>
+			{
+				continue;
+			}
+		};
 		directory_entries.push(DirectoryEntry {
 			name: directory_entry_name,
 			size_in_bytes: directory_entry_size_in_bytes,
 			file_type: directory_entry_file_type,
-			permissions: directory_entry_permissions
+			permissions: directory_entry_permissions,
+			user_owner_name: directory_entry_user_owner_name
 		});
 	}
+	eprintln!("Index | Type            Size   Permissions       Owner        Name");
 	for directory_entry_iterator in 0..directory_entries.len()
 	{
 		println!(
-			"{:>4} | {:<9}   {:>8}   {}   {}",
+			"{:>5} | {:<9}   {:>8}   {}   {:<10}   {}",
 			directory_entry_iterator + 1,
 			covert_file_type_to_human_readable_string(&directory_entries[directory_entry_iterator].file_type),
 			convert_size_in_bytes_to_human_readable_string(directory_entries[directory_entry_iterator].size_in_bytes),
 			convert_permissions_to_human_readable_string(&directory_entries[directory_entry_iterator].permissions),
+			directory_entries[directory_entry_iterator].user_owner_name,
 			directory_entries[directory_entry_iterator].name
 		);
 	}
