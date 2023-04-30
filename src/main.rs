@@ -294,10 +294,6 @@ fn reveal_directory(directory_path: &PathBuf)
 		exit(1);
 	});
 	let mut directory_entries: Vec<DirectoryEntry> = Vec::new();
-	println!(
-		"Revealing directory: {:?}.",
-		directory_path
-	);
 	for directory_entry in directory_stream
 	{
 		let directory_entry: DirEntry = match directory_entry
@@ -412,6 +408,10 @@ fn reveal_directory(directory_path: &PathBuf)
 			symlink_path: directory_entry_symlink_path
 		});
 	}
+	println!(
+		"Revealing directory: {:?}.",
+		directory_path
+	);
 	println!("Index | Type             Size   Permissions       Owner        Name");
 	directory_entries.sort_by_key(|directory_entry| {
 		directory_entry
