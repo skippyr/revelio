@@ -64,6 +64,7 @@ impl File
 	}
 }
 
+#[derive(Debug)]
 enum DirectoryEntryKind
 {
 	File,
@@ -91,6 +92,25 @@ impl DirectoryEntryKind
 		else
 		{ DirectoryEntryKind::Fifo }
 	}
+
+	pub fn as_string(&self) -> String
+	{
+		match self
+		{
+			DirectoryEntryKind::File =>
+			{ String::from("File") }
+			DirectoryEntryKind::Directory =>
+			{ String::from("Directory") }
+			DirectoryEntryKind::Socket =>
+			{ String::from("Socket") }
+			DirectoryEntryKind::Character =>
+			{ String::from("Character") }
+			DirectoryEntryKind::Block =>
+			{ String::from("Block") }
+			DirectoryEntryKind::Fifo =>
+			{ String::from("Fifo") }
+		}
+	}
 }
 
 pub struct UnixPermissions
@@ -112,31 +132,31 @@ impl UnixPermissions
 	{ UnixPermissions { permissions_mode } }
 
 	fn does_owner_can_read(&self) -> bool
-	{ self.permissions_mode & UNIX_OWNER_READING_PERMISSIONS_BIT == 0 }
+	{ self.permissions_mode & UNIX_OWNER_READING_PERMISSIONS_BIT != 0 }
 
 	fn does_owner_can_write(&self) -> bool
-	{ self.permissions_mode & UNIX_OWNER_WRITING_PERMISSIONS_BIT == 0 }
+	{ self.permissions_mode & UNIX_OWNER_WRITING_PERMISSIONS_BIT != 0 }
 
 	fn does_owner_can_execute(&self) -> bool
-	{ self.permissions_mode & UNIX_OWNER_EXECUTION_PERMISSIONS_BIT == 0 }
+	{ self.permissions_mode & UNIX_OWNER_EXECUTION_PERMISSIONS_BIT != 0 }
 
 	fn does_group_can_read(&self) -> bool
-	{ self.permissions_mode & UNIX_GROUP_READING_PERMISSIONS_BIT == 0 }
+	{ self.permissions_mode & UNIX_GROUP_READING_PERMISSIONS_BIT != 0 }
 
 	fn does_group_can_write(&self) -> bool
-	{ self.permissions_mode & UNIX_GROUP_WRITING_PERMISSIONS_BIT == 0 }
+	{ self.permissions_mode & UNIX_GROUP_WRITING_PERMISSIONS_BIT != 0 }
 
 	fn does_group_can_execute(&self) -> bool
-	{ self.permissions_mode & UNIX_GROUP_EXECUTION_PERMISSIONS_BIT == 0 }
+	{ self.permissions_mode & UNIX_GROUP_EXECUTION_PERMISSIONS_BIT != 0 }
 
 	fn does_others_can_read(&self) -> bool
-	{ self.permissions_mode & UNIX_OTHERS_READING_PERMISSIONS_BIT == 0 }
+	{ self.permissions_mode & UNIX_OTHERS_READING_PERMISSIONS_BIT != 0 }
 
 	fn does_others_can_write(&self) -> bool
-	{ self.permissions_mode & UNIX_OTHERS_WRITING_PERMISSIONS_BIT == 0 }
+	{ self.permissions_mode & UNIX_OTHERS_WRITING_PERMISSIONS_BIT != 0 }
 
 	fn does_others_can_execute(&self) -> bool
-	{ self.permissions_mode & UNIX_OTHERS_EXECUTION_PERMISSIONS_BIT == 0 }
+	{ self.permissions_mode & UNIX_OTHERS_EXECUTION_PERMISSIONS_BIT != 0 }
 
 	pub fn as_bits_sum(&self) -> u32
 	{
@@ -167,25 +187,35 @@ impl UnixPermissions
 		const READING_CHARACTER: char = 'r';
 		const WRITING_CHARACTER: char = 'w';
 		const EXECUTION_CHARACTER: char = 'x';
+		const NONE_CHARACTER: char = '-';
 		let mut string: String = String::new();
 		if self.does_owner_can_read()
 		{ string.push(READING_CHARACTER); }
+		else { string.push(NONE_CHARACTER); }
 		if self.does_owner_can_write()
 		{ string.push(WRITING_CHARACTER); }
+		else { string.push(NONE_CHARACTER); }
 		if self.does_owner_can_execute()
 		{ string.push(EXECUTION_CHARACTER); }
+		else { string.push(NONE_CHARACTER); }
 		if self.does_group_can_read()
 		{ string.push(READING_CHARACTER); }
+		else { string.push(NONE_CHARACTER); }
 		if self.does_group_can_write()
 		{ string.push(WRITING_CHARACTER); }
+		else { string.push(NONE_CHARACTER); }
 		if self.does_group_can_execute()
 		{ string.push(EXECUTION_CHARACTER); }
+		else { string.push(NONE_CHARACTER); }
 		if self.does_others_can_read()
 		{ string.push(READING_CHARACTER); }
+		else { string.push(NONE_CHARACTER); }
 		if self.does_others_can_write()
 		{ string.push(WRITING_CHARACTER); }
+		else { string.push(NONE_CHARACTER); }
 		if self.does_others_can_execute()
 		{ string.push(EXECUTION_CHARACTER); }
+		else { string.push(NONE_CHARACTER); }
 		string
 	}
 }
@@ -214,6 +244,24 @@ impl DirectoryEntry
 			symlink_path,
 			permissions: UnixPermissions::new(permissions_mode)
 		}
+	}
+
+	pub fn as_string(&self) -> String
+	{
+		format!(
+			"{}{:<10}  {} ({:o})   {}",
+			match &self.symlink_path
+			{
+				Some(_symlink_path) =>
+				{ String::from("@") }
+				None =>
+				{ String::from(" ") }
+			},
+			self.kind.as_string(),
+			self.permissions.as_string(),
+			self.permissions.as_bits_sum(),
+			self.name
+		)
 	}
 }
 
@@ -282,10 +330,25 @@ impl Directory
 				permissions_mode
 			));
 		}
+		entries.sort_by_key(
+			|entry|
+			entry.name.clone()
+		);
 		entries
 	}
 
 	pub fn reveal(&self)
-	{}
+	{
+		let mut entry_number: u32 = 1;
+		for entry in self.get_entries()
+		{
+			eprintln!(
+				"{:>5} | {}",
+				entry_number,
+				entry.as_string()
+			);
+			entry_number += 1;
+		}
+	}
 }
 
