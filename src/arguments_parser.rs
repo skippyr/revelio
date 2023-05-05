@@ -18,10 +18,13 @@ impl ArgumentsParser
 		self.arguments.len() > DEFAULT_ARGUMENTS_LENGTH
 	}
 
-	pub fn get_path(&self) -> PathBuf
+	pub fn get_path(&self) -> Option<PathBuf>
 	{
 		let last_argument_index: usize = self.arguments.len() - 1;
-		PathBuf::from(self.arguments[last_argument_index].clone())
+		if self.has_enough_arguments()
+		{ Some(PathBuf::from(self.arguments[last_argument_index].clone())) }
+		else
+		{ None }
 	}
 }
 
