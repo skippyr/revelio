@@ -1,6 +1,11 @@
-use reveal::{
+use reveal::
+{
 	arguments_parse::ArgumentsParser,
-	pretty_printing::print_error,
+	pretty_printing::
+	{
+		print_error,
+		print_help_instructions
+	},
 	file_system::
 	{
 		File,
@@ -17,6 +22,11 @@ use std::
 fn main()
 {
 	let arguments_parser: ArgumentsParser = ArgumentsParser::from_environment();
+	if arguments_parser.is_to_show_help()
+	{
+		print_help_instructions();
+		exit(0);
+	}
 	let path: PathBuf = arguments_parser.get_path();
 	let metadata: Metadata = path
 		.metadata()
@@ -37,3 +47,4 @@ fn main()
 		exit(1);
 	}
 }
+

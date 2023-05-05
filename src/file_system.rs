@@ -24,6 +24,11 @@ use std::
 		PermissionsExt
 	}
 };
+use num_format::
+{
+	Locale,
+	ToFormattedString
+};
 use super::pretty_printing::print_error;
 
 pub struct File
@@ -55,8 +60,8 @@ impl File
 				}
 			);
 			println!(
-				"{:>5} | {}",
-				line_number,
+				"{:>6} | {}",
+				line_number.to_formatted_string(&Locale::en),
 				line
 			);
 			line_number += 1;
@@ -343,8 +348,8 @@ impl Directory
 		for entry in self.get_entries()
 		{
 			eprintln!(
-				"{:>5} | {}",
-				entry_number,
+				"{:>6} | {}",
+				entry_number.to_formatted_string(&Locale::en),
 				entry.as_string()
 			);
 			entry_number += 1;

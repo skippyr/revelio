@@ -4,11 +4,7 @@ use std::
 	path::PathBuf,
 	process::exit
 };
-use super::pretty_printing::
-{
-	print_error,
-	print_usage_instructions
-};
+use super::pretty_printing::print_error;
 
 pub struct ArgumentsParser
 { arguments: Vec<String> }
@@ -24,15 +20,25 @@ impl ArgumentsParser
 		self.arguments.len() > DEFAULT_ARGUMENTS_LENGTH
 	}
 
+	pub fn is_to_show_help(&self) -> bool
+	{
+		self.arguments.contains(&String::from("-h")) ||
+		self.arguments.contains(&String::from("--help"))
+	}
+
 	pub fn get_path(&self) -> PathBuf
 	{
-		if !self.has_enough_arguments()
-		{
-			print_usage_instructions();
-			exit(1);
-		}
 		let last_argument_index: usize = self.arguments.len() - 1;
-		PathBuf::from(self.arguments[last_argument_index].clone())
+		let path: PathBuf =
+		if self.has_enough_arguments()
+		{
+			PathBuf::from(self.arguments[last_argument_index].clone())
+		}
+		else
+		{
+			PathBuf::from(".")
+		};
+		path
 			.canonicalize()
 			.unwrap_or_else(
 				|_error|

@@ -7,7 +7,7 @@ pub fn print_error(description: String)
 	);
 }
 
-pub fn print_usage_instructions()
+pub fn print_help_instructions()
 {
 	eprintln!("Usage Instructions");
 	eprintln!("Starting Point");
