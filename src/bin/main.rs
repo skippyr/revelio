@@ -1,7 +1,11 @@
 use reveal::{
 	arguments_parse::ArgumentsParser,
 	pretty_printing::print_error,
-	file_system::File
+	file_system::
+	{
+		File,
+		Directory
+	}
 };
 use std::
 {
@@ -25,6 +29,8 @@ fn main()
 		);
 	if metadata.is_file()
 	{ File::from(&path).reveal(); }
+	else if metadata.is_dir()
+	{ Directory::from(&path).reveal(); }
 	else
 	{
 		print_error(String::from("Could not reveal path type."));
