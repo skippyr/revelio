@@ -1,8 +1,28 @@
 use std::
 {
-	fs,
+	fs::
+	{
+		self,
+		ReadDir,
+		read_dir,
+		DirEntry,
+		Metadata,
+		read_link,
+		FileType
+	},
+	ffi::OsStr,
 	path::PathBuf,
-	process::exit, io::{BufReader, BufRead}
+	process::exit,
+	io::
+	{
+		BufReader,
+		BufRead
+	},
+	os::unix::prelude::
+	{
+		FileTypeExt,
+		PermissionsExt
+	}
 };
 use super::pretty_printing::print_error;
 
@@ -44,13 +64,33 @@ impl File
 	}
 }
 
-enum DirectoryEntryType
+enum DirectoryEntryKind
 {
 	File,
 	Directory,
 	Socket,
-	CharacterDevice,
-	BlockDevice
+	Character,
+	Block,
+	Fifo
+}
+
+impl DirectoryEntryKind
+{
+	pub fn from(file_type: &FileType) -> DirectoryEntryKind
+	{
+		if file_type.is_file()
+		{ DirectoryEntryKind::File }
+		else if file_type.is_dir()
+		{ DirectoryEntryKind::Directory }
+		else if file_type.is_socket()
+		{ DirectoryEntryKind::Socket }
+		else if file_type.is_char_device()
+		{ DirectoryEntryKind::Character }
+		else if file_type.is_block_device()
+		{ DirectoryEntryKind::Block }
+		else
+		{ DirectoryEntryKind::Fifo }
+	}
 }
 
 pub struct UnixPermissions
@@ -68,7 +108,7 @@ const UNIX_OTHERS_EXECUTION_PERMISSIONS_BIT: u32 = 0o1;
 
 impl UnixPermissions
 {
-	pub fn from_permissions_mode(permissions_mode: u32) -> UnixPermissions
+	pub fn new(permissions_mode: u32) -> UnixPermissions
 	{ UnixPermissions { permissions_mode } }
 
 	fn does_owner_can_read(&self) -> bool
@@ -153,7 +193,28 @@ impl UnixPermissions
 pub struct DirectoryEntry
 {
 	name: String,
+	kind: DirectoryEntryKind,
+	symlink_path: Option<PathBuf>,
 	permissions: UnixPermissions
+}
+
+impl DirectoryEntry
+{
+	pub fn new(
+		name: String,
+		file_type: FileType,
+		symlink_path: Option<PathBuf>,
+		permissions_mode: u32
+	) -> DirectoryEntry
+	{
+		DirectoryEntry
+		{
+			name,
+			kind: DirectoryEntryKind::from(&file_type),
+			symlink_path,
+			permissions: UnixPermissions::new(permissions_mode)
+		}
+	}
 }
 
 pub struct Directory
@@ -164,7 +225,65 @@ impl Directory
 	pub fn from(path: &PathBuf) -> Directory
 	{ Directory { path: path.clone() } }
 
-	pub fn get_entries()
+	pub fn get_entries(&self) -> Vec<DirectoryEntry>
+	{
+		let stream: ReadDir = read_dir(&self.path).unwrap_or_else(
+			|_error|
+			{
+				print_error(String::from("Could not read directory."));
+				exit(1);
+			}
+		);
+		let mut entries: Vec<DirectoryEntry> = Vec::new();
+		for entry in stream
+		{
+			let entry: DirEntry = match entry
+			{
+				Ok(entry) =>
+				{ entry }
+				Err(_error) =>
+				{ continue; }
+			};
+			let path: PathBuf = entry.path();
+			let file_name: &OsStr = match path.file_name()
+			{
+				Some(file_name) =>
+				{ file_name }
+				None =>
+				{ continue; }
+			};
+			let name: String = match file_name.to_str()
+			{
+				Some(name) =>
+				{ String::from(name) }
+				None =>
+				{ continue; }
+			};
+			let metadata: Metadata = match entry.metadata()
+			{
+				Ok(metadata) =>
+				{ metadata }
+				Err(_error) =>
+				{ continue; }
+			};
+			let file_type: FileType = metadata.file_type();
+			let symlink_path: Option<PathBuf> = match read_link(&path)
+			{
+				Ok(symlink_path) =>
+				{ Some(symlink_path) }
+				Err(_error) =>
+				{ None }
+			};
+			let permissions_mode: u32 = metadata.permissions().mode();
+			entries.push(DirectoryEntry::new(
+				name,
+				file_type,
+				symlink_path,
+				permissions_mode
+			));
+		}
+		entries
+	}
 
 	pub fn reveal(&self)
 	{}
