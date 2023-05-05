@@ -1,5 +1,18 @@
 use reveal::arguments_parser::ArgumentsParser;
-use std::process::exit;
+use std::
+{
+	process::exit,
+	path::PathBuf
+};
+
+fn print_error(message: &str)
+{
+	eprintln!("Opsie!");
+	eprintln!(
+		"{}",
+		message
+	);
+}
 
 fn print_usage_instructions()
 {
@@ -11,10 +24,22 @@ fn print_usage_instructions()
 fn main()
 {
 	let arguments_parser: ArgumentsParser = ArgumentsParser::from_environment();
-	if !arguments_parser.has_enough_arguments()
-	{
-		print_usage_instructions();
-		exit(1);
-	}
-	eprintln!("{:?}", arguments_parser.get_path());
+	let path: PathBuf = arguments_parser
+		.get_path()
+		.unwrap_or_else(
+			||
+			{
+				print_usage_instructions();
+				exit(1);
+			}
+		)
+		.canonicalize()
+		.unwrap_or_else(
+			|_error|
+			{
+				print_error("The path does not exist.");
+				exit(1);
+			}
+		);
+	eprintln!("{:?}", path);
 }

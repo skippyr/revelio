@@ -12,7 +12,7 @@ impl ArgumentsParser
 	pub fn from_environment() -> ArgumentsParser
 	{ ArgumentsParser { arguments: args().collect() } }
 
-	pub fn has_enough_arguments(&self) -> bool
+	fn has_enough_arguments(&self) -> bool
 	{
 		const DEFAULT_ARGUMENTS_LENGTH: usize = 1;
 		self.arguments.len() > DEFAULT_ARGUMENTS_LENGTH
