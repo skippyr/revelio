@@ -29,6 +29,11 @@ use num_format::
 	Locale,
 	ToFormattedString
 };
+use users::
+{
+	User,
+	get_user_by_uid
+};
 use super::pretty_printing::print_error;
 
 pub struct File
@@ -76,7 +81,8 @@ enum DirectoryEntryKind
 	Socket,
 	Character,
 	Block,
-	Fifo
+	Fifo,
+	Unknown
 }
 
 impl DirectoryEntryKind
@@ -93,8 +99,10 @@ impl DirectoryEntryKind
 		{ DirectoryEntryKind::Character }
 		else if file_type.is_block_device()
 		{ DirectoryEntryKind::Block }
-		else
+		else if file_type.is_fifo()
 		{ DirectoryEntryKind::Fifo }
+		else
+		{ DirectoryEntryKind::Unknown }
 	}
 
 	pub fn as_string(&self) -> String
@@ -113,6 +121,8 @@ impl DirectoryEntryKind
 			{ String::from("Block") }
 			DirectoryEntryKind::Fifo =>
 			{ String::from("Fifo") }
+			DirectoryEntryKind::Unknown =>
+			{ String::from("Unknown") }
 		}
 	}
 }
@@ -289,6 +299,7 @@ pub struct DirectoryEntry
 {
 	name: String,
 	size: Size,
+	owner: User,
 	kind: DirectoryEntryKind,
 	symlink_path: Option<PathBuf>,
 	permissions: UnixPermissions
@@ -299,6 +310,7 @@ impl DirectoryEntry
 	pub fn new(
 		name: String,
 		size_in_bytes: u64,
+		owner: User,
 		file_type: FileType,
 		symlink_path: Option<PathBuf>,
 		permissions_mode: u32
@@ -308,6 +320,7 @@ impl DirectoryEntry
 		{
 			name,
 			size: Size::new(size_in_bytes),
+			owner,
 			kind: DirectoryEntryKind::from(&file_type),
 			symlink_path,
 			permissions: UnixPermissions::new(permissions_mode)
@@ -317,7 +330,7 @@ impl DirectoryEntry
 	pub fn as_string(&self) -> String
 	{
 		format!(
-			"{}{:<10}  {:>7}   {} ({:o})   {}{}",
+			"{}{:<10}  {:>7}   {} ({:o})   {:<10} {}{}",
 			match &self.symlink_path
 			{
 				Some(_symlink_path) =>
@@ -329,6 +342,13 @@ impl DirectoryEntry
 			self.size.as_string(),
 			self.permissions.as_string(),
 			self.permissions.as_bits_sum(),
+			match self.owner.name().to_str()
+			{
+				Some(owner) =>
+				{ String::from(owner) }
+				None =>
+				{ String::new() }
+			},
 			self.name,
 			match &self.symlink_path
 			{
@@ -402,10 +422,11 @@ impl Directory
 				{ continue; }
 			};
 			let file_type: FileType = metadata.file_type();
-			let size_in_bytes: u64 = if file_type.is_file()
-			{ metadata.size() }
-			else
-			{ 0 };
+			let size_in_bytes: u64 =
+				if file_type.is_file()
+				{ metadata.size() }
+				else
+				{ 0 };
 			let symlink_path: Option<PathBuf> = match read_link(&path)
 			{
 				Ok(symlink_path) =>
@@ -414,9 +435,17 @@ impl Directory
 				{ None }
 			};
 			let permissions_mode: u32 = metadata.permissions().mode();
+			let owner: User = match get_user_by_uid(metadata.uid())
+			{
+				Some(user) =>
+				{ user }
+				None =>
+				{ continue; }
+			};
 			entries.push(DirectoryEntry::new(
 				name,
 				size_in_bytes,
+				owner,
 				file_type,
 				symlink_path,
 				permissions_mode
