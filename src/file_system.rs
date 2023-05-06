@@ -402,10 +402,10 @@ impl Directory
 				{ continue; }
 			};
 			let file_type: FileType = metadata.file_type();
-			let size_in_bytes: u64 = if file_type.is_dir()
-			{ 0 }
+			let size_in_bytes: u64 = if file_type.is_file()
+			{ metadata.size() }
 			else
-			{ metadata.size() };
+			{ 0 };
 			let symlink_path: Option<PathBuf> = match read_link(&path)
 			{
 				Ok(symlink_path) =>
