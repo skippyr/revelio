@@ -22,7 +22,7 @@ use std::
 fn main()
 {
 	let arguments_parser: ArgumentsParser = ArgumentsParser::from_environment();
-	if arguments_parser.is_to_show_help()
+	if arguments_parser.is_to_print_help_instructions()
 	{
 		print_help_instructions();
 		exit(0);

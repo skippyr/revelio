@@ -21,7 +21,7 @@ use std::
 	os::unix::prelude::
 	{
 		FileTypeExt,
-		PermissionsExt
+		PermissionsExt, MetadataExt
 	}
 };
 use num_format::
@@ -225,9 +225,71 @@ impl UnixPermissions
 	}
 }
 
+pub struct Size
+{ as_bytes: u64 }
+
+impl Size
+{
+	pub fn new(size_in_bytes: u64) -> Size
+	{ Size { as_bytes: size_in_bytes } }
+
+	fn to_gigabytes(&self) -> f32
+	{
+		const ONE_GIGABYTE_AS_BYTES: u64 = 10_u64.pow(9);
+		self.as_bytes as f32 / ONE_GIGABYTE_AS_BYTES as f32
+	}
+
+	fn to_megabytes(&self) -> f32
+	{
+		const ONE_MEGABYTE_AS_BYTES: u64 = 10_u64.pow(6);
+		self.as_bytes as f32 / ONE_MEGABYTE_AS_BYTES as f32
+	}
+
+	fn to_kilobytes(&self) -> f32
+	{
+		const ONE_KILOBYTE_AS_BYTES: u64 = 10_u64.pow(3);
+		self.as_bytes as f32 / ONE_KILOBYTE_AS_BYTES as f32
+	}
+
+	pub fn as_string(&self) -> String
+	{
+		if self.to_gigabytes() as u64 > 0
+		{
+			format!(
+				"{:.1}GB",
+				self.to_gigabytes()
+			)
+		}
+		else if self.to_megabytes() as u64 > 0
+		{
+			format!(
+				"{:.1}MB",
+				self.to_megabytes()
+			)
+		}
+		else if self.to_kilobytes() as u64 > 0
+		{
+			format!(
+				"{:.1}KB",
+				self.to_kilobytes()
+			)
+		}
+		else if self.as_bytes > 0
+		{
+			format!(
+				"{}B",
+				self.as_bytes
+			)
+		}
+		else
+		{ String::from("-") }
+	}
+}
+
 pub struct DirectoryEntry
 {
 	name: String,
+	size: Size,
 	kind: DirectoryEntryKind,
 	symlink_path: Option<PathBuf>,
 	permissions: UnixPermissions
@@ -237,6 +299,7 @@ impl DirectoryEntry
 {
 	pub fn new(
 		name: String,
+		size_in_bytes: u64,
 		file_type: FileType,
 		symlink_path: Option<PathBuf>,
 		permissions_mode: u32
@@ -245,6 +308,7 @@ impl DirectoryEntry
 		DirectoryEntry
 		{
 			name,
+			size: Size::new(size_in_bytes),
 			kind: DirectoryEntryKind::from(&file_type),
 			symlink_path,
 			permissions: UnixPermissions::new(permissions_mode)
@@ -254,7 +318,7 @@ impl DirectoryEntry
 	pub fn as_string(&self) -> String
 	{
 		format!(
-			"{}{:<10}  {} ({:o})   {}",
+			"{}{:<10}  {:>7}   {} ({:o})   {}",
 			match &self.symlink_path
 			{
 				Some(_symlink_path) =>
@@ -263,6 +327,7 @@ impl DirectoryEntry
 				{ String::from(" ") }
 			},
 			self.kind.as_string(),
+			self.size.as_string(),
 			self.permissions.as_string(),
 			self.permissions.as_bits_sum(),
 			self.name
@@ -320,6 +385,10 @@ impl Directory
 				{ continue; }
 			};
 			let file_type: FileType = metadata.file_type();
+			let size_in_bytes: u64 = if file_type.is_dir()
+			{ 0 }
+			else
+			{ metadata.size() };
 			let symlink_path: Option<PathBuf> = match read_link(&path)
 			{
 				Ok(symlink_path) =>
@@ -330,6 +399,7 @@ impl Directory
 			let permissions_mode: u32 = metadata.permissions().mode();
 			entries.push(DirectoryEntry::new(
 				name,
+				size_in_bytes,
 				file_type,
 				symlink_path,
 				permissions_mode

@@ -20,7 +20,7 @@ impl ArgumentsParser
 		self.arguments.len() > DEFAULT_ARGUMENTS_LENGTH
 	}
 
-	pub fn is_to_show_help(&self) -> bool
+	pub fn is_to_print_help_instructions(&self) -> bool
 	{
 		self.arguments.contains(&String::from("-h")) ||
 		self.arguments.contains(&String::from("--help"))
@@ -31,13 +31,9 @@ impl ArgumentsParser
 		let last_argument_index: usize = self.arguments.len() - 1;
 		let path: PathBuf =
 		if self.has_enough_arguments()
-		{
-			PathBuf::from(self.arguments[last_argument_index].clone())
-		}
+		{ PathBuf::from(self.arguments[last_argument_index].clone()) }
 		else
-		{
-			PathBuf::from(".")
-		};
+		{ PathBuf::from(".") };
 		path
 			.canonicalize()
 			.unwrap_or_else(
