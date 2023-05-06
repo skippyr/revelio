@@ -317,7 +317,7 @@ impl DirectoryEntry
 	pub fn as_string(&self) -> String
 	{
 		format!(
-			"{}{:<10}  {:>7}   {} ({:o})   {}",
+			"{}{:<10}  {:>7}   {} ({:o})   {}{}",
 			match &self.symlink_path
 			{
 				Some(_symlink_path) =>
@@ -329,7 +329,25 @@ impl DirectoryEntry
 			self.size.as_string(),
 			self.permissions.as_string(),
 			self.permissions.as_bits_sum(),
-			self.name
+			self.name,
+			match &self.symlink_path
+			{
+				Some(symlink_path) =>
+				{
+					format!(
+						" -> {}",
+						match symlink_path.to_str()
+						{
+							Some(symlink_path) =>
+							{ String::from(symlink_path) }
+							None =>
+							{ String::new() }
+						}
+					)
+				}
+				None =>
+				{ String::new() }
+			}
 		)
 	}
 }
