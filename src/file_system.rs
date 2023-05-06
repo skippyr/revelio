@@ -46,6 +46,10 @@ impl File
 
 	pub fn reveal(&self)
 	{
+		println!(
+			"Revealing file: {}.",
+			self.path.display()
+		);
 		let file: fs::File = fs::File::open(&self.path).unwrap_or_else(
 			|_error|
 			{
@@ -455,6 +459,11 @@ impl Directory
 	pub fn reveal(&self)
 	{
 		let mut entry_number: u32 = 1;
+		println!(
+			"Revealing directory: {}.",
+			self.path.display()
+		);
+		println!(" Index | Type            Size   Permissions       Owner      Name");
 		for entry in self.get_entries()
 		{
 			println!(
