@@ -39,7 +39,7 @@ impl ArgumentsParser
 			.unwrap_or_else(
 				|_error|
 				{
-					print_error(String::from("The path does not exists."));
+					print_error(String::from("The path provided does not exists."));
 					exit(1);
 				}
 			)
