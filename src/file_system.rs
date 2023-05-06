@@ -347,7 +347,7 @@ impl DirectoryEntry
 				Some(owner) =>
 				{ String::from(owner) }
 				None =>
-				{ String::new() }
+				{ String::from("-") }
 			},
 			self.name,
 			match &self.symlink_path
@@ -356,13 +356,7 @@ impl DirectoryEntry
 				{
 					format!(
 						" -> {}",
-						match symlink_path.to_str()
-						{
-							Some(symlink_path) =>
-							{ String::from(symlink_path) }
-							None =>
-							{ String::new() }
-						}
+						symlink_path.display()
 					)
 				}
 				None =>
@@ -414,7 +408,7 @@ impl Directory
 				None =>
 				{ continue; }
 			};
-			let metadata: Metadata = match entry.metadata()
+			let metadata: Metadata = match path.metadata()
 			{
 				Ok(metadata) =>
 				{ metadata }
