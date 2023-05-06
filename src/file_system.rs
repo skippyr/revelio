@@ -284,7 +284,7 @@ impl Size
 		else if self.to_kilobytes() as u64 > 0
 		{
 			format!(
-				"{:.1}KB",
+				"{:.1}kB",
 				self.to_kilobytes()
 			)
 		}
