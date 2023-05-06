@@ -69,7 +69,6 @@ impl File
 	}
 }
 
-#[derive(Debug)]
 enum DirectoryEntryKind
 {
 	File,
@@ -417,7 +416,7 @@ impl Directory
 		let mut entry_number: u32 = 1;
 		for entry in self.get_entries()
 		{
-			eprintln!(
+			println!(
 				"{:>6} | {}",
 				entry_number.to_formatted_string(&Locale::en),
 				entry.as_string()
