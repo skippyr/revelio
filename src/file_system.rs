@@ -21,7 +21,8 @@ use std::
 	os::unix::prelude::
 	{
 		FileTypeExt,
-		PermissionsExt, MetadataExt
+		PermissionsExt,
+		MetadataExt
 	}
 };
 use num_format::

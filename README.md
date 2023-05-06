@@ -1,9 +1,8 @@
 <h1>Reveal</h1>
 	<h2>Starting Point</h2>
-		<p>Reveal is an utility tool to reveal directory entries and file contents.</p>
+		<p>An utility tool to reveal directory entries and file contents.</p>
 		<img src="./images/preview.gif"/>
 	<h2>Installation And Usage</h2>
-		<p>Be aware that Reveal was built to run on Linux. I can not ensure that it will run in other systems as well.</p>
 		<ul>
 			<li>Install <a href="https://www.rust-lang.org/">Rust development tools</a>.</li>
 			<li>Download this repository to a directory in your machine. If you have <code>git</code> installed, you can use it in the following command:</li>
