@@ -1,4 +1,6 @@
-pub fn print_help_instructions()
+use std::process::exit;
+
+pub fn print_help_instructions() -> !
 {
 	eprintln!("Help Instructions");
 	eprintln!("\tStarting Point");
@@ -10,5 +12,6 @@ pub fn print_help_instructions()
 	eprintln!("\t\t\t--help: print these help instructions.");
 	eprintln!("\t\tIf no path is provided, it will consider your current directory.");
 	eprintln!("\t\tIf multiple paths are provided, only the last one will be considered.");
+	exit(0);
 }
 

@@ -1,9 +1,5 @@
-use super::errors::print_error;
-use std::
-{
-	path::PathBuf,
-	process::exit
-};
+use crate::errors::throw_error;
+use std::path::PathBuf;
 
 pub struct PathResolver
 { path: PathBuf }
@@ -21,13 +17,11 @@ impl PathResolver
 			{ path }
 			Err(_error) =>
 			{
-				let exit_code: i32 = 1;
-				print_error(
+				throw_error(
 					String::from("the given path does not exists."),
 					String::from("ensure that you did not mispelled it."),
-					exit_code
+					1
 				);
-				exit(exit_code);
 			}
 		}
 	}
