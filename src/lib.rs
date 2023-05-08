@@ -1,4 +1,4 @@
-pub mod arguments_parse;
+pub mod arguments;
+pub mod help;
 pub mod file_system;
-pub mod error_treatment;
 
