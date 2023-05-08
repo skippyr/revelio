@@ -35,7 +35,7 @@ use users::
 	User,
 	get_user_by_uid
 };
-use super::pretty_printing::print_error;
+use super::error_treatment::print_error;
 
 pub struct File
 { path: PathBuf }
@@ -54,8 +54,13 @@ impl File
 		let file: fs::File = fs::File::open(&self.path).unwrap_or_else(
 			|_error|
 			{
-				print_error(String::from("Could not open file."));
-				exit(1);
+				let exit_code: i32 = 1;
+				print_error(
+					String::from("could not open the file."),
+					String::from("ensure that you have enough permissions to read it."),
+					exit_code
+				);
+				exit(exit_code);
 			}
 		);
 		let buffer: BufReader<fs::File> = BufReader::new(file);
@@ -65,8 +70,13 @@ impl File
 			let line: String = line.unwrap_or_else(
 				|_error|
 				{
-					print_error(String::from("Could not read lines of file."));
-					exit(1);
+					let exit_code: i32 = 1;
+					print_error(
+						String::from("could not read the lines of the file."),
+						String::from("ensure that its content is readable."),
+						exit_code
+					);
+					exit(exit_code);
 				}
 			);
 			println!(
@@ -384,8 +394,13 @@ impl Directory
 		let stream: ReadDir = read_dir(&self.path).unwrap_or_else(
 			|_error|
 			{
-				print_error(String::from("Could not read directory."));
-				exit(1);
+				let exit_code: i32 = 1;
+				print_error(
+					String::from("could not read the directory."),
+					String::from("ensure that you have enough permissions to read it."),
+					exit_code
+				);
+				exit(exit_code);
 			}
 		);
 		let mut entries: Vec<DirectoryEntry> = Vec::new();

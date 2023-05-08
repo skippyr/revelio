@@ -1,16 +1,12 @@
 use reveal::
 {
 	arguments_parse::ArgumentsParser,
-	pretty_printing::
-	{
-		print_error,
-		print_help_instructions
-	},
 	file_system::
 	{
 		File,
 		Directory
-	}
+	},
+	error_treatment::print_error
 };
 use std::
 {
@@ -18,6 +14,20 @@ use std::
 	path::PathBuf,
 	fs::Metadata
 };
+
+fn print_help_instructions()
+{
+	println!("Usage Instructions");
+	println!("Starting Point");
+	println!("\tAn utility tool to reveal directory entries and file contents.");
+	println!("Syntax");
+	println!("\tUse it with the following syntax:");
+	println!("\t\treveal [flags] <path>");
+	println!("\tThe flags it can accept are:");
+	println!("\t\t--help: print these help instructions.");
+	println!("\tIf no path is provided, it will consider your current one.");
+	println!("\tIf multiple paths are provided, it will only consider the last one.");
+}
 
 fn main()
 {
@@ -33,8 +43,13 @@ fn main()
 		.unwrap_or_else(
 			|_error|
 			{
-				print_error(String::from("Could not get path metadata."));
-				exit(1);
+				let exit_code: i32 = 1;
+				print_error(
+					String::from("could not get path metadata."),
+					String::from("ensure that you have enough permissions to read it."),
+					exit_code
+				);
+				exit(exit_code);
 			}
 		);
 	if metadata.is_file()
@@ -43,8 +58,13 @@ fn main()
 	{ Directory::from(&path).reveal(); }
 	else
 	{
-		print_error(String::from("Could not reveal path type."));
-		exit(1);
+		let exit_code: i32 = 1;
+		print_error(
+			String::from("could not reveal path type."),
+			String::from("read the help instructions by using the flag --help."),
+			exit_code
+		);
+		exit(exit_code);
 	}
 }
 
