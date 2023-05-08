@@ -1,7 +1,11 @@
 use crate::
 {
 	errors::throw_error,
-	file_system::file::File
+	file_system::
+	{
+		file::File,
+		directory::Directory
+	}
 };
 use std::
 {
@@ -60,11 +64,13 @@ impl PathRevealer
 		};
 		if metadata.is_file()
 		{ File::from(&self.path).reveal() }
+		else if metadata.is_dir()
+		{ Directory::from(&self.path).reveal() }
 		else
 		{
 			throw_error(
 				String::from("could not reveal the type of the given path."),
-				String::from("read the help instructions by using the flag --help."),
+				String::from("read the help instructions by using the flag --help to see what types can be revealed."),
 				1
 			);
 		}

@@ -9,7 +9,6 @@ use std::
 	},
 	path::PathBuf
 };
-
 use crate::errors::throw_error;
 
 pub struct File
