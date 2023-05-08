@@ -1,7 +1,12 @@
 use reveal::
 {
 	arguments::ArgumentsParser,
-	help::print_help_instructions
+	help::print_help_instructions,
+	file_system::
+	{
+		PathResolver,
+		PathRevealer
+	}
 };
 use std::
 {
@@ -17,10 +22,10 @@ fn main()
 		print_help_instructions();
 		exit(0);
 	}
-	let path: PathBuf = arguments_parser.get_path();
-	eprintln!(
-		"{:?}",
-		path
-	);
+	let unresolved_path: PathBuf = arguments_parser.get_path();
+	let path_resolver: PathResolver = PathResolver::from(&unresolved_path);
+	let path: PathBuf = path_resolver.resolve();
+	let path_revealer: PathRevealer = PathRevealer::from(&path);
+	path_revealer.reveal();
 }
 
