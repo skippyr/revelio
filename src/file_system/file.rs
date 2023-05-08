@@ -4,6 +4,7 @@ use std::
 	io::
 	{
 		BufRead,
+		Read,
 		BufReader
 	},
 	path::PathBuf
@@ -12,21 +13,12 @@ use std::
 use crate::errors::throw_error;
 
 pub struct File
-{
-	path: PathBuf,
-	descriptor: BufReader<fs::File>
-}
+{ descriptor: BufReader<fs::File> }
 
 impl File
 {
 	pub fn from(path: &PathBuf) -> File
-	{
-		File
-		{
-			path: path.clone(),
-			descriptor: File::get_descriptor(path)
-		}
-	}
+	{ File { descriptor: File::get_descriptor(path) } }
 
 	fn get_descriptor(path: &PathBuf) -> BufReader<fs::File>
 	{
@@ -38,7 +30,7 @@ impl File
 			{
 				throw_error(
 					String::from("could not open the file."),
-					String::from("ensure that you have enough 	permissions to read it."),
+					String::from("ensure that you have enough permissions to read it."),
 					1
 				);
 			}
@@ -46,7 +38,31 @@ impl File
 		BufReader::new(file)
 	}
 
-	pub fn reveal(&self)
-	{  }
+	pub fn reveal(&mut self)
+	{
+		let mut line_number: u32 = 0;
+		for line in self.descriptor.by_ref().lines()
+		{
+			let line: String = match line
+			{
+				Ok(line) =>
+				{ line }
+				Err(_error) =>
+				{
+					throw_error(
+						String::from("could not read lines of the file."),
+						String::from("ensure that it is of a readable type."),
+						1
+					);
+				}
+			};
+			println!(
+				"{} | {}",
+				line_number,
+				line
+			);
+			line_number += 1;
+		}
+	}
 }
 
