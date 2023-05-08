@@ -2,7 +2,7 @@ use reveal::
 {
 	arguments::ArgumentsParser,
 	help::print_help_instructions,
-	file_system::
+	file_system::path::
 	{
 		PathResolver,
 		PathRevealer
