@@ -6,8 +6,7 @@ use std::
 		ReadDir,
 		DirEntry,
 		Metadata,
-		FileType,
-		read_link
+		FileType
 	},
 	path::PathBuf,
 	ffi::OsStr,
@@ -29,6 +28,7 @@ use crate::
 	file_system::
 	{
 		permissions::UnixPermissions,
+		symlink::Symlink,
 		sizes::DigitalSize
 	}
 };
@@ -93,20 +93,13 @@ struct DirectoryEntry
 	kind: DirectoryEntryKind,
 	size: DigitalSize,
 	owner: Option<UnixUser>,
-	symlink_path: Option<PathBuf>
+	symlink: Symlink
 }
 
 impl DirectoryEntry
 {
 	pub fn as_string(&self) -> String
 	{
-		let symlink_decorator: String = match &self.symlink_path
-		{
-			Some(_symlink_path) =>
-			{ String::from("@") }
-			None =>
-			{ String::from(" ") }
-		};
 		let owner: String = match &self.owner
 		{
 			Some(owner) =>
@@ -114,28 +107,16 @@ impl DirectoryEntry
 			None =>
 			{ String::new() }
 		};
-		let symlink_path: String = match &self.symlink_path
-		{
-			Some(symlink_path) =>
-			{
-				format!(
-					" -> {}",
-					symlink_path.display()
-				)
-			}
-			None =>
-			{ String::new() }
-		};
 		format!(
 			"{}{:<9}   {:>7}   {} ({:o})   {:<10}   {}{}",
-			symlink_decorator,
+			self.symlink.as_decorator_string(),
 			self.kind.as_string(),
 			self.size.as_string(),
 			self.permissions.as_string(),
 			self.permissions.as_bits_sum(),
 			owner,
 			self.name,
-			symlink_path
+			self.symlink.as_string()
 		)
 	}
 }
@@ -212,13 +193,6 @@ impl Directory
 			let size_in_bytes: u64 = metadata.size();
 			let owner_uid: u32 = metadata.uid();
 			let permissions_mode: u32 = metadata.permissions().mode();
-			let symlink_path: Option<PathBuf> = match read_link(path)
-			{
-				Ok(symlink_path) =>
-				{ Some(symlink_path) }
-				Err(_error) =>
-				{ None }
-			};
 			entries.push(
 				DirectoryEntry
 				{
@@ -227,7 +201,7 @@ impl Directory
 					kind: DirectoryEntryKind::from(&file_type),
 					size: DigitalSize::from(size_in_bytes),
 					owner: UnixUser::from(owner_uid),
-					symlink_path
+					symlink: Symlink::from(&path)
 				}
 			)
 		}
