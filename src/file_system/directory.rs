@@ -183,7 +183,11 @@ impl Directory
 				{ continue; }
 			};
 			let file_type: FileType = metadata.file_type();
-			let size_in_bytes: u64 = metadata.size();
+			let size_in_bytes: u64 =
+				if metadata.is_file()
+				{ metadata.size() }
+				else
+				{ 0 };
 			let owner_uid: u32 = metadata.uid();
 			let permissions_mode: u32 = metadata.permissions().mode();
 			entries.push(
