@@ -10,19 +10,24 @@ use std::
 	},
 	path::PathBuf,
 	ffi::OsStr,
-	os::unix::{fs::
+	os::unix::
 	{
-		PermissionsExt,
-		FileTypeExt
-	}, prelude::MetadataExt}
+		fs::
+		{
+			PermissionsExt,
+			FileTypeExt
+		},
+		prelude::MetadataExt
+	}
 };
 use crate::
 {
 	errors::Error,
+	users::UnixUser,
 	file_system::
 	{
 		permissions::UnixPermissions,
-		sizes::Size
+		sizes::DigitalSize
 	}
 };
 
@@ -84,19 +89,28 @@ struct DirectoryEntry
 	name: String,
 	permissions: UnixPermissions,
 	kind: DirectoryEntryKind,
-	size: Size
+	size: DigitalSize,
+	owner: Option<UnixUser>
 }
 
 impl DirectoryEntry
 {
 	pub fn as_string(&self) -> String
 	{
+		let owner: String = match &self.owner
+		{
+			Some(owner) =>
+			{ owner.get_name() }
+			None =>
+			{ String::new() }
+		};
 		format!(
-			"{:<9}   {:>7}   {} ({:o})   {}",
+			"{:<9}   {:>7}   {} ({:o})   {:<10}   {}",
 			self.kind.as_string(),
 			self.size.as_string(),
 			self.permissions.as_string(),
 			self.permissions.as_bits_sum(),
+			owner,
 			self.name
 		)
 	}
@@ -163,6 +177,7 @@ impl Directory
 			};
 			let file_type: FileType = metadata.file_type();
 			let size_in_bytes: u64 = metadata.size();
+			let owner_uid: u32 = metadata.uid();
 			let permissions_mode: u32 = metadata.permissions().mode();
 			entries.push(
 				DirectoryEntry
@@ -170,7 +185,8 @@ impl Directory
 					name,
 					permissions: UnixPermissions::from(permissions_mode),
 					kind: DirectoryEntryKind::from(&file_type),
-					size: Size::from(size_in_bytes)
+					size: DigitalSize::from(size_in_bytes),
+					owner: UnixUser::from(owner_uid)
 				}
 			)
 		}

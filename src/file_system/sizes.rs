@@ -1,10 +1,10 @@
-pub struct Size
+pub struct DigitalSize
 { bytes: u64 }
 
-impl Size
+impl DigitalSize
 {
-	pub fn from(bytes: u64) -> Size
-	{ Size { bytes } }
+	pub fn from(bytes: u64) -> DigitalSize
+	{ DigitalSize { bytes } }
 
 	fn to_gigabytes(&self) -> f32
 	{
