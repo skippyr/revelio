@@ -24,6 +24,7 @@ use crate::
 {
 	errors::Error,
 	users::UnixUser,
+	locale::NumberFormatter,
 	file_system::
 	{
 		permissions::UnixPermissions,
@@ -117,12 +118,21 @@ impl DirectoryEntry
 }
 
 pub struct Directory
-{ stream: ReadDir }
+{
+	path: PathBuf,
+	stream: ReadDir
+}
 
 impl Directory
 {
 	pub fn from(path: &PathBuf) -> Directory
-	{ Directory { stream: Directory::get_stream(path) } }
+	{
+		Directory
+		{
+			path: path.clone(),
+			stream: Directory::get_stream(path)
+		}
+	}
 
 	fn get_stream(path: &PathBuf) -> ReadDir
 	{
@@ -190,6 +200,10 @@ impl Directory
 				}
 			)
 		}
+		entries.sort_by_key(
+			|entry|
+			{ entry.name.clone() }
+		);
 		entries
 	}
 
@@ -197,11 +211,16 @@ impl Directory
 	{
 		let entries: Vec<DirectoryEntry> = self.get_entries();
 		let mut entry_number: u32 = 0;
+		println!(
+			"Revealing directory: {}.",
+			self.path.display()
+		);
+		println!("Index | Type           Size   Permissions       Owner        Name");
 		for entry in entries
 		{
-			eprintln!(
-				"{:>5} | {}",
-				entry_number,
+			println!(
+				"{:>6} | {}",
+				NumberFormatter::format_u32(entry_number),
 				entry.as_string()
 			);
 			entry_number += 1;

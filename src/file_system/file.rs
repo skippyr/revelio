@@ -9,15 +9,28 @@ use std::
 	},
 	path::PathBuf
 };
-use crate::errors::Error;
+use crate::
+{
+	errors::Error,
+	locale::NumberFormatter
+};
 
 pub struct File
-{ descriptor: BufReader<fs::File> }
+{
+	path: PathBuf,
+	descriptor: BufReader<fs::File>
+}
 
 impl File
 {
 	pub fn from(path: &PathBuf) -> File
-	{ File { descriptor: File::get_descriptor(path) } }
+	{
+		File
+		{
+			path: path.clone(),
+			descriptor: File::get_descriptor(path)
+		}
+	}
 
 	fn get_descriptor(path: &PathBuf) -> BufReader<fs::File>
 	{
@@ -40,6 +53,10 @@ impl File
 	pub fn reveal(&mut self)
 	{
 		let mut line_number: u32 = 0;
+		println!(
+			"Revealing file: {}.",
+			self.path.display()
+		);
 		for line in self.descriptor.by_ref().lines()
 		{
 			let line: String = match line
@@ -57,7 +74,7 @@ impl File
 			};
 			println!(
 				"{} | {}",
-				line_number,
+				NumberFormatter::format_u32(line_number),
 				line
 			);
 			line_number += 1;
