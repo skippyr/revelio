@@ -6,7 +6,8 @@ use std::
 		ReadDir,
 		DirEntry,
 		Metadata,
-		FileType
+		FileType,
+		read_link
 	},
 	path::PathBuf,
 	ffi::OsStr,
@@ -91,13 +92,21 @@ struct DirectoryEntry
 	permissions: UnixPermissions,
 	kind: DirectoryEntryKind,
 	size: DigitalSize,
-	owner: Option<UnixUser>
+	owner: Option<UnixUser>,
+	symlink_path: Option<PathBuf>
 }
 
 impl DirectoryEntry
 {
 	pub fn as_string(&self) -> String
 	{
+		let symlink_decorator: String = match &self.symlink_path
+		{
+			Some(_symlink_path) =>
+			{ String::from("@") }
+			None =>
+			{ String::from(" ") }
+		};
 		let owner: String = match &self.owner
 		{
 			Some(owner) =>
@@ -105,14 +114,28 @@ impl DirectoryEntry
 			None =>
 			{ String::new() }
 		};
+		let symlink_path: String = match &self.symlink_path
+		{
+			Some(symlink_path) =>
+			{
+				format!(
+					" -> {}",
+					symlink_path.display()
+				)
+			}
+			None =>
+			{ String::new() }
+		};
 		format!(
-			"{:<9}   {:>7}   {} ({:o})   {:<10}   {}",
+			"{}{:<9}   {:>7}   {} ({:o})   {:<10}   {}{}",
+			symlink_decorator,
 			self.kind.as_string(),
 			self.size.as_string(),
 			self.permissions.as_string(),
 			self.permissions.as_bits_sum(),
 			owner,
-			self.name
+			self.name,
+			symlink_path
 		)
 	}
 }
@@ -189,6 +212,13 @@ impl Directory
 			let size_in_bytes: u64 = metadata.size();
 			let owner_uid: u32 = metadata.uid();
 			let permissions_mode: u32 = metadata.permissions().mode();
+			let symlink_path: Option<PathBuf> = match read_link(path)
+			{
+				Ok(symlink_path) =>
+				{ Some(symlink_path) }
+				Err(_error) =>
+				{ None }
+			};
 			entries.push(
 				DirectoryEntry
 				{
@@ -196,7 +226,8 @@ impl Directory
 					permissions: UnixPermissions::from(permissions_mode),
 					kind: DirectoryEntryKind::from(&file_type),
 					size: DigitalSize::from(size_in_bytes),
-					owner: UnixUser::from(owner_uid)
+					owner: UnixUser::from(owner_uid),
+					symlink_path
 				}
 			)
 		}
@@ -215,7 +246,7 @@ impl Directory
 			"Revealing directory: {}.",
 			self.path.display()
 		);
-		println!("Index | Type           Size   Permissions       Owner        Name");
+		println!(" Index | Type            Size   Permissions       Owner        Name");
 		for entry in entries
 		{
 			println!(
