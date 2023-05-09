@@ -92,7 +92,7 @@ struct DirectoryEntry
 	permissions: UnixPermissions,
 	kind: DirectoryEntryKind,
 	size: DigitalSize,
-	owner: Option<UnixUser>,
+	owner: UnixUser,
 	symlink: Symlink
 }
 
@@ -100,13 +100,6 @@ impl DirectoryEntry
 {
 	pub fn as_string(&self) -> String
 	{
-		let owner: String = match &self.owner
-		{
-			Some(owner) =>
-			{ owner.get_name() }
-			None =>
-			{ String::new() }
-		};
 		format!(
 			"{}{:<9}   {:>7}   {} ({:o})   {:<10}   {}{}",
 			self.symlink.as_decorator_string(),
@@ -114,7 +107,7 @@ impl DirectoryEntry
 			self.size.as_string(),
 			self.permissions.as_string(),
 			self.permissions.as_bits_sum(),
-			owner,
+			self.owner.get_name(),
 			self.name,
 			self.symlink.as_string()
 		)

@@ -1,31 +1,19 @@
-use users::
-{
-	User,
-	get_user_by_uid
-};
+use users::get_user_by_uid;
 
 pub struct UnixUser
 { name: String }
 
 impl UnixUser
 {
-	pub fn from(uid: u32) -> Option<UnixUser>
+	pub fn from(uid: u32) -> UnixUser
 	{
-		let user: User = match get_user_by_uid(uid)
+		let mut name: String = String::from("-");
+		if let Some(user) = get_user_by_uid(uid)
 		{
-			Some(user) =>
-			{ user }
-			None =>
-			{ return None; }
+			if let Some(name_as_osstr) = user.name().to_str()
+			{ name = String::from(name_as_osstr) }
 		};
-		let name: String = match user.name().to_str()
-		{
-			Some(name) =>
-			{ String::from(name) }
-			None =>
-			{ return None; }
-		};
-		Some(UnixUser { name })
+		UnixUser { name }
 	}
 
 	pub fn get_name(&self) -> String
