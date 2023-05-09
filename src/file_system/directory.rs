@@ -4,11 +4,36 @@ use std::
 	{
 		read_dir,
 		ReadDir,
-		DirEntry
+		DirEntry, Metadata
 	},
-	path::PathBuf
+	path::PathBuf,
+	ffi::OsStr,
+	os::unix::fs::PermissionsExt
 };
-use crate::errors::throw_error;
+use crate::
+{
+	errors::throw_error,
+	file_system::permissions::UnixPermissions
+};
+
+pub struct DirectoryEntry
+{
+	name: String,
+	permissions: UnixPermissions
+}
+
+impl DirectoryEntry
+{
+	pub fn as_string(&self) -> String
+	{
+		format!(
+			"{} ({:o})   {}",
+			self.permissions.as_string(),
+			self.permissions.as_bits_sum(),
+			self.name
+		)
+	}
+}
 
 pub struct Directory
 { stream: ReadDir }
@@ -35,7 +60,65 @@ impl Directory
 		}
 	}
 
-	pub fn reveal(&self)
-	{  }
+	fn get_entries(&mut self) -> Vec<DirectoryEntry>
+	{
+		let mut entries: Vec<DirectoryEntry> = Vec::new();
+		for entry in self.stream.by_ref()
+		{
+			let entry: DirEntry = match entry
+			{
+				Ok(entry) =>
+				{ entry }
+				Err(_error) =>
+				{ continue; }
+			};
+			let path: PathBuf = entry.path();
+			let file_name: &OsStr = match path.file_name()
+			{
+				Some(file_name) =>
+				{ file_name }
+				None =>
+				{ continue; }
+			};
+			let name: String = match file_name.to_str()
+			{
+				Some(name) =>
+				{ String::from(name) }
+				None =>
+				{ continue; }
+			};
+			let metadata: Metadata = match path.metadata()
+			{
+				Ok(metadata) =>
+				{ metadata }
+				Err(_error) =>
+				{ continue; }
+			};
+			let permissions_mode: u32 = metadata.permissions().mode();
+			entries.push(
+				DirectoryEntry
+				{
+					name,
+					permissions: UnixPermissions::from(permissions_mode)
+				}
+			)
+		}
+		entries
+	}
+
+	pub fn reveal(&mut self)
+	{
+		let entries: Vec<DirectoryEntry> = self.get_entries();
+		let mut entry_number: u32 = 0;
+		for entry in entries
+		{
+			eprintln!(
+				"{:>5} | {}",
+				entry_number,
+				entry.as_string()
+			);
+			entry_number += 1;
+		}
+	}
 }
 
