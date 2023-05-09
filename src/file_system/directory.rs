@@ -10,16 +10,20 @@ use std::
 	},
 	path::PathBuf,
 	ffi::OsStr,
-	os::unix::fs::
+	os::unix::{fs::
 	{
 		PermissionsExt,
 		FileTypeExt
-	}
+	}, prelude::MetadataExt}
 };
 use crate::
 {
 	errors::Error,
-	file_system::permissions::UnixPermissions
+	file_system::
+	{
+		permissions::UnixPermissions,
+		sizes::Size
+	}
 };
 
 enum DirectoryEntryKind
@@ -79,7 +83,8 @@ struct DirectoryEntry
 {
 	name: String,
 	permissions: UnixPermissions,
-	kind: DirectoryEntryKind
+	kind: DirectoryEntryKind,
+	size: Size
 }
 
 impl DirectoryEntry
@@ -87,8 +92,9 @@ impl DirectoryEntry
 	pub fn as_string(&self) -> String
 	{
 		format!(
-			"{:<9}   {} ({:o})   {}",
+			"{:<9}   {:>7}   {} ({:o})   {}",
 			self.kind.as_string(),
+			self.size.as_string(),
 			self.permissions.as_string(),
 			self.permissions.as_bits_sum(),
 			self.name
@@ -156,13 +162,15 @@ impl Directory
 				{ continue; }
 			};
 			let file_type: FileType = metadata.file_type();
+			let size_in_bytes: u64 = metadata.size();
 			let permissions_mode: u32 = metadata.permissions().mode();
 			entries.push(
 				DirectoryEntry
 				{
 					name,
 					permissions: UnixPermissions::from(permissions_mode),
-					kind: DirectoryEntryKind::from(&file_type)
+					kind: DirectoryEntryKind::from(&file_type),
+					size: Size::from(size_in_bytes)
 				}
 			)
 		}
