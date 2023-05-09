@@ -10,8 +10,8 @@ impl UnixUser
 		let mut name: String = String::from("-");
 		if let Some(user) = get_user_by_uid(uid)
 		{
-			if let Some(name_as_osstr) = user.name().to_str()
-			{ name = String::from(name_as_osstr) }
+			if let Some(name_as_str) = user.name().to_str()
+			{ name = String::from(name_as_str) }
 		};
 		UnixUser { name }
 	}

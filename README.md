@@ -27,8 +27,9 @@
 				<li>If you are using Bash: <code>~/.bashrc</code>.</li>
 				<li>If you are using ZSH: <code>~/.zshrc</code>.</li>
 			</ul>
-			<li>If you enjoy playing with this command a lot, consider to add it as an alias for your shell too:</li>
+			<li>If you enjoy playing with this command a lot, you might consider to add it as an alias for your shell too, for example:</li>
 			<pre><code>alias l="reveal"</code></pre>
+			<p>This alias will call the <code>reveal</code> program when you enter <code>l</code> as a command. Which will make it easier, to make multiple calls of it.</p>
 		</ul>
 	<h2>Issues And Contributions</h2>
 		<p>Learn how to report issues, questions and ideas and how to contribute to this project by reading its <a href="https://skippyr.github.io/materials/pages/contributions_guideline.html">contributions guideline</a>.</p>
