@@ -1,6 +1,6 @@
 use crate::
 {
-	errors::throw_error,
+	errors::Error,
 	file_system::
 	{
 		file::File,
@@ -29,11 +29,11 @@ impl PathResolver
 			{ path }
 			Err(_error) =>
 			{
-				throw_error(
+				Error::new(
 					String::from("the given path does not exists."),
 					String::from("ensure that you did not mispelled it."),
 					1
-				);
+				).throw();
 			}
 		}
 	}
@@ -55,11 +55,11 @@ impl PathRevealer
 			{ metadata }
 			Err(_error) =>
 			{
-				throw_error(
+				Error::new(
 					String::from("could not get metadata of given path."),
 					String::from("ensure that you have enough permissions to read it."),
 					1
-				);
+				).throw();
 			}
 		};
 		if metadata.is_file()
@@ -68,11 +68,11 @@ impl PathRevealer
 		{ Directory::from(&self.path).reveal() }
 		else
 		{
-			throw_error(
+			Error::new(
 				String::from("could not reveal the type of the given path."),
 				String::from("read the help instructions by using the flag --help to see what types can be revealed."),
 				1
-			);
+			).throw();
 		}
 	}
 }

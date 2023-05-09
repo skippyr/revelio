@@ -9,7 +9,7 @@ use std::
 	},
 	path::PathBuf
 };
-use crate::errors::throw_error;
+use crate::errors::Error;
 
 pub struct File
 { descriptor: BufReader<fs::File> }
@@ -27,11 +27,11 @@ impl File
 			{ file }
 			Err(_error) => 
 			{
-				throw_error(
+				Error::new(
 					String::from("could not open the file."),
 					String::from("ensure that you have enough permissions to read it."),
 					1
-				);
+				).throw();
 			}
 		};
 		BufReader::new(file)
@@ -48,11 +48,11 @@ impl File
 				{ line }
 				Err(_error) =>
 				{
-					throw_error(
+					Error::new(
 						String::from("could not read lines of the file."),
 						String::from("ensure that it is of a readable type."),
 						1
-					);
+					).throw();
 				}
 			};
 			println!(

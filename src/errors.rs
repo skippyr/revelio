@@ -1,24 +1,44 @@
 use std::process::exit;
 
-pub fn throw_error(
+pub struct Error
+{
 	description: String,
 	suggestion: String,
-	exit_code: i32
-) -> !
+	exit_code: u32
+}
+
+impl Error
 {
-	eprintln!("Opsie!");
-	eprintln!(
-		"\tdescription: {}",
-		description
-	);
-	eprintln!(
-		"\tsuggestion: {}",
-		suggestion
-	);
-	eprintln!(
-		"\texit code: {}",
-		exit_code
-	);
-	exit(1);
+	pub fn new(
+		description: String,
+		suggestion: String,
+		exit_code: u32
+	) -> Error
+	{
+		Error
+		{
+			description,
+			suggestion,
+			exit_code
+		}
+	}
+
+	pub fn throw(&self) -> !
+	{
+		eprintln!("Opsie!");
+		eprintln!(
+			"\tdescription: {}",
+			self.description
+		);
+		eprintln!(
+			"\tsuggestion: {}",
+			self.suggestion
+		);
+		eprintln!(
+			"\texit code: {}",
+			self.exit_code
+		);
+		exit(self.exit_code as i32);
+	}
 }
 

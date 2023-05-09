@@ -12,7 +12,7 @@ use std::
 };
 use crate::
 {
-	errors::throw_error,
+	errors::Error,
 	file_system::permissions::UnixPermissions
 };
 
@@ -51,11 +51,11 @@ impl Directory
 			{ stream }
 			Err(_error) =>
 			{
-				throw_error(
+				Error::new(
 					String::from("could not read directory."),
 					String::from("ensure that you have enough permissions to read it."),
 					1
-				);
+				).throw();
 			}
 		}
 	}
