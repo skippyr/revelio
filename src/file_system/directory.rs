@@ -4,11 +4,17 @@ use std::
 	{
 		read_dir,
 		ReadDir,
-		DirEntry, Metadata
+		DirEntry,
+		Metadata,
+		FileType
 	},
 	path::PathBuf,
 	ffi::OsStr,
-	os::unix::fs::PermissionsExt
+	os::unix::fs::
+	{
+		PermissionsExt,
+		FileTypeExt
+	}
 };
 use crate::
 {
@@ -16,10 +22,64 @@ use crate::
 	file_system::permissions::UnixPermissions
 };
 
-pub struct DirectoryEntry
+enum DirectoryEntryKind
+{
+	File,
+	Directory,
+	Socket,
+	Character,
+	Block,
+	Fifo,
+	Unknown
+}
+
+impl DirectoryEntryKind
+{
+	pub fn from(file_type: &FileType) -> DirectoryEntryKind
+	{
+		if file_type.is_file()
+		{ DirectoryEntryKind::File }
+		else if file_type.is_dir()
+		{ DirectoryEntryKind::Directory }
+		else if file_type.is_socket()
+		{ DirectoryEntryKind::Socket }
+		else if file_type.is_char_device()
+		{ DirectoryEntryKind::Character }
+		else if file_type.is_block_device()
+		{ DirectoryEntryKind::Block }
+		else if file_type.is_fifo()
+		{ DirectoryEntryKind::Fifo }
+		else
+		{ DirectoryEntryKind::Unknown }
+	}
+
+	pub fn as_string(&self) -> String
+	{
+		match self
+		{
+			DirectoryEntryKind::File =>
+			{ String::from("File") }
+			DirectoryEntryKind::Directory =>
+			{ String::from("Directory") }
+			DirectoryEntryKind::Socket =>
+			{ String::from("Socket") }
+			DirectoryEntryKind::Character =>
+			{ String::from("Character") }
+			DirectoryEntryKind::Block =>
+			{ String::from("Block") }
+			DirectoryEntryKind::Fifo =>
+			{ String::from("Fifo") }
+			DirectoryEntryKind::Unknown =>
+			{ String::from("Unknown") }
+		}
+	}
+}
+
+struct DirectoryEntry
 {
 	name: String,
-	permissions: UnixPermissions
+	permissions: UnixPermissions,
+	kind: DirectoryEntryKind
 }
 
 impl DirectoryEntry
@@ -27,7 +87,8 @@ impl DirectoryEntry
 	pub fn as_string(&self) -> String
 	{
 		format!(
-			"{} ({:o})   {}",
+			"{:<9}   {} ({:o})   {}",
+			self.kind.as_string(),
 			self.permissions.as_string(),
 			self.permissions.as_bits_sum(),
 			self.name
@@ -94,12 +155,14 @@ impl Directory
 				Err(_error) =>
 				{ continue; }
 			};
+			let file_type: FileType = metadata.file_type();
 			let permissions_mode: u32 = metadata.permissions().mode();
 			entries.push(
 				DirectoryEntry
 				{
 					name,
-					permissions: UnixPermissions::from(permissions_mode)
+					permissions: UnixPermissions::from(permissions_mode),
+					kind: DirectoryEntryKind::from(&file_type)
 				}
 			)
 		}
