@@ -52,7 +52,7 @@ impl File
 
 	pub fn reveal(&mut self)
 	{
-		let mut line_number: u32 = 0;
+		let mut line_number: u32 = 1;
 		println!(
 			"Revealing file: {}.",
 			self.path.display()

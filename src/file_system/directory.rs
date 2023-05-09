@@ -208,7 +208,7 @@ impl Directory
 	pub fn reveal(&mut self)
 	{
 		let entries: Vec<DirectoryEntry> = self.get_entries();
-		let mut entry_number: u32 = 0;
+		let mut entry_number: u32 = 1;
 		println!(
 			"Revealing directory: {}.",
 			self.path.display()
