@@ -35,7 +35,7 @@ impl Error
 			self.suggestion
 		);
 		eprintln!(
-			"\texit code: {}",
+			"\texit code: {}.",
 			self.exit_code
 		);
 		exit(self.exit_code as i32);
