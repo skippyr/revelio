@@ -73,7 +73,7 @@ impl File
 				}
 			};
 			println!(
-				"{} | {}",
+				"{:>7} | {}",
 				NumberFormatter::format_u32(line_number),
 				line
 			);
