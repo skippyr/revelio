@@ -26,6 +26,7 @@ impl Error
 	pub fn throw(&self) -> !
 	{
 		eprintln!("Opsie!");
+		eprintln!("\tprogram: reveal.");
 		eprintln!(
 			"\tdescription: {}",
 			self.description

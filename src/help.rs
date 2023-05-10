@@ -8,7 +8,7 @@ impl Helper
 	{
 		eprintln!("Help Instructions");
 		eprintln!("\tStarting Point");
-		eprintln!("\t\tThis is a program to reveal directory entries and file contents.");
+		eprintln!("\t\tA program to reveal directory entries and file contents for UNIX-like operating systems.");
 		eprintln!("\tSyntax");
 		eprintln!("\t\tUse this program with following syntax:");
 		eprintln!("\t\t\treveal [flags] <path>");

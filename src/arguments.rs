@@ -22,13 +22,9 @@ impl ArgumentsParser
 	) -> bool
 	{
 		let characters: Vec<char> = argument.chars().collect();
-		if
-			characters.len() > 2 &&
-			characters[0] == '-' &&
-			characters[1] == '-'
-		{ true }
-		else
-		{ false }
+		characters.len() > 2 &&
+		characters[0] == '-' &&
+		characters[1] == '-'
 	}
 
 	pub fn get_path(&self) -> PathBuf
