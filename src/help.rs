@@ -6,7 +6,7 @@ impl Helper
 {
 	pub fn print_instructions() -> !
 	{
-		eprintln!("Help Instructions");
+		eprintln!("Help Instructions - Reveal");
 		eprintln!("\tStarting Point");
 		eprintln!("\t\tA program to reveal directory entries and file contents for UNIX-like operating systems.");
 		eprintln!("\tSyntax");
