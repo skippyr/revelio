@@ -40,7 +40,7 @@ enum DirectoryEntryKind
 	Character,
 	Block,
 	Fifo,
-	Unknown
+	Broken
 }
 
 impl DirectoryEntryKind
@@ -60,7 +60,7 @@ impl DirectoryEntryKind
 		else if file_type.is_fifo()
 		{ DirectoryEntryKind::Fifo }
 		else
-		{ DirectoryEntryKind::Unknown }
+		{ DirectoryEntryKind::Broken }
 	}
 
 	pub fn as_string(&self) -> String
@@ -79,8 +79,8 @@ impl DirectoryEntryKind
 			{ String::from("Block") }
 			DirectoryEntryKind::Fifo =>
 			{ String::from("Fifo") }
-			DirectoryEntryKind::Unknown =>
-			{ String::from("Unknown") }
+			DirectoryEntryKind::Broken =>
+			{ String::from("Broken") }
 		}
 	}
 }
