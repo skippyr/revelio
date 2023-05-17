@@ -9,7 +9,6 @@ use std::
 		FileType
 	},
 	path::PathBuf,
-	ffi::OsStr,
 	os::unix::
 	{
 		fs::
@@ -141,8 +140,7 @@ impl Directory
 			{
 				Error::new(
 					String::from("could not read directory."),
-					String::from("ensure that you have enough permissions to read it."),
-					1
+					String::from("ensure that you have enough permissions to read it.")
 				).throw();
 			}
 		}
@@ -161,44 +159,49 @@ impl Directory
 				{ continue; }
 			};
 			let path: PathBuf = entry.path();
-			let file_name: &OsStr = match path.file_name()
+			let mut name: String = format!(
+				"{}",
+				path.display()
+			);
+			if let Some(file_name) = path.file_name()
 			{
-				Some(file_name) =>
-				{ file_name }
-				None =>
-				{ continue; }
-			};
-			let name: String = match file_name.to_str()
-			{
-				Some(name) =>
-				{ String::from(name) }
-				None =>
-				{ continue; }
-			};
+				if let Some(file_name_as_str) = file_name.to_str()
+				{ name = String::from(file_name_as_str); }
+			}
 			let metadata: Metadata = match path.metadata()
 			{
 				Ok(metadata) =>
 				{ metadata }
 				Err(_error) =>
-				{ continue; }
+				{
+					match entry.metadata()
+					{
+						Ok(metadata) =>
+						{ metadata }
+						Err(_error) =>
+						{ continue; }
+					}
+				}
 			};
-			let file_type: FileType = metadata.file_type();
-			let size_in_bytes: u64 =
+			let kind: DirectoryEntryKind = DirectoryEntryKind::from(&metadata.file_type());
+			let size: DigitalSize = DigitalSize::from(
 				if metadata.is_file()
 				{ metadata.size() }
 				else
-				{ 0 };
-			let owner_uid: u32 = metadata.uid();
-			let permissions_mode: u32 = metadata.permissions().mode();
+				{ 0 }
+			);
+			let owner: UnixUser = UnixUser::from(metadata.uid());
+			let permissions: UnixPermissions = UnixPermissions::from(metadata.permissions().mode());
+			let symlink: Symlink = Symlink::from(&path);
 			entries.push(
 				DirectoryEntry
 				{
 					name,
-					permissions: UnixPermissions::from(permissions_mode),
-					kind: DirectoryEntryKind::from(&file_type),
-					size: DigitalSize::from(size_in_bytes),
-					owner: UnixUser::from(owner_uid),
-					symlink: Symlink::from(&path)
+					permissions,
+					kind,
+					size,
+					owner,
+					symlink
 				}
 			)
 		}

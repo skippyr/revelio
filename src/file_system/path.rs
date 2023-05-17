@@ -31,8 +31,7 @@ impl PathResolver
 			{
 				Error::new(
 					String::from("the given path does not exists."),
-					String::from("ensure that you did not mispelled it."),
-					1
+					String::from("ensure that you did not mispelled it.")
 				).throw();
 			}
 		}
@@ -57,8 +56,7 @@ impl PathRevealer
 			{
 				Error::new(
 					String::from("could not get metadata of given path."),
-					String::from("ensure that you have enough permissions to read it."),
-					1
+					String::from("ensure that you have enough permissions to read it.")
 				).throw();
 			}
 		};
@@ -70,8 +68,7 @@ impl PathRevealer
 		{
 			Error::new(
 				String::from("could not reveal the type of the given path."),
-				String::from("read the help instructions by using the flag --help to see what types can be revealed."),
-				1
+				String::from("read the help instructions by using the flag --help to see what types can be revealed.")
 			).throw();
 		}
 	}

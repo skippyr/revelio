@@ -3,23 +3,20 @@ use std::process::exit;
 pub struct Error
 {
 	description: String,
-	suggestion: String,
-	exit_code: u32
+	suggestion: String
 }
 
 impl Error
 {
 	pub fn new(
 		description: String,
-		suggestion: String,
-		exit_code: u32
+		suggestion: String
 	) -> Error
 	{
 		Error
 		{
 			description,
-			suggestion,
-			exit_code
+			suggestion
 		}
 	}
 
@@ -35,11 +32,7 @@ impl Error
 			"\tsuggestion: {}",
 			self.suggestion
 		);
-		eprintln!(
-			"\texit code: {}.",
-			self.exit_code
-		);
-		exit(self.exit_code as i32);
+		exit(1);
 	}
 }
 

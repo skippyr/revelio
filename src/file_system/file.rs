@@ -42,8 +42,7 @@ impl File
 			{
 				Error::new(
 					String::from("could not open the file."),
-					String::from("ensure that you have enough permissions to read it."),
-					1
+					String::from("ensure that you have enough permissions to read it.")
 				).throw();
 			}
 		};
@@ -67,8 +66,7 @@ impl File
 				{
 					Error::new(
 						String::from("could not read lines of the file."),
-						String::from("ensure that it is of a readable type."),
-						1
+						String::from("ensure that it is of a readable type.")
 					).throw();
 				}
 			};
