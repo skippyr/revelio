@@ -100,13 +100,13 @@ impl DirectoryEntry
 	pub fn as_string(&self) -> String
 	{
 		format!(
-			"{}{:<9}   {:>7}   {} ({:o})   {:<10}   {}{}",
-			self.symlink.as_decorator_string(),
-			self.kind.as_string(),
+			"{:<10}   {:>7}   {} ({:o})   {}{:<9}   {}{}",
+			self.owner.get_name(),
 			self.size.as_string(),
 			self.permissions.as_string(),
 			self.permissions.as_bits_sum(),
-			self.owner.get_name(),
+			self.symlink.as_decorator_string(),
+			self.kind.as_string(),
 			self.name,
 			self.symlink.as_string()
 		)
@@ -220,7 +220,7 @@ impl Directory
 			"Revealing directory: {}.",
 			self.path.display()
 		);
-		println!(" Index | Type            Size   Permissions       Owner        Name");
+		println!(" Index | Owner           Size   Permissions        Type        Name");
 		for entry in entries
 		{
 			println!(
