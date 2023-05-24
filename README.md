@@ -2,7 +2,7 @@
 	<h2>Starting Point</h2>
 		<p>A program to reveal directory entries and file contents for UNIX-like operating systems.</p>
 		<img src="./images/preview.gif"/>
-		<p>In the preview, Reveal was used on the <a href="https://github.com/kovidgoyal/kitty">Kitty</a> terminal emulator with the <a href="https://github.com/skippyr/river_dreams">River Dreams</a> ZSH theme, <a href="https://github.com/skippyr/flamerial">Flamerial</a> theme and <a href="https://github.com/intel/intel-one-mono">IntelOne Mono</a> font.</p>
+		<p>In the preview, reveal was used on the <a href="https://github.com/kovidgoyal/kitty">Kitty</a> terminal emulator with the <a href="https://github.com/skippyr/river_dreams">River Dreams</a> ZSH theme, <a href="https://github.com/skippyr/flamerial">Flamerial</a> theme and <a href="https://github.com/be5invis/Iosevka">Iosevka</a> font (stylistic set <code>ss08</code>).</p>
 	<h2>Installation And Usage</h2>
 		<ul>
 			<li>Install <a href="https://www.rust-lang.org/">Rust development tools</a>.</li>
