@@ -289,10 +289,10 @@ pub fn reveal_directory(path: &PathBuf) {
 		});
 		let name = match entry.file_name().to_str() {
 			Some(name) => {String::from(name)}
-			None => {format!("{}", entry.path().display())}
+			None => {entry.path().display().to_string()}
 		};
 		let symlink_path = match read_link(entry.path()) {
-			Ok(symlink_path) => {Some(format!("{}", symlink_path.display()))}
+			Ok(symlink_path) => {Some(symlink_path.display().to_string())}
 			Err(..) => {None}
 		};
 		let metadata = match entry.path().metadata() {
