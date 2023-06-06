@@ -2,7 +2,11 @@ use std::{
 	process::exit,
 	env::args,
 	path::PathBuf,
-	fs::File,
+	fs::{
+		File,
+		Metadata,
+		read_dir
+	},
 	io::{
 		BufReader,
 		BufRead
@@ -46,6 +50,67 @@ fn reveal_file(path: &PathBuf) {
 	}
 }
 
+enum EntryKind {
+	File,
+	Directory,
+	Socket,
+	Character,
+	Block,
+	Fifo,
+	Broken
+}
+
+struct Entry {
+	name: String,
+	kind: EntryKind,
+	size: u64
+}
+
+fn reveal_directory(path: &PathBuf) {
+	let stream = read_dir(path).unwrap_or_else(|_| {
+		throw_error(
+			"Could not open directory.",
+			"Ensure that you have enough permissions to read it."
+		);
+	});
+	let mut entries: Vec<Entry> = Vec::new();
+	for entry in stream {
+		let entry = entry.unwrap_or_else(|_| {
+			throw_error(
+				"Could not read entries of directory.",
+				"Ensure that you have enough permissions to read it."
+			);
+		});
+		let name = match entry.file_name().to_str() {
+			Some(name) => {String::from(name)}
+			None => {format!("{}", entry.path().display())}
+		};
+		let metadata = match entry.path().metadata() {
+			Ok(metadata) => {metadata}
+			Err(..) => {
+				entries.push(Entry {
+					name,
+					kind: EntryKind::Broken,
+					size: 0
+				});
+				continue;
+			}
+		};
+		let file_type = metadata.file_type();
+		let kind = if file_type.is_dir() {
+			EntryKind::Directory
+		} else {
+			EntryKind::File
+		};
+		let size = 0;
+		entries.push(Entry {
+			name,
+			kind,
+			size
+		});
+	}
+}
+
 fn main() {
 	let arguments = args().collect::<Vec<String>>();
 	if arguments.contains(&String::from("--help")) {
@@ -72,7 +137,7 @@ fn main() {
 	if metadata.is_file() {
 		reveal_file(&path);
 	} else if metadata.is_dir() {
-		eprintln!("Revealing A Directory");
+		reveal_directory(&path);
 	} else {
 		throw_error(
 			"Can not reveal this type.",
