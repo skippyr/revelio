@@ -18,7 +18,7 @@
 				<pre><code>cd reveal</code></pre>
 			<li>Build a release.</li>
 				<pre><code>cargo build --release</code></pre>
-			<li>Link the binary file to a directory that is in your <code>${PATH}</code>.</li>
+			<li>Link the binary file to a directory that is in your <code>${PATH}</code> variable.</li>
 				<p>In this example, the directory <code>~/.local/bin</code> will be added to the <code>${PATH}</code> variable. Make this change persistent by adding the same export command to your shell startup.</p>
 				<pre><code>
 mkdir -p ~/.local/bin
@@ -32,7 +32,7 @@ ln -sf $(pwd)/target/release/reveal ~/.local/bin
 	<h2>Issues And Contributions</h2>
 		<p>Learn how to report issues, questions and ideas and how to contribute to this project by reading its <a href="https://skippyr.github.io/materials/pages/contributions_guidelines.html">contributions guidelines</a>.</p>
 	<h2>License</h2>
-		<p>This project is released under terms of the MIT License. You can refer to the license as the file LICENSE in the repository's root directory.</p>
+		<p>This project is released under terms of the MIT License.</p>
 		<p>Copyright (c) 2023, Sherman Rofeman. MIT License.</p>
 
 
