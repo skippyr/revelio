@@ -179,53 +179,54 @@ impl Permissions {
 		const WRITING_CHARACTER: char = 'w';
 		const EXECUTION_CHARACTER: char = 'x';
 		const NONE_CHARACTER: char = '-';
-		let mut string: String = String::new();
-		if self.does_owner_can_read() {
-			string.push(READING_CHARACTER);
-		} else {
-			string.push(NONE_CHARACTER);
-		}
-		if self.does_owner_can_write() {
-			string.push(WRITING_CHARACTER);
-		} else {
-			string.push(NONE_CHARACTER);
-		}
-		if self.does_owner_can_execute() {
-			string.push(EXECUTION_CHARACTER);
-		} else {
-			string.push(NONE_CHARACTER);
-		}
-		if self.does_group_can_read() {
-			string.push(READING_CHARACTER);
-		} else {
-			string.push(NONE_CHARACTER);
-		}
-		if self.does_group_can_write() {
-			string.push(WRITING_CHARACTER);
-		} else {
-			string.push(NONE_CHARACTER);
-		}
-		if self.does_group_can_execute() {
-			string.push(EXECUTION_CHARACTER);
-		} else {
-			string.push(NONE_CHARACTER);
-		}
-		if self.does_others_can_read() {
-			string.push(READING_CHARACTER);
-		} else {
-			string.push(NONE_CHARACTER);
-		}
-		if self.does_others_can_write() {
-			string.push(WRITING_CHARACTER);
-		} else {
-			string.push(NONE_CHARACTER);
-		}
-		if self.does_others_can_execute() {
-			string.push(EXECUTION_CHARACTER);
-		} else {
-			string.push(NONE_CHARACTER);
-		}
-		string
+		format!(
+			"{}{}{} {}{}{} {}{}{}",
+			if self.does_owner_can_read() {
+				READING_CHARACTER
+			} else {
+				NONE_CHARACTER
+			},
+			if self.does_owner_can_write() {
+				WRITING_CHARACTER
+			} else {
+				NONE_CHARACTER
+			},
+			if self.does_owner_can_execute() {
+				EXECUTION_CHARACTER
+			} else {
+				NONE_CHARACTER
+			},
+			if self.does_group_can_read() {
+				READING_CHARACTER
+			} else {
+				NONE_CHARACTER
+			},
+			if self.does_group_can_write() {
+				WRITING_CHARACTER
+			} else {
+				NONE_CHARACTER
+			},
+			if self.does_group_can_execute() {
+				EXECUTION_CHARACTER
+			} else {
+				NONE_CHARACTER
+			},
+			if self.does_others_can_read() {
+				READING_CHARACTER
+			} else {
+				NONE_CHARACTER
+			},
+			if self.does_others_can_write() {
+				WRITING_CHARACTER
+			} else {
+				NONE_CHARACTER
+			},
+			if self.does_others_can_execute() {
+				EXECUTION_CHARACTER
+			} else {
+				NONE_CHARACTER
+			}
+		)
 	}
 }
 
@@ -336,25 +337,26 @@ pub fn reveal_directory(path: &PathBuf) {
 		});
 	}
 	entries.sort_by_key(|entry| {entry.name.clone()});
-	println!("Owner       Size     Permissions    Type       Name");
-	for entry in entries {
+	println!("Owner       Size     Permissions      Type       Name");
+	for entry in &entries {
 		println!(
-			"{:<10}  {:<7}  {} {:o}  {:<9}  {}{}",
-			match entry.owner {
-				Some(owner) => {owner}
+			"{:<10}  {:<7}  {} {:<3o}  {:<9}  {}{}",
+			match &entry.owner {
+				Some(owner) => {owner.clone()}
 				None => String::from("-")
 			},
 			convert_size_to_human_readable_format(entry.size),
 			entry.permissions.as_string(),
 			entry.permissions.as_bits_sum(),
-			format!("{}", entry.kind),
+			entry.kind.to_string(),
 			entry.name,
-			match entry.symlink_path {
+			match &entry.symlink_path {
 				Some(symlink_path) => {format!(" => {}", symlink_path)}
 				None => {String::new()}
 			}
 		);
 	}
-	println!("Path: {}.", format!("{}", path.display()));
+	println!("Path: {}.", path.display().to_string());
+	println!("Total: {}.", entries.len());
 }
 
