@@ -13,11 +13,11 @@ use reveal::{
 
 fn print_help_instructions() -> ! {
 	println!("Reveal - Help Instructions");
-	println!("\tStarting Point");
-	println!("\t\tA program to reveal directory entries and file contents.");
-	println!("\tSyntax");
+	println!("\tStarting Point:");
+	println!("\t\tReveal is a program to reveal directory entries and file contents.");
+	println!("\tSyntax:");
 	println!("\t\treveal [flags] <path>");
-	println!("\tFlags");
+	println!("\tFlags:");
 	println!("\t\t--help: print these help instructions.");
 	exit(0);
 }
