@@ -38,7 +38,7 @@ pub fn reveal_file(path: &PathBuf) {
 				"Ensure that the file is not a binary."
 			);
 		});
-		eprintln!("{}", line);
+		println!("{}", line);
 	}
 }
 
