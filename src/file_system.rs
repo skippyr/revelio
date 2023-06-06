@@ -31,6 +31,7 @@ pub fn reveal_file(path: &PathBuf) {
 		);
 	});
 	let reader = BufReader::new(file);
+	let mut lines = 0;
 	for line in reader.lines() {
 		let line = line.unwrap_or_else(|_| {
 			throw_error(
@@ -38,8 +39,11 @@ pub fn reveal_file(path: &PathBuf) {
 				"Ensure that the file is not a binary."
 			);
 		});
+		lines += 1;
 		println!("{}", line);
 	}
+	println!("Path: {}.", path.display().to_string());
+	println!("Lines: {}.", lines);
 }
 
 enum EntryKind {
@@ -357,6 +361,6 @@ pub fn reveal_directory(path: &PathBuf) {
 		);
 	}
 	println!("Path: {}.", path.display().to_string());
-	println!("Total: {}.", entries.len());
+	println!("Entries: {}.", entries.len());
 }
 
