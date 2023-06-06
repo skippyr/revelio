@@ -1,32 +1,33 @@
 <h1>Reveal</h1>
 	<h2>Starting Point</h2>
-		<p>A program to reveal directory entries and file contents for UNIX-like operating systems.</p>
+		<p>A program to reveal directory entries and file contents for UNIX-like operating systems. It works similarly to the <code>ls</code> and <code>cat</code> commands.</p>
 		<img src="./images/preview.gif"/>
 		<p>In the preview, reveal was used on the <a href="https://github.com/kovidgoyal/kitty">Kitty</a> terminal emulator with the <a href="https://github.com/skippyr/river_dreams">River Dreams</a> ZSH theme, <a href="https://github.com/skippyr/flamerial">Flamerial</a> theme and <a href="https://github.com/be5invis/Iosevka">Iosevka</a> font (stylistic set <code>ss08</code>).</p>
 	<h2>Installation And Usage</h2>
 		<ul>
-			<li>Install <a href="https://www.rust-lang.org/">Rust development tools</a>.</li>
-			<li>Download this repository to a directory in your machine. If you have <code>git</code> installed, you can use it in the following command:</li>
-			<pre><code>git clone --depth=1 https://github.com/skippyr/reveal</code></pre>
-			<p>This command will clone this repository to the directory <code>reveal</code>, but feel free to change to whatever directory you want to, just remember its path because you will need it for the next step. The flag <code>--depth</code> with value <code>1</code> specifies to <code>git</code> that you only want to download the latest commit instead of the whole commit tree.</p>
-			<p>If you do not have <code>git</code> installed, you can download this repository from its page on GitHub. Access that page, click on the <code>Code</code> button on the top of the page, then click on <code>Download ZIP</code>. This will download a ZIP file containing the repository, you just have to unzip it and move to the path you want it to be.</p>
+			<li>Install the required dependencies:</li>
+				<ul>
+					<li>Install Rust toolchain.</li>
+						<p>These are the tools needed to compile the source code.</p>
+					<li>Install Git.</li>
+						<p>This tool will be used to download the repository.</p>
+				</ul>
+			<li>Clone this repository.</li>
+				<pre><code>git clone --depth=1 https://github.com/skippyr/reveal</code></pre>
 			<li>Access the repository's directory.</li>
-			<pre><code>cd reveal</code></pre>
-			<li>Use <code>cargo</code> to build a release.</li>
-			<pre><code>cargo build --release</code></pre>
-			<p>The binary file will be available at <code>target/release/reveal</code>. You can run it using the <code>--help</code> flag to print help instructions.</p>
-			<pre><code>./target/release/reveal --help</code></pre>
-			<p>Alternatively, instead of running the binary directly, you can move it to a directory that is in your <code>PATH</code> variable. Like this, it will be available as any other system command.</p>
-			<p>As an example, the commands below will move the binary to <code>~/.local/bin</code> and will add that directory to the <code>PATH</code> variable for your current shell session.</p>
-			<p>Assuming that you are in the root directory of the repository:</p>
-			<pre><code>mkdir -p ~/.local/bin</code></pre>
-			<pre><code>mv target/release/reveal ~/.local/bin</code></pre>
-			<pre><code>export PATH="${PATH}:~/.local/bin"</code></pre>
-			<p>If you want to make this change persistent to all shell sessions you can add that <code>export</code> rule to your shell's configuration file:</p>
-			<ul>
-				<li>If you are using Bash: <code>~/.bashrc</code>.</li>
-				<li>If you are using ZSH: <code>~/.zshrc</code>.</li>
-			</ul>
+				<pre><code>cd reveal</code></pre>
+			<li>Build a release.</li>
+				<pre><code>cargo build --release</code></pre>
+			<li>Link the binary file to a directory that is in your <code>${PATH}</code>.</li>
+				<p>In this example, the directory <code>~/.local/bin</code> will be added to the <code>${PATH}</code> variable. Make this change persistent by adding the same export command to your shell startup.</p>
+				<pre><code>
+mkdir -p ~/.local/bin
+export PATH="${PATH}:${HOME}/.local/bin"
+ln -sf $(pwd)/target/release/reveal ~/.local/bin
+				</code></pre>
+			<li>Use the binary with the <code>--help</code> flag to see help instructions.</li>
+				<pre><code>reveal --help</code></pre>
+			<p>Give it a test by passing the path of a file or directory as an argument. For example:</p>
 		</ul>
 	<h2>Issues And Contributions</h2>
 		<p>Learn how to report issues, questions and ideas and how to contribute to this project by reading its <a href="https://skippyr.github.io/materials/pages/contributions_guidelines.html">contributions guidelines</a>.</p>

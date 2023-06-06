@@ -17,6 +17,7 @@ fn print_help_instructions() -> ! {
 	println!("\t\tReveal is a program to reveal directory entries and file contents.");
 	println!("\tSyntax:");
 	println!("\t\treveal [flags] <path>");
+	println!("\t\tIf no path is given, it will consider the current directory one.");
 	println!("\tFlags:");
 	println!("\t\t--help: print these help instructions.");
 	exit(0);
