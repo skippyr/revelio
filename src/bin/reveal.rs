@@ -15,6 +15,11 @@ use std::{
 	os::unix::fs::{
 		FileTypeExt,
 		MetadataExt
+	},
+	fmt::{
+		Result,
+		Display,
+		Formatter
 	}
 };
 use users::get_user_by_uid;
@@ -86,12 +91,60 @@ impl EntryKind {
 	}
 }
 
+impl Display for EntryKind {
+	fn fmt(&self, formatter: &mut Formatter) -> Result {
+		let kind = match self {
+			Self::File => {String::from("File")}
+			Self::Directory => {String::from("Directory")}
+			Self::Broken => {String::from("Broken")}
+			Self::Fifo => {String::from("Fifo")}
+			Self::Block => {String::from("Block")}
+			Self::Socket => {String::from("Socket")}
+			Self::Character => {String::from("Character")}
+		};
+		write!(formatter, "{}", kind)
+	}
+}
+
 struct Entry {
 	name: String,
 	kind: EntryKind,
 	size: u64,
 	owner: Option<String>,
 	symlink_path: Option<String>
+}
+
+fn convert_size_to_human_readable_format(size: u64) -> String {
+	if size == 0 {
+		return String::from("-")
+	}
+	const ONE_GIGABYTE_AS_BYTES: u64 = 10_u64.pow(9);
+	const ONE_MEGABYTE_AS_BYTES: u64 = 10_u64.pow(6);
+	const ONE_KILOBYTE_AS_BYTES: u64 = 10_u64.pow(3);
+	let gigabytes = size as f32 / ONE_GIGABYTE_AS_BYTES as f32;
+	let megabytes = size as f32 / ONE_MEGABYTE_AS_BYTES as f32;
+	let kilobytes = size as f32 / ONE_KILOBYTE_AS_BYTES as f32;
+	if gigabytes as u64 > 0 {
+		format!(
+			"{:.1}GB",
+			gigabytes
+		)
+	} else if megabytes as u64 > 0 {
+		format!(
+			"{:.1}MB",
+			megabytes
+		)
+	} else if kilobytes as u64 > 0 {
+		format!(
+			"{:.1}kB",
+			kilobytes
+		)
+	} else {
+		format!(
+			"{}B",
+			size
+		)
+	}
 }
 
 fn reveal_directory(path: &PathBuf) {
@@ -155,6 +208,23 @@ fn reveal_directory(path: &PathBuf) {
 			symlink_path
 		});
 	}
+	entries.sort_by_key(|entry| {entry.name.clone()});
+	for entry in entries {
+		println!(
+			"{:<10}  {:<7}  {:<9}  {}{}",
+			match entry.owner {
+				Some(owner) => {owner}
+				None => String::from("-")
+			},
+			convert_size_to_human_readable_format(entry.size),
+			format!("{}", entry.kind),
+			entry.name,
+			match entry.symlink_path {
+				Some(symlink_path) => {format!(" => {}", symlink_path)}
+				None => {String::new()}
+			}
+		);
+	}
 }
 
 fn main() {
@@ -162,13 +232,11 @@ fn main() {
 	if arguments.contains(&String::from("--help")) {
 		print_help_instructions();
 	}
-	if arguments.len() < 2 {
-		throw_error(
-			"Not enough arguments.",
-			"Use the --help flag to see what arguments it can receive."
-		);
-	}
-	let path = PathBuf::from(&arguments[1]).canonicalize().unwrap_or_else(|_| {
+	let path = PathBuf::from(if arguments.len() < 2 {
+		"."
+	} else {
+		&arguments[1]
+	}).canonicalize().unwrap_or_else(|_| {
 		throw_error(
 			"The given path does not exists.",
 			"Ensure that you did not mispell it."
