@@ -27,7 +27,7 @@ ln -sf $(pwd)/target/release/reveal ~/.local/bin
 				</code></pre>
 			<li>Use the binary with the <code>--help</code> flag to see help instructions.</li>
 				<pre><code>reveal --help</code></pre>
-			<p>Give it a test by passing the path of a file or directory as an argument. For example:</p>
+			<p>Give it a test by passing the path of a file or directory as an argument.</p>
 		</ul>
 	<h2>Issues And Contributions</h2>
 		<p>Learn how to report issues, questions and ideas and how to contribute to this project by reading its <a href="https://skippyr.github.io/materials/pages/contributions_guidelines.html">contributions guidelines</a>.</p>
