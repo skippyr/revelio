@@ -5,12 +5,7 @@ import (
 	"github.com/skippyr/graffiti"
 	"os"
 	"path/filepath"
-)
-
-const (
-	oneGigaByteInBytes = 1e9
-	oneMegaByteInBytes = 1e6
-	oneKiloByteInBytes = 1e3
+	"io/fs"
 )
 
 func throwError(description string, suggestion string) {
@@ -30,28 +25,41 @@ func throwError(description string, suggestion string) {
 	os.Exit(exitCode)
 }
 
-func colorizeMode(mode *string) string {
-	var coloredMode string
-	for characterIterator, character := range *mode {
-		if character == '-' {
-			coloredMode += string(character)
-		} else if characterIterator == 0 {
-			coloredMode += fmt.Sprintf("@F{cyan}@B%c@r", character)
-		} else if characterIterator == 1 || characterIterator == 4 || characterIterator == 7 {
-			coloredMode += fmt.Sprintf("@F{green}%c@r", character)
-		} else if characterIterator == 2 || characterIterator == 5 || characterIterator == 8 {
-			coloredMode += fmt.Sprintf("@F{yellow}%c@r", character)
+func stringifyType(typeMode fs.FileMode) string {
+	/*
+	 * Checking if certain types bits are set.
+	 * The GoLang uses its own bits to determinate file types.
+	 * All bits it has defined can be found here:
+	 *
+	 * https://pkg.go.dev/io/fs#FileMode
+	 *
+	 * For UNIX specific, all seven stardard file types can be found here:
+	 * https://en.wikipedia.org/wiki/Unix_file_types
+	 */
+	if typeMode & fs.ModeDir != 0 {
+		return "Directory"
+	} else if typeMode & fs.ModeSymlink != 0 {
+		return "Symlink"
+	} else if typeMode & fs.ModeDevice != 0 {
+		if fs.ModeCharDevice != 0 {
+			return "Character"
 		} else {
-			coloredMode += fmt.Sprintf("@F{red}%c@r", character)
+			return "Block"
 		}
-		if characterIterator == 9 && len(*mode) == 10 {
-			coloredMode += "-"
-		}
+	} else if typeMode & fs.ModeNamedPipe != 0 {
+		return "Fifo"
+	} else if typeMode & fs.ModeSocket != 0 {
+		return "Socket"
 	}
-	return coloredMode
+	return "File"
 }
 
-func humanizeSize(sizeInBytes *int64) string {
+func stringifySize(sizeInBytes *int64) string {
+	const (
+		oneGigaByteInBytes = 1e9
+		oneMegaByteInBytes = 1e6
+		oneKiloByteInBytes = 1e3
+	)
 	sizeInGigaBytes := float32(*sizeInBytes) / oneGigaByteInBytes
 	if int(sizeInGigaBytes) > 0 {
 		return fmt.Sprintf("%.1fGB", sizeInGigaBytes)
@@ -75,18 +83,18 @@ func revealDirectory(path *string) {
 			"Ensure that you have enough permissions to read it.",
 		)
 	}
-	graffiti.Println("@UPermissions@r  @UName@r")
 	for _, entry := range entries {
 		info, err := entry.Info()
 		if err != nil {
 			continue
 		}
-		mode := fmt.Sprint(info.Mode())
-		var size int64
+		var sizeInBytes int64
 		if info.Mode().IsRegular() {
-			size = info.Size()
+			sizeInBytes = info.Size()
 		}
-		graffiti.Println("%s   %s  %s", colorizeMode(&mode), humanizeSize(&size), info.Name())
+		size := stringifySize(&sizeInBytes)
+		typeMode := stringifyType(info.Mode().Type())
+		graffiti.Println("%s  %s  %s", size, typeMode, info.Name())
 	}
 	graffiti.Println("")
 	graffiti.Println("@BPath:@r %s.", *path)
