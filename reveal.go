@@ -1,10 +1,16 @@
 package main
 
 import (
+	"fmt"
 	"github.com/skippyr/graffiti"
 	"os"
 	"path/filepath"
-	"fmt"
+)
+
+const (
+	oneGigaByteInBytes = 1e9
+	oneMegaByteInBytes = 1e6
+	oneKiloByteInBytes = 1e3
 )
 
 func throwError(description string, suggestion string) {
@@ -38,8 +44,27 @@ func colorizeMode(mode *string) string {
 		} else {
 			coloredMode += fmt.Sprintf("@F{red}%c@r", character)
 		}
+		if characterIterator == 9 && len(*mode) == 10 {
+			coloredMode += "-"
+		}
 	}
 	return coloredMode
+}
+
+func humanizeSize(sizeInBytes *int64) string {
+	sizeInGigaBytes := float32(*sizeInBytes) / oneGigaByteInBytes
+	if int(sizeInGigaBytes) > 0 {
+		return fmt.Sprintf("%.1fGB", sizeInGigaBytes)
+	}
+	sizeInMegaBytes := float32(*sizeInBytes) / oneMegaByteInBytes
+	if int(sizeInMegaBytes) > 0 {
+		return fmt.Sprintf("%.1fMB", sizeInMegaBytes)
+	}
+	sizeInKiloBytes := float32(*sizeInBytes) / oneKiloByteInBytes
+	if int(sizeInKiloBytes) > 0 {
+		return fmt.Sprintf("%.1fkB", sizeInKiloBytes)
+	}
+	return fmt.Sprintf("%dB   ", *sizeInBytes)
 }
 
 func revealDirectory(path *string) {
@@ -57,7 +82,11 @@ func revealDirectory(path *string) {
 			continue
 		}
 		mode := fmt.Sprint(info.Mode())
-		graffiti.Println("%s   %s", colorizeMode(&mode), info.Name())
+		var size int64
+		if info.Mode().IsRegular() {
+			size = info.Size()
+		}
+		graffiti.Println("%s   %s  %s", colorizeMode(&mode), humanizeSize(&size), info.Name())
 	}
 	graffiti.Println("")
 	graffiti.Println("@BPath:@r %s.", *path)
@@ -97,10 +126,10 @@ func printManual() {
 }
 
 func main() {
-	for argumentsIterator := 0; argumentsIterator < len(os.Args); argumentsIterator ++ {
+	for argumentsIterator := 0; argumentsIterator < len(os.Args); argumentsIterator++ {
 		argument := os.Args[argumentsIterator]
 		if argument == "--manual" {
-			printManual();
+			printManual()
 		}
 	}
 	relativePath := "."
@@ -130,4 +159,3 @@ func main() {
 		)
 	}
 }
-
