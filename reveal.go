@@ -64,7 +64,45 @@ func revealDirectory(path *string) {
 	graffiti.Println("@BTotal:@r %d.", len(entries))
 }
 
+func printManual() {
+	graffiti.Println("@B@F{red}Reveal - Manual")
+	graffiti.Println("    @BStarting Point")
+	graffiti.Println("        Reveal is a program to reveal data about the file system.")
+	graffiti.Println("        It can reveal the entries of a directory or the contents of a file.")
+	graffiti.Println("        It is created to work on Unix-like operating system: such as Linux and MacOS.")
+	graffiti.Println("")
+	graffiti.Println("    @BUsage")
+	graffiti.Println("        Reveal expects a path for it to reveal.")
+	graffiti.Println("        As an example, you can make it reveal all the entries in your home directory:")
+	graffiti.Println("")
+	graffiti.Println("        @F{red}reveal @F{green}~")
+	graffiti.Println("")
+	graffiti.Println("        All contents printed contains headers to help you understand the data.")
+	graffiti.Println("")
+	graffiti.Println("        If it is more comfortable, you can also pipe its output to a pager.")
+	graffiti.Println("        For this other example, let's reveal a directory with a large amount of files:")
+	graffiti.Println("")
+	graffiti.Println("        @F{red}reveal @F{green}/usr/bin@r | @F{red}less")
+	graffiti.Println("")
+	graffiti.Println("        You can use @F{red}q@r to exit the @F{red}less@r command.")
+	graffiti.Println("")
+	graffiti.Println("    @BSource Code")
+	graffiti.Println("        The source code of this program can be found at:")
+	graffiti.Println("        @F{green}https://github.com/skippyr/reveal")
+	graffiti.Println("")
+	graffiti.Println("    @BLicense")
+	graffiti.Println("        Reveal is distributed under the terms of the MIT License.")
+	graffiti.Println("        Copyright (c) 2023, Sherman Rofeman. MIT License.")
+	os.Exit(0)
+}
+
 func main() {
+	for argumentsIterator := 0; argumentsIterator < len(os.Args); argumentsIterator ++ {
+		argument := os.Args[argumentsIterator]
+		if argument == "--manual" {
+			printManual();
+		}
+	}
 	relativePath := "."
 	if len(os.Args) > 1 {
 		relativePath = os.Args[1]
@@ -88,7 +126,7 @@ func main() {
 	} else {
 		throwError(
 			"Could not reveal the given path type.",
-			"Use the flag --help to see what types can be revealed.",
+			"Use the flag --manual to see what types can be revealed.",
 		)
 	}
 }
