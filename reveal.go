@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"github.com/skippyr/graffiti"
+	"io/fs"
 	"os"
 	"path/filepath"
-	"io/fs"
 )
 
 func throwError(description string, suggestion string) {
@@ -27,31 +27,33 @@ func throwError(description string, suggestion string) {
 
 func stringifyType(typeMode fs.FileMode) string {
 	/*
-	 * Checking if certain types bits are set.
 	 * The GoLang uses its own bits to determinate file types.
 	 * All bits it has defined can be found here:
 	 *
 	 * https://pkg.go.dev/io/fs#FileMode
 	 *
-	 * For UNIX specific, all seven stardard file types can be found here:
+	 * For UNIX specific, common file types can be found here:
+	 *
 	 * https://en.wikipedia.org/wiki/Unix_file_types
 	 */
-	if typeMode & fs.ModeDir != 0 {
+	switch {
+	case typeMode&fs.ModeDir != 0:
 		return "Directory"
-	} else if typeMode & fs.ModeSymlink != 0 {
+	case typeMode&fs.ModeSymlink != 0:
 		return "Symlink"
-	} else if typeMode & fs.ModeDevice != 0 {
+	case typeMode&fs.ModeDevice != 0:
 		if fs.ModeCharDevice != 0 {
 			return "Character"
 		} else {
 			return "Block"
 		}
-	} else if typeMode & fs.ModeNamedPipe != 0 {
+	case typeMode&fs.ModeNamedPipe != 0:
 		return "Fifo"
-	} else if typeMode & fs.ModeSocket != 0 {
+	case typeMode&fs.ModeSocket != 0:
 		return "Socket"
+	default:
+		return "File"
 	}
-	return "File"
 }
 
 func stringifySize(sizeInBytes *int64) string {
