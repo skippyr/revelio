@@ -16,6 +16,10 @@ func throwError(description string, suggestion string) {
 	graffiti.Eprintln("    @BSuggestion")
 	graffiti.Eprintln("        %s", suggestion)
 	graffiti.Eprintln("")
+	graffiti.Eprintln("    @BHelp@r")
+	graffiti.Eprintln("        You can talk to the developer at:")
+	graffiti.Eprintln("        @F{green}https://github.com/skippyr/reveal/issues")
+	graffiti.Eprintln("")
 	graffiti.Eprintln("Program exited with exit code %d.", exitCode)
 	os.Exit(exitCode)
 }
@@ -26,7 +30,7 @@ func colorizeMode(mode *string) string {
 		if character == '-' {
 			coloredMode += string(character)
 		} else if characterIterator == 0 {
-			coloredMode += fmt.Sprintf("@F{cyan}%c@r", character)
+			coloredMode += fmt.Sprintf("@F{cyan}@B%c@r", character)
 		} else if characterIterator == 1 || characterIterator == 4 || characterIterator == 7 {
 			coloredMode += fmt.Sprintf("@F{green}%c@r", character)
 		} else if characterIterator == 2 || characterIterator == 5 || characterIterator == 8 {
