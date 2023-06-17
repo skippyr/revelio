@@ -10,9 +10,9 @@ import (
 )
 
 type EntryPermission struct {
-	bit int
+	bit       int
 	character rune
-	color string
+	color     string
 }
 
 func throwError(description string, suggestion string) {
@@ -49,7 +49,7 @@ func stringifyType(typeMode fs.FileMode) string {
 	case typeMode&fs.ModeSymlink != 0:
 		return "Symlink"
 	case typeMode&fs.ModeDevice != 0:
-		if fs.ModeCharDevice != 0 {
+		if typeMode&fs.ModeCharDevice != 0 {
 			return "Character"
 		} else {
 			return "Block"
@@ -64,36 +64,41 @@ func stringifyType(typeMode fs.FileMode) string {
 }
 
 func stringifyPermissions(permissionsMode fs.FileMode) string {
+	/*
+	 * A list containing all permissions bit for UNIX-like operating systems can be found here:
+	 *
+	 * https://www.gnu.org/software/libc/manual/html_node/Permission-Bits.html
+	 */
 	lackPermissionCharacter := '-'
-	multipliers := []int {
+	multipliers := []int{
 		0100, // User
 		010,  // Group
 		01,   // Others
 	}
-	permissions := []EntryPermission {
+	permissions := []EntryPermission{
 		{
 			// Read
-			bit: 04,
+			bit:       04,
 			character: 'r',
-			color: "green",
+			color:     "green",
 		},
 		{
 			// Write
-			bit: 02,
+			bit:       02,
 			character: 'w',
-			color: "yellow",
+			color:     "yellow",
 		},
 		{
 			// Execute
-			bit: 01,
+			bit:       01,
 			character: 'x',
-			color: "red",
+			color:     "red",
 		},
 	}
 	var permissionsAsString string
 	for _, multiplier := range multipliers {
 		for _, permission := range permissions {
-			if int(permissionsMode)&(permission.bit * multiplier) != 0 {
+			if int(permissionsMode)&(permission.bit*multiplier) != 0 {
 				permissionsAsString += fmt.Sprintf("@F{%s}%c@r", permission.color, permission.character)
 			} else {
 				permissionsAsString += string(lackPermissionCharacter)
@@ -111,10 +116,10 @@ func stringifySize(sizeInBytes *int64) string {
 		oneGigaByteInBytes = 1e9
 		oneMegaByteInBytes = 1e6
 		oneKiloByteInBytes = 1e3
-		floatPrecision = 1
-		floatDigits = 6
-		intDigits = 7
-		unitColor = "cyan"
+		floatPrecision     = 1
+		floatDigits        = 6
+		intDigits          = 7
+		unitColor          = "cyan"
 	)
 	sizeInGigaBytes := float32(*sizeInBytes) / oneGigaByteInBytes
 	if int(sizeInGigaBytes) > 0 {
