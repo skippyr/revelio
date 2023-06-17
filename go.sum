@@ -1,5 +1,5 @@
-github.com/skippyr/graffiti v1.1.5 h1:3a8EDukZBjxrzdR4YOoL8yC2IbRCQ2MX16t2hrM4LRg=
-github.com/skippyr/graffiti v1.1.5/go.mod h1:FF/sZR5eeOJXp1gTZYvar/fX15IuBExP0Fhkp+/N3xA=
+github.com/skippyr/graffiti v1.2.0 h1:Nejr3A2bYATCfZZ6us0CqcEjBXa+ZjwhAMAB+5tpxcY=
+github.com/skippyr/graffiti v1.2.0/go.mod h1:FF/sZR5eeOJXp1gTZYvar/fX15IuBExP0Fhkp+/N3xA=
 golang.org/x/sys v0.9.0 h1:KS/R3tvhPqvJvwcKfnBHJwwthS11LRhmM5D59eEXa0s=
 golang.org/x/sys v0.9.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.9.0 h1:GRRCnKYhdQrD8kfRAdQ6Zcw1P0OcELxGLKJvtjVMZ28=

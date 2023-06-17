@@ -5,7 +5,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/skippyr/graffiti"
 )
@@ -69,25 +68,21 @@ func stringifySize(sizeInBytes *int64) string {
 		floatPrecision = 1
 		floatDigits = 6
 		intDigits = 7
-		unitColor = "red"
+		unitColor = "cyan"
 	)
 	sizeInGigaBytes := float32(*sizeInBytes) / oneGigaByteInBytes
 	if int(sizeInGigaBytes) > 0 {
-		return fmt.Sprintf("%*.*f@F{%s}GB@r", floatDigits, floatPrecision, sizeInGigaBytes, unitColor)
+		return fmt.Sprintf("%*.*fGB", floatDigits, floatPrecision, sizeInGigaBytes)
 	}
 	sizeInMegaBytes := float32(*sizeInBytes) / oneMegaByteInBytes
 	if int(sizeInMegaBytes) > 0 {
-		return fmt.Sprintf("%*.*f@F{%s}MB@r", floatDigits, floatPrecision, sizeInMegaBytes, unitColor)
+		return fmt.Sprintf("%*.*fMB", floatDigits, floatPrecision, sizeInMegaBytes)
 	}
 	sizeInKiloBytes := float32(*sizeInBytes) / oneKiloByteInBytes
 	if int(sizeInKiloBytes) > 0 {
-		return fmt.Sprintf("%*.*f@F{%s}kB@r", floatDigits, floatPrecision, sizeInKiloBytes, unitColor)
+		return fmt.Sprintf("%*.*fkB", floatDigits, floatPrecision, sizeInKiloBytes)
 	}
-	return fmt.Sprintf("%*d@F{%s}B@r", intDigits, *sizeInBytes, unitColor)
-}
-
-func replaceAts(s string) string {
-	return strings.ReplaceAll(s, "@", "@@")
+	return fmt.Sprintf("%*dB", intDigits, *sizeInBytes)
 }
 
 func revealDirectory(path *string) {
@@ -98,7 +93,7 @@ func revealDirectory(path *string) {
 			"Ensure that you have enough permissions to read it.",
 		)
 	}
-	graffiti.Println("    @BSize       Type  Name")
+	graffiti.Println("    @B@F{red}Size       Type  Name")
 	for _, entry := range entries {
 		info, err := entry.Info()
 		if err != nil {
@@ -110,11 +105,11 @@ func revealDirectory(path *string) {
 		}
 		size := stringifySize(&sizeInBytes)
 		typeMode := stringifyType(info.Mode().Type())
-		name := replaceAts(info.Name())
+		name := graffiti.EscapePrefixCharacters(info.Name())
 		graffiti.Println("%s  %9s  %s", size, typeMode, name)
 	}
 	graffiti.Println("")
-	graffiti.Println("@BPath:@r %s.", replaceAts(*path))
+	graffiti.Println("@BPath:@r %s.", graffiti.EscapePrefixCharacters(*path))
 	graffiti.Println("@BTotal:@r %d entries.", len(entries))
 }
 
