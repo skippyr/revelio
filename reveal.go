@@ -57,24 +57,31 @@ func stringifyType(typeMode fs.FileMode) string {
 }
 
 func stringifySize(sizeInBytes *int64) string {
+	if *sizeInBytes == 0 {
+		return "       -"
+	}
 	const (
 		oneGigaByteInBytes = 1e9
 		oneMegaByteInBytes = 1e6
 		oneKiloByteInBytes = 1e3
+		floatPrecision = 1
+		floatDigits = 6
+		intDigits = 7
+		unitColor = "red"
 	)
 	sizeInGigaBytes := float32(*sizeInBytes) / oneGigaByteInBytes
 	if int(sizeInGigaBytes) > 0 {
-		return fmt.Sprintf("%.1fGB", sizeInGigaBytes)
+		return fmt.Sprintf("%*.*f@F{%s}GB@r", floatDigits, floatPrecision, sizeInGigaBytes, unitColor)
 	}
 	sizeInMegaBytes := float32(*sizeInBytes) / oneMegaByteInBytes
 	if int(sizeInMegaBytes) > 0 {
-		return fmt.Sprintf("%.1fMB", sizeInMegaBytes)
+		return fmt.Sprintf("%*.*f@F{%s}MB@r", floatDigits, floatPrecision, sizeInMegaBytes, unitColor)
 	}
 	sizeInKiloBytes := float32(*sizeInBytes) / oneKiloByteInBytes
 	if int(sizeInKiloBytes) > 0 {
-		return fmt.Sprintf("%.1fkB", sizeInKiloBytes)
+		return fmt.Sprintf("%*.*f@F{%s}kB@r", floatDigits, floatPrecision, sizeInKiloBytes, unitColor)
 	}
-	return fmt.Sprintf("%dB   ", *sizeInBytes)
+	return fmt.Sprintf("%*d@F{%s}B@r", intDigits, *sizeInBytes, unitColor)
 }
 
 func revealDirectory(path *string) {
@@ -85,6 +92,7 @@ func revealDirectory(path *string) {
 			"Ensure that you have enough permissions to read it.",
 		)
 	}
+	graffiti.Println("    @BSize       Type  Name")
 	for _, entry := range entries {
 		info, err := entry.Info()
 		if err != nil {
@@ -96,7 +104,7 @@ func revealDirectory(path *string) {
 		}
 		size := stringifySize(&sizeInBytes)
 		typeMode := stringifyType(info.Mode().Type())
-		graffiti.Println("%s  %s  %s", size, typeMode, info.Name())
+		graffiti.Println("%s  %9s  %s", size, typeMode, info.Name())
 	}
 	graffiti.Println("")
 	graffiti.Println("@BPath:@r %s.", *path)
