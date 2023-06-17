@@ -9,6 +9,12 @@ import (
 	"github.com/skippyr/graffiti"
 )
 
+type EntryPermission struct {
+	bit int
+	character rune
+	color string
+}
+
 func throwError(description string, suggestion string) {
 	exitCode := 1
 	graffiti.Eprintln("@B@F{red}Reveal - Error Report")
@@ -58,68 +64,41 @@ func stringifyType(typeMode fs.FileMode) string {
 }
 
 func stringifyPermissions(permissionsMode fs.FileMode) string {
+	lackPermissionCharacter := '-'
+	multipliers := []int {
+		0100, // User
+		010,  // Group
+		01,   // Others
+	}
+	permissions := []EntryPermission {
+		{
+			// Read
+			bit: 04,
+			character: 'r',
+			color: "green",
+		},
+		{
+			// Write
+			bit: 02,
+			character: 'w',
+			color: "yellow",
+		},
+		{
+			// Execute
+			bit: 01,
+			character: 'x',
+			color: "red",
+		},
+	}
 	var permissionsAsString string
-	const (
-		readPermissionsCharacter = 'r'
-		writePermissionsCharacter = 'w'
-		executePermissionsCharacter = 'x'
-		nonPermissionsCharacter = '-'
-		unixUserReadPermissionsBit = 0400
-		unixUserWritePermissionsBit = 0200
-		unixUserExecutePermissionsBit = 0100
-		unixGroupReadPermissionsBit = 040
-		unixGroupWritePermissionsBit = 020
-		unixGroupExecutePermissionsBit = 010
-		unixOthersReadPermissionsBit = 04
-		unixOthersWritePermissionsBit = 02
-		unixOthersExecutePermissionsBit = 01
-	)
-	if permissionsMode&unixUserReadPermissionsBit != 0 {
-		permissionsAsString+=string(readPermissionsCharacter)
-	} else {
-		permissionsAsString+=string(nonPermissionsCharacter)
-	}
-	if permissionsMode&unixUserWritePermissionsBit != 0 {
-		permissionsAsString+=string(writePermissionsCharacter)
-	} else {
-		permissionsAsString+=string(nonPermissionsCharacter)
-	}
-	if permissionsMode&unixUserExecutePermissionsBit != 0 {
-		permissionsAsString+=string(executePermissionsCharacter)
-	} else {
-		permissionsAsString+=string(nonPermissionsCharacter)
-	}
-
-	if permissionsMode&unixGroupReadPermissionsBit != 0 {
-		permissionsAsString+=string(readPermissionsCharacter)
-	} else {
-		permissionsAsString+=string(nonPermissionsCharacter)
-	}
-	if permissionsMode&unixGroupWritePermissionsBit != 0 {
-		permissionsAsString+=string(writePermissionsCharacter)
-	} else {
-		permissionsAsString+=string(nonPermissionsCharacter)
-	}
-	if permissionsMode&unixGroupExecutePermissionsBit != 0 {
-		permissionsAsString+=string(executePermissionsCharacter)
-	} else {
-		permissionsAsString+=string(nonPermissionsCharacter)
-	}
-
-	if permissionsMode&unixOthersReadPermissionsBit != 0 {
-		permissionsAsString+=string(readPermissionsCharacter)
-	} else {
-		permissionsAsString+=string(nonPermissionsCharacter)
-	}
-	if permissionsMode&unixOthersWritePermissionsBit != 0 {
-		permissionsAsString+=string(writePermissionsCharacter)
-	} else {
-		permissionsAsString+=string(nonPermissionsCharacter)
-	}
-	if permissionsMode&unixOthersExecutePermissionsBit != 0 {
-		permissionsAsString+=string(executePermissionsCharacter)
-	} else {
-		permissionsAsString+=string(nonPermissionsCharacter)
+	for _, multiplier := range multipliers {
+		for _, permission := range permissions {
+			if int(permissionsMode)&(permission.bit * multiplier) != 0 {
+				permissionsAsString += fmt.Sprintf("@F{%s}%c@r", permission.color, permission.character)
+			} else {
+				permissionsAsString += string(lackPermissionCharacter)
+			}
+		}
 	}
 	return permissionsAsString
 }
