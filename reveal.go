@@ -57,6 +57,73 @@ func stringifyType(typeMode fs.FileMode) string {
 	}
 }
 
+func stringifyPermissions(permissionsMode fs.FileMode) string {
+	var permissionsAsString string
+	const (
+		readPermissionsCharacter = 'r'
+		writePermissionsCharacter = 'w'
+		executePermissionsCharacter = 'x'
+		nonPermissionsCharacter = '-'
+		unixUserReadPermissionsBit = 0400
+		unixUserWritePermissionsBit = 0200
+		unixUserExecutePermissionsBit = 0100
+		unixGroupReadPermissionsBit = 040
+		unixGroupWritePermissionsBit = 020
+		unixGroupExecutePermissionsBit = 010
+		unixOthersReadPermissionsBit = 04
+		unixOthersWritePermissionsBit = 02
+		unixOthersExecutePermissionsBit = 01
+	)
+	if permissionsMode&unixUserReadPermissionsBit != 0 {
+		permissionsAsString+=string(readPermissionsCharacter)
+	} else {
+		permissionsAsString+=string(nonPermissionsCharacter)
+	}
+	if permissionsMode&unixUserWritePermissionsBit != 0 {
+		permissionsAsString+=string(writePermissionsCharacter)
+	} else {
+		permissionsAsString+=string(nonPermissionsCharacter)
+	}
+	if permissionsMode&unixUserExecutePermissionsBit != 0 {
+		permissionsAsString+=string(executePermissionsCharacter)
+	} else {
+		permissionsAsString+=string(nonPermissionsCharacter)
+	}
+
+	if permissionsMode&unixGroupReadPermissionsBit != 0 {
+		permissionsAsString+=string(readPermissionsCharacter)
+	} else {
+		permissionsAsString+=string(nonPermissionsCharacter)
+	}
+	if permissionsMode&unixGroupWritePermissionsBit != 0 {
+		permissionsAsString+=string(writePermissionsCharacter)
+	} else {
+		permissionsAsString+=string(nonPermissionsCharacter)
+	}
+	if permissionsMode&unixGroupExecutePermissionsBit != 0 {
+		permissionsAsString+=string(executePermissionsCharacter)
+	} else {
+		permissionsAsString+=string(nonPermissionsCharacter)
+	}
+
+	if permissionsMode&unixOthersReadPermissionsBit != 0 {
+		permissionsAsString+=string(readPermissionsCharacter)
+	} else {
+		permissionsAsString+=string(nonPermissionsCharacter)
+	}
+	if permissionsMode&unixOthersWritePermissionsBit != 0 {
+		permissionsAsString+=string(writePermissionsCharacter)
+	} else {
+		permissionsAsString+=string(nonPermissionsCharacter)
+	}
+	if permissionsMode&unixOthersExecutePermissionsBit != 0 {
+		permissionsAsString+=string(executePermissionsCharacter)
+	} else {
+		permissionsAsString+=string(nonPermissionsCharacter)
+	}
+	return permissionsAsString
+}
+
 func stringifySize(sizeInBytes *int64) string {
 	if *sizeInBytes == 0 {
 		return "       -"
@@ -93,7 +160,7 @@ func revealDirectory(path *string) {
 			"Ensure that you have enough permissions to read it.",
 		)
 	}
-	graffiti.Println("    @B@F{red}Size       Type  Name")
+	graffiti.Println("    @B@F{red}Size  Permissions       Type  Name")
 	for _, entry := range entries {
 		info, err := entry.Info()
 		if err != nil {
@@ -105,8 +172,9 @@ func revealDirectory(path *string) {
 		}
 		size := stringifySize(&sizeInBytes)
 		typeMode := stringifyType(info.Mode().Type())
+		permissionsMode := stringifyPermissions(info.Mode().Perm())
 		name := graffiti.EscapePrefixCharacters(info.Name())
-		graffiti.Println("%s  %9s  %s", size, typeMode, name)
+		graffiti.Println("%s  %s    %9s  %s", size, permissionsMode, typeMode, name)
 	}
 	graffiti.Println("")
 	graffiti.Println("@BPath:@r %s.", graffiti.EscapePrefixCharacters(*path))
