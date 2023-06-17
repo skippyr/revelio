@@ -86,6 +86,10 @@ func stringifySize(sizeInBytes *int64) string {
 	return fmt.Sprintf("%*d@F{%s}B@r", intDigits, *sizeInBytes, unitColor)
 }
 
+func replaceAts(s string) string {
+	return strings.ReplaceAll(s, "@", "@@")
+}
+
 func revealDirectory(path *string) {
 	entries, err := os.ReadDir(*path)
 	if err != nil {
@@ -106,12 +110,12 @@ func revealDirectory(path *string) {
 		}
 		size := stringifySize(&sizeInBytes)
 		typeMode := stringifyType(info.Mode().Type())
-		name := strings.ReplaceAll(info.Name(), "@", "@@")
+		name := replaceAts(info.Name())
 		graffiti.Println("%s  %9s  %s", size, typeMode, name)
 	}
 	graffiti.Println("")
-	graffiti.Println("@BPath:@r %s.", *path)
-	graffiti.Println("@BTotal:@r %d.", len(entries))
+	graffiti.Println("@BPath:@r %s.", replaceAts(*path))
+	graffiti.Println("@BTotal:@r %d entries.", len(entries))
 }
 
 func printManual() {
