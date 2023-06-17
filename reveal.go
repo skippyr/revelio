@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/skippyr/graffiti"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
+
+	"github.com/skippyr/graffiti"
 )
 
 func throwError(description string, suggestion string) {
@@ -104,7 +106,8 @@ func revealDirectory(path *string) {
 		}
 		size := stringifySize(&sizeInBytes)
 		typeMode := stringifyType(info.Mode().Type())
-		graffiti.Println("%s  %9s  %s", size, typeMode, info.Name())
+		name := strings.ReplaceAll(info.Name(), "@", "@@")
+		graffiti.Println("%s  %9s  %s", size, typeMode, name)
 	}
 	graffiti.Println("")
 	graffiti.Println("@BPath:@r %s.", *path)
