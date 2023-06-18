@@ -19,6 +19,9 @@ type DigitalSizeUnit struct {
 }
 
 func stringifyKind(mode uint) string {
+	if mode == 0 {
+		return "Broken"
+	}
 	kinds := []EntryKind{
 		{
 			bit:  uint(fs.ModeDir),

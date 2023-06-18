@@ -58,7 +58,7 @@ func stringifyPermissions(mode uint) string {
 			}
 		}
 	}
-	permissionsAsString += fmt.Sprintf(" (%o)", octalSum)
+	permissionsAsString += fmt.Sprintf(" (%3o)", octalSum)
 	return permissionsAsString
 }
 
@@ -70,35 +70,34 @@ func RevealDirectory(directoryPath *string) {
 	var quantityOfEntries int
 	graffiti.Println("     Owner      Size      Permissions       Kind  Name")
 	for _, entry := range entries {
+		var mode uint
+		var sizeInBytes int64
+		owner := "-"
+		name := graffiti.EscapePrefixCharacters(entry.Name())
 		entryPath := filepath.Join(*directoryPath, entry.Name())
 		resolvedEntryPath, err := filepath.EvalSymlinks(entryPath)
 		if err != nil {
-			continue
+			resolvedEntryPath = entryPath
 		}
 		info, err := os.Stat(resolvedEntryPath)
-		if err != nil {
-			continue
+		if err == nil {
+			mode = uint(info.Mode())
+			if info.Mode().IsRegular() {
+				sizeInBytes = info.Size()
+			}
+			systemData := info.Sys()
+			if systemData != nil {
+				stat := systemData.(*syscall.Stat_t)
+				user, err := user.LookupId(fmt.Sprint(stat.Uid))
+				if err == nil {
+					owner = user.Username
+				}
+			}
 		}
-		systemData := info.Sys()
-		if systemData == nil {
-			continue
-		}
-		stat := systemData.(*syscall.Stat_t)
-		user, err := user.LookupId(fmt.Sprint(stat.Uid))
-		if err != nil {
-			continue
-		}
-		var sizeInBytes int64
-		if info.Mode().IsRegular() {
-			sizeInBytes = info.Size()
-		}
-		mode := uint(info.Mode())
-		name := graffiti.EscapePrefixCharacters(entry.Name())
-		owner := user.Username
-		permission := stringifyPermissions(mode)
 		kind := stringifyKind(mode)
 		size := stringifySize(sizeInBytes)
-		graffiti.Println("%10s  %s  %s  %9s  %s%s", owner, size, permission, kind, name, stringifySymlinkOriginPath(&entryPath))
+		permissions := stringifyPermissions(mode)
+		graffiti.Println("%10s  %s  %s  %9s  %s%s", owner, size, permissions, kind, name, stringifySymlinkOriginPath(&entryPath))
 		quantityOfEntries ++
 	}
 	graffiti.Println("")

@@ -17,21 +17,21 @@ func RevealDirectory(directoryPath *string) {
 	var quantityOfEntries int
 	graffiti.Println("    Size       Kind  Name")
 	for _, entry := range entries {
+		var mode uint
+		var sizeInBytes int64
+		name := graffiti.EscapePrefixCharacters(entry.Name())
 		entryPath := filepath.Join(*directoryPath, entry.Name())
 		resolvedEntryPath, err := filepath.EvalSymlinks(entryPath)
 		if err != nil {
-			continue
+			resolvedEntryPath = entryPath
 		}
 		info, err := os.Stat(resolvedEntryPath)
-		if err != nil {
-			continue
+		if err == nil {
+			mode = uint(info.Mode())
+			if info.Mode().IsRegular() {
+				sizeInBytes = info.Size()
+			}
 		}
-		var sizeInBytes int64
-		if info.Mode().IsRegular() {
-			sizeInBytes = info.Size()
-		}
-		mode := uint(info.Mode())
-		name := graffiti.EscapePrefixCharacters(entry.Name())
 		kind := stringifyKind(mode)
 		size := stringifySize(sizeInBytes)
 		graffiti.Println("%s  %9s  %s%s", size, kind, name, stringifySymlinkOriginPath(&entryPath))
