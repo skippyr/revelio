@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"os/user"
 	"path/filepath"
+	"syscall"
 
 	"github.com/skippyr/graffiti"
 )
@@ -103,7 +105,7 @@ func stringifyPermissions(permissionsMode fs.FileMode) string {
 	var octalSum int
 	for _, multiplier := range multipliers {
 		for _, permission := range permissions {
-			permissionValue := permission.bit*multiplier
+			permissionValue := permission.bit * multiplier
 			if int(permissionsMode)&permissionValue != 0 {
 				permissionsAsString += fmt.Sprintf("@F{%s}%c@r", permission.color, permission.character)
 				octalSum += permissionValue
@@ -155,11 +157,17 @@ func revealDirectory(path *string) {
 			"Ensure that you have enough permissions to read it.",
 		)
 	}
-	graffiti.Println("    @B@F{red}Size  Permissions           Type  Name")
+	graffiti.Println("@B@F{red}Owner        Size  Permissions           Type  Name")
 	for _, entry := range entries {
 		info, err := entry.Info()
 		if err != nil {
 			continue
+		}
+		stat := info.Sys().(*syscall.Stat_t)
+		owner := "-"
+		user, err := user.LookupId(fmt.Sprint(stat.Uid))
+		if err == nil {
+			owner = user.Username
 		}
 		var sizeInBytes int64
 		if info.Mode().IsRegular() {
@@ -169,7 +177,7 @@ func revealDirectory(path *string) {
 		typeMode := stringifyType(info.Mode().Type())
 		permissionsMode := stringifyPermissions(info.Mode().Perm())
 		name := graffiti.EscapePrefixCharacters(info.Name())
-		graffiti.Println("%s  %s  %9s  %s", size, permissionsMode, typeMode, name)
+		graffiti.Println("%-7s  %s  %s  %9s  %s", owner, size, permissionsMode, typeMode, name)
 	}
 	graffiti.Println("")
 	graffiti.Println("@BPath:@r %s.", graffiti.EscapePrefixCharacters(*path))
