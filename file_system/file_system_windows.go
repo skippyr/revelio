@@ -4,6 +4,7 @@ package file_system
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/skippyr/graffiti"
 )
@@ -13,9 +14,15 @@ func RevealDirectory(directoryPath *string) {
 	if err != nil {
 		throwRevealDirectoryError()
 	}
+	var quantityOfEntries int
 	graffiti.Println("    Size       Kind  Name")
 	for _, entry := range entries {
-		info, err := entry.Info()
+		entryPath := filepath.Join(*directoryPath, entry.Name())
+		resolvedEntryPath, err := filepath.EvalSymlinks(entryPath)
+		if err != nil {
+			continue
+		}
+		info, err := os.Stat(resolvedEntryPath)
 		if err != nil {
 			continue
 		}
@@ -24,13 +31,14 @@ func RevealDirectory(directoryPath *string) {
 			sizeInBytes = info.Size()
 		}
 		mode := uint(info.Mode())
-		name := graffiti.EscapePrefixCharacters(info.Name())
+		name := graffiti.EscapePrefixCharacters(entry.Name())
 		kind := stringifyKind(mode)
 		size := stringifySize(sizeInBytes)
-		graffiti.Println("%s  %9s  %s", size, kind, name)
+		graffiti.Println("%s  %9s  %s%s", size, kind, name, stringifySymlinkOriginPath(&entryPath))
+		quantityOfEntries ++
 	}
 	graffiti.Println("")
 	graffiti.Println("Path: %s.", graffiti.EscapePrefixCharacters(*directoryPath))
-	graffiti.Println("Total: %d entries.", len(entries))
+	graffiti.Println("Total: %d entries.", quantityOfEntries)
 }
 

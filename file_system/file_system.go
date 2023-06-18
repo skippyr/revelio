@@ -2,6 +2,7 @@ package file_system
 
 import (
 	"io/fs"
+	"os"
 	"fmt"
 
 	"github.com/skippyr/reveal/errors"
@@ -72,6 +73,14 @@ func stringifySize(sizeInBytes int64) string {
 		}
 	}
 	return fmt.Sprintf("%7dB", sizeInBytes)
+}
+
+func stringifySymlinkOriginPath(symlinkPath *string) string {
+	originPath, err := os.Readlink(*symlinkPath)
+	if err != nil {
+		return ""
+	}
+	return fmt.Sprintf(" => %s", originPath)
 }
 
 func throwRevealDirectoryError() {
