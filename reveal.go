@@ -100,15 +100,19 @@ func stringifyPermissions(permissionsMode fs.FileMode) string {
 		},
 	}
 	var permissionsAsString string
+	var octalSum int
 	for _, multiplier := range multipliers {
 		for _, permission := range permissions {
-			if int(permissionsMode)&(permission.bit*multiplier) != 0 {
+			permissionValue := permission.bit*multiplier
+			if int(permissionsMode)&permissionValue != 0 {
 				permissionsAsString += fmt.Sprintf("@F{%s}%c@r", permission.color, permission.character)
+				octalSum += permissionValue
 			} else {
 				permissionsAsString += string(lackPermissionCharacter)
 			}
 		}
 	}
+	permissionsAsString += fmt.Sprintf(" (%o)", octalSum)
 	return permissionsAsString
 }
 
@@ -116,6 +120,7 @@ func stringifySize(sizeInBytes int64) string {
 	if sizeInBytes == 0 {
 		return "       -"
 	}
+	unitColor := "red"
 	units := []DigitalSizeUnit{
 		{
 			// GigaBytes
@@ -136,10 +141,10 @@ func stringifySize(sizeInBytes int64) string {
 	for _, unit := range units {
 		unitSize := float32(sizeInBytes) / unit.valueInBytes
 		if int(unitSize) > 0 {
-			return fmt.Sprintf("%6.1f%cB", unitSize, unit.SiCharacter)
+			return fmt.Sprintf("%6.1f@F{%s}%cB", unitSize, unitColor, unit.SiCharacter)
 		}
 	}
-	return fmt.Sprintf("%7dB", sizeInBytes)
+	return fmt.Sprintf("%7d@F{%s}B", sizeInBytes, unitColor)
 }
 
 func revealDirectory(path *string) {
@@ -150,7 +155,7 @@ func revealDirectory(path *string) {
 			"Ensure that you have enough permissions to read it.",
 		)
 	}
-	graffiti.Println("    @B@F{red}Size  Permissions       Type  Name")
+	graffiti.Println("    @B@F{red}Size  Permissions           Type  Name")
 	for _, entry := range entries {
 		info, err := entry.Info()
 		if err != nil {
@@ -164,7 +169,7 @@ func revealDirectory(path *string) {
 		typeMode := stringifyType(info.Mode().Type())
 		permissionsMode := stringifyPermissions(info.Mode().Perm())
 		name := graffiti.EscapePrefixCharacters(info.Name())
-		graffiti.Println("%s  %s    %9s  %s", size, permissionsMode, typeMode, name)
+		graffiti.Println("%s  %s  %9s  %s", size, permissionsMode, typeMode, name)
 	}
 	graffiti.Println("")
 	graffiti.Println("@BPath:@r %s.", graffiti.EscapePrefixCharacters(*path))
