@@ -4,7 +4,9 @@ package file_system
 
 import (
 	"os"
+	"os/user"
 	"fmt"
+	"syscall"
 
 	"github.com/skippyr/graffiti"
 )
@@ -64,9 +66,15 @@ func RevealDirectory(directoryPath *string) {
 	if err != nil {
 		throwRevealDirectoryError()
 	}
-	graffiti.Println("    Size  Permissions           Kind  Name")
+	graffiti.Println("     Owner      Size      Permissions       Kind   Name")
 	for _, entry := range entries {
 		info, err := entry.Info()
+		systemData := info.Sys()
+		if err != nil || systemData == nil {
+			continue
+		}
+		stat := systemData.(*syscall.Stat_t)
+		user, err := user.LookupId(fmt.Sprint(stat.Uid))
 		if err != nil {
 			continue
 		}
@@ -76,10 +84,11 @@ func RevealDirectory(directoryPath *string) {
 		}
 		mode := uint(info.Mode())
 		name := graffiti.EscapePrefixCharacters(info.Name())
+		owner := user.Username
 		permission := stringifyPermissions(mode)
 		kind := stringifyKind(mode)
 		size := stringifySize(sizeInBytes)
-		graffiti.Println("%s  %s  %9s  %s", size, permission, kind, name)
+		graffiti.Println("%10s  %s  %s  %9s  %s", owner, size, permission, kind, name)
 	}
 	graffiti.Println("")
 	graffiti.Println("Path: %s.", graffiti.EscapePrefixCharacters(*directoryPath))
