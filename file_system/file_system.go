@@ -111,10 +111,10 @@ func RevealFile(filePath *string) {
 	for scanner.Scan() {
 		if !utf8.ValidString(scanner.Text()) {
 			errors.ThrowError(
-				"Could not read file as it contains non UTF-8 enconded characters.",
+				"Could not read file as it contains non UTF-8 encoded characters.",
 				"Ensure that it is of a readable type.",
 			)
 		}
-		graffiti.Print(strings.ReplaceAll(scanner.Text(), "\x1b", "@K{white}@F{black}[ESCAPE]@r"))
+		graffiti.Print(graffiti.EscapePrefixCharacters(strings.ReplaceAll(scanner.Text(), "\x1b", "@K{white}@F{black}[ESCAPE]@r")))
 	}
 }
