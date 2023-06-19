@@ -108,6 +108,7 @@ func RevealFile(filePath *string) {
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanRunes)
+	var quantityOfLines int
 	for scanner.Scan() {
 		if !utf8.ValidString(scanner.Text()) {
 			errors.ThrowError(
@@ -115,6 +116,12 @@ func RevealFile(filePath *string) {
 				"Ensure that it is of a readable type.",
 			)
 		}
-		graffiti.Print(graffiti.EscapePrefixCharacters(strings.ReplaceAll(scanner.Text(), "\x1b", "@K{white}@F{black}[ESCAPE]@r")))
+		if scanner.Text() == "\n" {
+			quantityOfLines ++
+		}
+		graffiti.Print(strings.ReplaceAll(graffiti.EscapePrefixCharacters(scanner.Text()), "\x1b", "@K{white}@F{black}[ESCAPE]@r"))
 	}
+	graffiti.Println("")
+	graffiti.Println("Path: %s.", graffiti.EscapePrefixCharacters(*filePath))
+	graffiti.Println("Total: %d lines.", quantityOfLines)
 }
