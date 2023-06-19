@@ -40,6 +40,8 @@ func main() {
 	}
 	if metadata.IsDir() {
 		file_system.RevealDirectory(&path)
+	} else if metadata.Mode().IsRegular() {
+		file_system.RevealFile(&path)
 	} else {
 		errors.ThrowError(
 			"Could not reveal the given path type.",

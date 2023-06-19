@@ -4,6 +4,10 @@ import (
 	"io/fs"
 	"os"
 	"fmt"
+	"bufio"
+	"unicode/utf8"
+	"strings"
+	"github.com/skippyr/graffiti"
 
 	"github.com/skippyr/reveal/errors"
 )
@@ -91,4 +95,26 @@ func throwRevealDirectoryError() {
 		"Could not reveal directory.",
 		"Ensure that you have enough permissions to read it.",
 	)
+}
+
+func RevealFile(filePath *string) {
+	file, err := os.Open(*filePath)
+	if err != nil {
+		errors.ThrowError(
+			"Could not open file.",
+			"Ensure that you have enough permissions to read it.",
+		)
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	scanner.Split(bufio.ScanRunes)
+	for scanner.Scan() {
+		if !utf8.ValidString(scanner.Text()) {
+			errors.ThrowError(
+				"Could not read file as it contains non UTF-8 enconded characters.",
+				"Ensure that it is of a readable type.",
+			)
+		}
+		graffiti.Print(strings.ReplaceAll(scanner.Text(), "\x1b", "@K{white}@F{black}[ESCAPE]@r"))
+	}
 }
