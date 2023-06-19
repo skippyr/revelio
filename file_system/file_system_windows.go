@@ -14,7 +14,6 @@ func RevealDirectory(directoryPath *string) {
 	if err != nil {
 		throwRevealDirectoryError()
 	}
-	var quantityOfEntries int
 	graffiti.Println("    Size       Kind  Name")
 	for _, entry := range entries {
 		var mode uint
@@ -35,10 +34,9 @@ func RevealDirectory(directoryPath *string) {
 		kind := stringifyKind(mode)
 		size := stringifySize(sizeInBytes)
 		graffiti.Println("%s  %9s  %s%s", size, kind, name, stringifySymlinkOriginPath(&entryPath))
-		quantityOfEntries ++
 	}
 	graffiti.Println("")
 	graffiti.Println("Path: %s.", graffiti.EscapePrefixCharacters(*directoryPath))
-	graffiti.Println("Total: %d entries.", quantityOfEntries)
+	graffiti.Println("Total: %d entries.", len(entries))
 }
 
