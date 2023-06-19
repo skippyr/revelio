@@ -67,7 +67,7 @@ func RevealDirectory(directoryPath *string) {
 	if err != nil {
 		throwRevealDirectoryError()
 	}
-	graffiti.Println("     Owner      Size      Permissions       Kind  Name")
+	graffiti.Println("@F{red}     Owner      Size      Permissions       Kind  Name")
 	for _, entry := range entries {
 		var mode uint
 		var sizeInBytes int64

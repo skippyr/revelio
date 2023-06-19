@@ -8,7 +8,7 @@ import (
 
 func ThrowError(description string, suggestion string) {
 	exitCode := 1
-	graffiti.Eprintln("Reveal - Error Report")
+	graffiti.Eprintln("@F{red}Reveal - Error Report")
 	graffiti.Eprintln("    Description")
 	graffiti.Eprintln("        %s", description)
 	graffiti.Eprintln("")

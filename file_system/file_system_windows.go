@@ -14,7 +14,7 @@ func RevealDirectory(directoryPath *string) {
 	if err != nil {
 		throwRevealDirectoryError()
 	}
-	graffiti.Println("    Size       Kind  Name")
+	graffiti.Println("@F{red}    Size       Kind  Name")
 	for _, entry := range entries {
 		var mode uint
 		var sizeInBytes int64
