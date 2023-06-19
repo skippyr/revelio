@@ -76,10 +76,10 @@ func stringifySize(sizeInBytes int64) string {
 	for _, unit := range units {
 		unitSize := float32(sizeInBytes) / float32(unit.bytes)
 		if int(unitSize) > 0 {
-			return fmt.Sprintf("%6.1f%cB", unitSize, unit.character)
+			return fmt.Sprintf("%6.1f@F{red}%cB@r", unitSize, unit.character)
 		}
 	}
-	return fmt.Sprintf("%7dB", sizeInBytes)
+	return fmt.Sprintf("%7d@F{red}B@r", sizeInBytes)
 }
 
 func stringifySymlinkOriginPath(symlinkPath *string) string {

@@ -52,6 +52,14 @@ func printManual() {
 	graffiti.Println("")
 	graffiti.Println("            * Owner (Unix only):")
 	graffiti.Println("              The name of the owner that owns that entry.")
+	graffiti.Println("")
+	graffiti.Println("    Source Code")
+	graffiti.Println("        Reveal's source code can be found here:")
+	graffiti.Println("        https://github.com/skippyr/reveal")
+	graffiti.Println("")
+	graffiti.Println("    License")
+	graffiti.Println("        This project is released under the terms of the MIT license.")
+	graffiti.Println("        Copyright (c) 2023, Sherman Rofeman. MIT License.")
 	os.Exit(0)
 }
 
@@ -76,7 +84,7 @@ func main() {
 	metadata, err := os.Stat(path)
 	if err != nil {
 		errors.ThrowError(
-			"Could not get metadata of given path.",
+			"The given path does not exists.",
 			"Ensure that you have not mispelled it.",
 		)
 	}

@@ -58,7 +58,7 @@ func stringifyPermissions(mode uint) string {
 			}
 		}
 	}
-	permissionsAsString += fmt.Sprintf(" (%3o)", octalSum)
+	permissionsAsString += fmt.Sprintf(" (@F{cyan}%3o@r)", octalSum)
 	return permissionsAsString
 }
 
@@ -67,7 +67,7 @@ func RevealDirectory(directoryPath *string) {
 	if err != nil {
 		throwRevealDirectoryError()
 	}
-	graffiti.Println("@F{red}     Owner      Size      Permissions       Kind  Name")
+	graffiti.Println("@F{red}          Owner      Size      Permissions       Kind  Name")
 	for _, entry := range entries {
 		var mode uint
 		var sizeInBytes int64
@@ -96,7 +96,7 @@ func RevealDirectory(directoryPath *string) {
 		kind := stringifyKind(mode)
 		size := stringifySize(sizeInBytes)
 		permissions := stringifyPermissions(mode)
-		graffiti.Println("%10s  %s  %s  %9s  %s%s", owner, size, permissions, kind, name, stringifySymlinkOriginPath(&entryPath))
+		graffiti.Println("@F{yellow}%15s@r  %s  %s  %9s  %s%s", owner, size, permissions, kind, name, stringifySymlinkOriginPath(&entryPath))
 	}
 	graffiti.Println("")
 	graffiti.Println("Path: %s.", graffiti.EscapePrefixCharacters(*directoryPath))
