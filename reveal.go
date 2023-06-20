@@ -103,7 +103,7 @@ func main() {
 	if err != nil {
 		errors.ThrowError(
 			"Could not resolve the absolute path of given path.",
-			"Ensure that it uses a valid convention for your system.",
+			"Ensure that you current directory is valid.",
 		)
 	}
 	metadata, err := os.Stat(path)
@@ -120,7 +120,7 @@ func main() {
 	} else {
 		errors.ThrowError(
 			"Could not reveal the given path type.",
-			"Use the flag --manual to see what types can be revealed.",
+			"Check out Reveal's manual to see what types can be revealed.",
 		)
 	}
 }

@@ -92,7 +92,7 @@ func stringifySymlinkOriginPath(symlinkPath *string) string {
 
 func throwRevealDirectoryError() {
 	errors.ThrowError(
-		"Could not reveal directory.",
+		"Could not open directory.",
 		"Ensure that you have enough permissions to read it.",
 	)
 }
