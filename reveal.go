@@ -17,7 +17,7 @@ func printManual() {
 	graffiti.Println("    entries and file contents.")
 	graffiti.Println("")
 	graffiti.Println("@F{magenta}Usage")
-	graffiti.Println("    Reveal expects a path of a file or directory as argument. For example:")
+	graffiti.Println("    Reveal expects the path of a file or directory as argument. For example:")
 	graffiti.Println("")
 	graffiti.Println("    reveal file.txt")
 	graffiti.Println("")

@@ -6,6 +6,18 @@ The Reveal project is a cross-platform terminal utility to reveal directory entr
 
 Here are some previews that you can check out.
 
+![](./images/preview_unix_file.png)
+
+In this image, Reveal revealed a file on Linux.
+
+![](./images/preview_unix.png)
+
+In this image, Reveal revealed a directory on Linux.
+
+![](./images/preview_windows.png)
+
+In this image, Reveal revealed a directory on Windows.
+
 ## Installation
 
 Not available for production yet.
