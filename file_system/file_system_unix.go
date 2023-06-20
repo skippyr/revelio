@@ -47,7 +47,7 @@ func stringifyPermissions(mode uint) string {
 		for _, permission := range permissions {
 			permissionValue := permission.bit * multiplier
 			if mode&permissionValue != 0 {
-				permissionsAsString += fmt.Sprintf("%c", permission.character)
+				permissionsAsString += string(permission.character)
 				octalSum += permissionValue
 			} else {
 				permissionsAsString += string(lackPermissionCharacter)

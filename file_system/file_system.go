@@ -108,7 +108,7 @@ func RevealFile(filePath *string) {
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanRunes)
-	var quantityOfLines int
+	var quantityOfLines uint
 	for scanner.Scan() {
 		if !utf8.ValidString(scanner.Text()) {
 			errors.ThrowError(
