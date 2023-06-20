@@ -77,6 +77,11 @@ func printManual() {
 	graffiti.Println("        Revealing large files can take some time. If you want to interrupt a reading,")
 	graffiti.Println("        send a SIGINT signal to your shell by using the keys sequence: [Ctrl] + [c].")
 	graffiti.Println("")
+	graffiti.Println("@F{magenta}Version")
+	graffiti.Println("    Check what version you are using by using the --version flag:")
+	graffiti.Println("")
+	graffiti.Println("    reveal --version")
+	graffiti.Println("")
 	graffiti.Println("@F{magenta}Source Code")
 	graffiti.Println("    Reveal's source code can be found at:")
 	graffiti.Println("")
@@ -88,10 +93,17 @@ func printManual() {
 	graffiti.Println("    Copyright (c) 2023, Sherman Rofeman. MIT License.")
 }
 
+func printVersion() {
+	defer os.Exit(0)
+	graffiti.Println("v2.0.0")
+}
+
 func main() {
 	for argumentsIterator := 0; argumentsIterator < len(os.Args); argumentsIterator++ {
 		argument := os.Args[argumentsIterator]
-		if argument == "--manual" {
+		if argument == "--version" {
+			printVersion()
+		} else if argument == "--manual" {
 			printManual()
 		}
 	}
