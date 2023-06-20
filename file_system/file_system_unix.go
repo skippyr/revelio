@@ -15,7 +15,6 @@ import (
 type EntryPermission struct {
 	bit       uint
 	character rune
-	color     string
 }
 
 func stringifyPermissions(mode uint) string {
@@ -30,19 +29,16 @@ func stringifyPermissions(mode uint) string {
 			// Read
 			bit:       04,
 			character: 'r',
-			color:     "green",
 		},
 		{
 			// Write
 			bit:       02,
 			character: 'w',
-			color:     "yellow",
 		},
 		{
 			// Execute
 			bit:       01,
 			character: 'x',
-			color:     "red",
 		},
 	}
 	var permissionsAsString string
@@ -51,14 +47,14 @@ func stringifyPermissions(mode uint) string {
 		for _, permission := range permissions {
 			permissionValue := permission.bit * multiplier
 			if mode&permissionValue != 0 {
-				permissionsAsString += fmt.Sprintf("@F{%s}%c@r", permission.color, permission.character)
+				permissionsAsString += fmt.Sprintf("%c", permission.character)
 				octalSum += permissionValue
 			} else {
 				permissionsAsString += string(lackPermissionCharacter)
 			}
 		}
 	}
-	permissionsAsString += fmt.Sprintf(" (@F{cyan}%3o@r)", octalSum)
+	permissionsAsString += fmt.Sprintf(" (%3o)", octalSum)
 	return permissionsAsString
 }
 
@@ -67,7 +63,7 @@ func RevealDirectory(directoryPath *string) {
 	if err != nil {
 		throwRevealDirectoryError()
 	}
-	graffiti.Println("@F{red}       Owner      Size      Permissions       Kind  Name")
+	graffiti.Println("@F{magenta}       Owner      Size      Permissions       Kind  Name")
 	for _, entry := range entries {
 		var mode uint
 		var sizeInBytes int64
@@ -96,7 +92,7 @@ func RevealDirectory(directoryPath *string) {
 		kind := stringifyKind(mode)
 		size := stringifySize(sizeInBytes)
 		permissions := stringifyPermissions(mode)
-		graffiti.Println("@F{yellow}%12s@r  %s  %s  %9s  %s%s", owner, size, permissions, kind, name, stringifySymlinkOriginPath(&entryPath))
+		graffiti.Println("%12s  %s  %s  %9s  %s%s", owner, size, permissions, kind, name, stringifySymlinkOriginPath(&entryPath))
 	}
 	graffiti.Println("")
 	graffiti.Println("Path: %s.", graffiti.EscapePrefixCharacters(*directoryPath))
