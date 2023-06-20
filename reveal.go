@@ -10,6 +10,7 @@ import (
 )
 
 func printManual() {
+	defer os.Exit(0)
 	graffiti.Println("@F{magenta}Reveal - Manual")
 	graffiti.Println("")
 	graffiti.Println("@F{magenta}Starting Point")
@@ -27,8 +28,8 @@ func printManual() {
 	graffiti.Println("    reveal \"file with spaces.txt\"")
 	graffiti.Println("")
 	graffiti.Println("    @F{magenta}Revealing A Directory")
-	graffiti.Println("        When revealing a directory, Reveal will always give you the following")
-	graffiti.Println("        data about its entries:")
+	graffiti.Println("        When revealing a directory, Reveal will give you the following data")
+	graffiti.Println("        about its entries:")
 	graffiti.Println("            * Size:")
 	graffiti.Println("              The size of the entry using the byte unit. It will use the most")
 	graffiti.Println("              formidable multiplier prefix.")
@@ -61,7 +62,7 @@ func printManual() {
 	graffiti.Println("")
 	graffiti.Println("              If a bit is not set, none of these characters will be used.")
 	graffiti.Println("")
-	graffiti.Println("              It also contains the octal sum of the those bits inside parenthesis.")
+	graffiti.Println("              It also contains the octal sum of those bits inside parenthesis.")
 	graffiti.Println("")
 	graffiti.Println("            * Owner (Unix only):")
 	graffiti.Println("              The name of the owner that owns that entry.")
@@ -74,7 +75,7 @@ func printManual() {
 	graffiti.Println("        In the end of the output, it will tell how many lines were printed.")
 	graffiti.Println("")
 	graffiti.Println("        Revealing large files can take some time. If you want to interrupt a reading,")
-	graffiti.Println("        send an SIGINT signal to your shell by using the keys sequence: [Ctrl] + [c].")
+	graffiti.Println("        send a SIGINT signal to your shell by using the keys sequence: [Ctrl] + [c].")
 	graffiti.Println("")
 	graffiti.Println("@F{magenta}Source Code")
 	graffiti.Println("    Reveal's source code can be found at:")
@@ -85,7 +86,6 @@ func printManual() {
 	graffiti.Println("    This project is released under the terms of the MIT license.")
 	graffiti.Println("")
 	graffiti.Println("    Copyright (c) 2023, Sherman Rofeman. MIT License.")
-	os.Exit(0)
 }
 
 func main() {

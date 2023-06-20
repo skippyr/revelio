@@ -8,6 +8,7 @@ import (
 
 func ThrowError(description string, suggestion string) {
 	exitCode := 1
+	defer os.Exit(exitCode)
 	graffiti.Eprintln("@F{magenta}Reveal - Error Report")
 	graffiti.Eprintln("")
 	graffiti.Eprintln("@F{magenta}Description")
@@ -30,5 +31,4 @@ func ThrowError(description string, suggestion string) {
 	graffiti.Eprintln("    And the Reveal's developer will help you whenever possible.")
 	graffiti.Eprintln("")
 	graffiti.Eprintln("Program exited with exit code %d.", exitCode)
-	os.Exit(exitCode)
 }
