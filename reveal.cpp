@@ -136,7 +136,14 @@ void reveal_size(struct stat &stats)
 
 void reveal_modified_date(struct stat &stats)
 {
-    std::cout << ctime(&stats.st_mtime);
+    char d[29];
+    if (strftime(d, sizeof(d), "%a %b %d %T %Z %Y",
+                 localtime(&stats.st_mtime)) == 0)
+    {
+        print_error("overflowed buffer to stored date.");
+        return;
+    }
+    std::cout << d << std::endl;
 }
 
 void reveal_file(const char *path)
