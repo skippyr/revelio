@@ -61,8 +61,9 @@ void print_help()
         << std::endl
         << std::endl
         << "ISSUES AND CONTRIBUTIONS" << std::endl
-        << "Report issues find in the program at:" << std::endl
+        << "Report issues found in the program at:" << std::endl
         << "  https://github.com/skippyr/reveal/issues" << std::endl
+        << std::endl
         << "Learn how to contribute to this software by visiting its "
            "source code page at:"
         << std::endl
@@ -140,7 +141,7 @@ void reveal_modified_date(struct stat &stats)
     if (strftime(d, sizeof(d), "%a %b %d %T %Z %Y",
                  localtime(&stats.st_mtime)) == 0)
     {
-        print_error("overflowed buffer to stored date.");
+        print_error("overflowed buffer to store date.");
         return;
     }
     std::cout << d << std::endl;

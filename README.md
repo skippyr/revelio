@@ -47,26 +47,27 @@ reveal --help
 ### Examples
 
 Reveal's output is very simple, but that is the perfect format for you to extend
-it by using other commands available in your system. What about using a scripting
-language such as Shell scripting?
+it by using other commands available in your system. Like this, there is no
+limit of what you can do.
 
-Here are some cool examples for you to try it out:
+Here are some cool examples for you to try it out in your Shell:
 
--   List the contents of directories alphabetically.
+-   This function list the contents of directories alphabetically, similar to
+    the `ls -A` command.
 
 ```bash
 function reveal-ls {
   typeset IFS=$'\n'
   typeset paths=($@)
   [[ ${#paths[@]} -eq 0 ]] &&
-    paths+=(".")
+    paths+=(.)
   for p in ${paths[@]}; do
     if [[ ! -d $p ]]; then
-      echo "$0: \"$p\" is not a directory."
+      echo -e "$0: \"$p\" is not a directory.\n"
       continue
     fi
     echo $p:
-    for e in $(reveal $p); do
+    for e in $(reveal $p | sort); do
       echo "  ${e##*/}"
     done
     echo
