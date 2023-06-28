@@ -5,6 +5,7 @@
 #include <pwd.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <time.h>
 
 #define PROGRAM_NAME "reveal"
 #define PROGRAM_VERSION "3.0.0"
@@ -19,6 +20,7 @@ enum Mode
     Group,
     Size,
     Permissions,
+    ModifiedDate,
     Contents,
 };
 
@@ -35,9 +37,9 @@ void print_help()
         << std::endl
         << "MODE FLAGS" << std::endl
         << "These flags changes the mode the program will use when "
-           "revealing an entry."
+           "revealing an entry. All"
         << std::endl
-        << "All arguments placed after that flag will be affected by it."
+        << "arguments placed after that flag will be affected by it."
         << std::endl
         << std::endl
         << "  --contents (default)  reveals the contents of the entry."
@@ -53,6 +55,9 @@ void print_help()
            "entry."
         << std::endl
         << "  --permissions         reveals the permissions octal of the entry."
+        << std::endl
+        << "  --modified-date       reveals the date of the last modification "
+           "of the entry."
         << std::endl
         << std::endl
         << "ISSUES AND CONTRIBUTIONS" << std::endl
@@ -129,6 +134,11 @@ void reveal_size(struct stat &stats)
     std::cout << stats.st_size << std::endl;
 }
 
+void reveal_modified_date(struct stat &stats)
+{
+    std::cout << ctime(&stats.st_mtime);
+}
+
 void reveal_file(const char *path)
 {
     FILE *file = fopen(path, "r");
@@ -174,7 +184,7 @@ void reveal(const char *path, Mode &mode)
         print_error("the path \"" + std::string(path) + "\" does not exists.");
         return;
     }
-    char abs_path[PATH_MAX + 1];
+    char abs_path[PATH_MAX];
     if (!realpath(path, abs_path))
     {
         print_error("could not resolve absolute path of \"" +
@@ -200,6 +210,9 @@ void reveal(const char *path, Mode &mode)
         break;
     case Mode::Permissions:
         reveal_permissions(stats);
+        break;
+    case Mode::ModifiedDate:
+        reveal_modified_date(stats);
         break;
     case Mode::Contents:
         if S_ISREG (stats.st_mode)
@@ -248,6 +261,7 @@ int main(int argc, char **argv)
     flagModes["--contents"] = Mode::Contents;
     flagModes["--size"] = Mode::Size;
     flagModes["--permissions"] = Mode::Permissions;
+    flagModes["--modified-date"] = Mode::ModifiedDate;
 
     for (int i = 1; i < argc; i++)
     {
