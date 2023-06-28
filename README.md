@@ -13,11 +13,13 @@ previous versions by visiting the [releases page](https://github.com/skippyr/rev
 
 ## Usage
 
+### First Steps
+
 Reveal expects the paths of entries of your file system. For example: you can
-make it reveal the contents of your current and home directories:
+make it reveal the contents of your current directory:
 
 ```bash
-reveal . ~
+reveal .
 ```
 
 You can change the mode Reveal is operating by using flags. By default, Reveal
@@ -28,13 +30,21 @@ know the size of a file: for that use the `--size` flag.
 reveal --size foo.txt
 ```
 
-You can also request for multiple types of data at once: this one will print
-the contents and size of a file, the permissions of `/` and the contents of the
-directory `/usr/bin`.
+You can also request for multiple types of data of multiple entries at once:
+this one will print the contents and size of a file, the permissions of `/` and
+the contents of the directory `/usr/bin`.
 
 ```bash
 reveal foo.txt --size foo.txt --permissions / --contents /
 ```
+
+For a full list of flags that you can use, check out its help:
+
+```bash
+reveal --help
+```
+
+### Examples
 
 Reveal's output is very simple, but that is the perfect format for you to extend
 it by using other commands available in your system. What about using a scripting
