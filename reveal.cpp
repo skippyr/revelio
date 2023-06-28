@@ -24,7 +24,18 @@ void reveal_owner_uid(struct stat &stats)
 
 void reveal_file(const char *path)
 {
-    std::cout << "Revealing default" << std::endl;
+    FILE *file = fopen(path, "r");
+    if (!file)
+    {
+        print_error("could not open file \"" + std::string(path) + "\".");
+        return;
+    }
+    char c;
+    while ((c = fgetc(file)) != EOF)
+    {
+        std::cout << c;
+    }
+    fclose(file);
 }
 
 void reveal_directory(const char *path)
@@ -37,8 +48,8 @@ void reveal_directory(const char *path)
         {
             continue;
         }
-        const char *separator = !strcmp(path, "/") ? "" : "/";
-        std::cout << path << separator << entry->d_name << std::endl;
+        const char *s = !strcmp(path, "/") ? "" : "/";
+        std::cout << path << s << entry->d_name << std::endl;
     }
     closedir(directory);
 }
