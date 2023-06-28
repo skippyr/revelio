@@ -16,40 +16,41 @@ enum Mode
     Owner,
     Size,
     Read,
+    Permissions,
 };
 
 void print_help()
 {
-    std::cout << "Usage: " << PROGRAM_NAME << " [FLAGS]... [PATHS]" << std::endl
-              << "Reveals information about entries in the file system."
-              << std::endl
-              << std::endl
-              << "META FLAGS" << std::endl
-              << "  --help     prints these help instructions." << std::endl
-              << "  --version  prints the version of the program." << std::endl
-              << "  --license  prints the license of the program." << std::endl
-              << std::endl
-              << "MODE FLAGS" << std::endl
-              << "These flags changes the mode the program will use when "
-                 "revealing an entry."
-              << std::endl
-              << "All arguments placed after that flag will be affected by it."
-              << std::endl
-              << std::endl
-              << "  --read (default)  reveals the contents of the entry."
-              << std::endl
-              << "  --owner           reveals the owner of the entry."
-              << std::endl
-              << "  --owner-uid       reveals the owner UID of the entry."
-              << std::endl
-              << std::endl
-              << "ISSUES AND CONTRIBUTIONS" << std::endl
-              << "Report issues find in the program at:" << std::endl
-              << "  https://github.com/skippyr/reveal/issues" << std::endl
-              << "Learn how to contribute to this software by visiting its "
-                 "source code page at:"
-              << std::endl
-              << "  https://github.com/skippyr/reveal" << std::endl;
+    std::cout
+        << "Usage: " << PROGRAM_NAME << " [FLAGS]... [PATHS]" << std::endl
+        << "Reveals information about entries in the file system." << std::endl
+        << std::endl
+        << "META FLAGS" << std::endl
+        << "  --help     prints these help instructions." << std::endl
+        << "  --version  prints the version of the program." << std::endl
+        << "  --license  prints the license of the program." << std::endl
+        << std::endl
+        << "MODE FLAGS" << std::endl
+        << "These flags changes the mode the program will use when "
+           "revealing an entry."
+        << std::endl
+        << "All arguments placed after that flag will be affected by it."
+        << std::endl
+        << std::endl
+        << "  --read (default)  reveals the contents of the entry." << std::endl
+        << "  --owner           reveals the owner of the entry." << std::endl
+        << "  --owner-uid       reveals the owner UID of the entry."
+        << std::endl
+        << "  --permissions     reveals the permissions octal of the entry."
+        << std::endl
+        << std::endl
+        << "ISSUES AND CONTRIBUTIONS" << std::endl
+        << "Report issues find in the program at:" << std::endl
+        << "  https://github.com/skippyr/reveal/issues" << std::endl
+        << "Learn how to contribute to this software by visiting its "
+           "source code page at:"
+        << std::endl
+        << "  https://github.com/skippyr/reveal" << std::endl;
     exit(0);
 }
 
@@ -84,6 +85,16 @@ void reveal_owner(const char *path, struct stat &stats)
         return;
     }
     std::cout << pw->pw_name << std::endl;
+}
+
+void reveal_permissions(struct stat &stats)
+{
+    unsigned int permissions =
+        stats.st_mode & (S_IRUSR | S_IWUSR | S_IXUSR | // User
+                         S_IRGRP | S_IWGRP | S_IXGRP | // Group
+                         S_IROTH | S_IWOTH | S_IXOTH   // Others
+                        );
+    std::cout << std::oct << permissions << std::endl;
 }
 
 void reveal_size(struct stat &stats)
@@ -149,6 +160,9 @@ void reveal(const char *path, Mode &mode)
     case Mode::Size:
         reveal_size(stats);
         break;
+    case Mode::Permissions:
+        reveal_permissions(stats);
+        break;
     case Mode::Read:
         if S_ISREG (stats.st_mode)
         {
@@ -193,6 +207,7 @@ int main(int argc, char **argv)
     flagModes["--read"] = Mode::Read;
     flagModes["--owner"] = Mode::Owner;
     flagModes["--size"] = Mode::Size;
+    flagModes["--permissions"] = Mode::Permissions;
 
     for (int i = 1; i < argc; i++)
     {
