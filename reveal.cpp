@@ -1,6 +1,7 @@
 #include <dirent.h>
 #include <iostream>
 #include <map>
+#include <pwd.h>
 #include <string.h>
 #include <sys/stat.h>
 
@@ -9,6 +10,7 @@ enum ProcessingOption
     Unknown,
     Read,
     OwnerUid,
+    Owner,
 };
 
 void print_error(std::string description)
@@ -18,8 +20,18 @@ void print_error(std::string description)
 
 void reveal_owner_uid(struct stat &stats)
 {
-    std::cout << "Revealing owner uid" << std::endl;
     std::cout << stats.st_uid << std::endl;
+}
+
+void reveal_owner(const char *path, struct stat &stats)
+{
+    struct passwd *pw = getpwuid(stats.st_uid);
+    if (!pw)
+    {
+        print_error("could not get owner of \"" + std::string(path) + "\".");
+        return;
+    }
+    std::cout << pw->pw_name << std::endl;
 }
 
 void reveal_file(const char *path)
@@ -62,19 +74,22 @@ void reveal(const char *path, ProcessingOption &option)
         print_error("the path \"" + std::string(path) + "\" does not exists.");
         return;
     }
+    char abs_path[PATH_MAX + 1];
+    if (!realpath(path, abs_path))
+    {
+        print_error("could not resolve absolute path of \"" +
+                    std::string(path) + "\".");
+        return;
+    }
     switch (option)
     {
     case ProcessingOption::OwnerUid:
         reveal_owner_uid(stats);
         break;
+    case ProcessingOption::Owner:
+        reveal_owner(abs_path, stats);
+        break;
     case ProcessingOption::Read:
-        char abs_path[PATH_MAX + 1];
-        if (!realpath(path, abs_path))
-        {
-            print_error("could not resolve absolute path of \"" +
-                        std::string(path) + "\".");
-            return;
-        }
         if S_ISREG (stats.st_mode)
         {
             reveal_file(abs_path);
@@ -99,6 +114,7 @@ int main(int argc, char **argv)
     std::map<std::string, ProcessingOption> flagOptions;
     flagOptions["--owner-uid"] = ProcessingOption::OwnerUid;
     flagOptions["--read"] = ProcessingOption::Read;
+    flagOptions["--owner"] = ProcessingOption::Owner;
 
     for (int i = 1; i < argc; i++)
     {
