@@ -1,4 +1,5 @@
 #include <dirent.h>
+#include <grp.h>
 #include <iostream>
 #include <map>
 #include <pwd.h>
@@ -14,6 +15,8 @@ enum Mode
     Unknown,
     OwnerUid,
     Owner,
+    GroupUid,
+    Group,
     Size,
     Permissions,
     Contents,
@@ -39,9 +42,15 @@ void print_help()
         << std::endl
         << "  --contents (default)  reveals the contents of the entry."
         << std::endl
-        << "  --owner               reveals the owner of the entry."
+        << "  --owner               reveals the user that owns the entry."
         << std::endl
-        << "  --owner-uid           reveals the owner UID of the entry."
+        << "  --owner-uid           reveals the UID of the user that owns the "
+           "entry."
+        << std::endl
+        << "  --group               reveals the group that owns the entry."
+        << std::endl
+        << "  --group-uid           reveals the UID of the group that owns the "
+           "entry."
         << std::endl
         << "  --permissions         reveals the permissions octal of the entry."
         << std::endl
@@ -87,6 +96,22 @@ void reveal_owner(const char *path, struct stat &stats)
         return;
     }
     std::cout << pw->pw_name << std::endl;
+}
+
+void reveal_group_uid(struct stat &stats)
+{
+    std::cout << stats.st_gid << std::endl;
+}
+
+void reveal_group(const char *path, struct stat &stats)
+{
+    struct group *g = getgrgid(stats.st_gid);
+    if (!g)
+    {
+        print_error("could not get group of \"" + std::string(path) + "\".");
+        return;
+    }
+    std::cout << g->gr_name << std::endl;
 }
 
 void reveal_permissions(struct stat &stats)
@@ -164,6 +189,12 @@ void reveal(const char *path, Mode &mode)
     case Mode::Owner:
         reveal_owner(abs_path, stats);
         break;
+    case Mode::GroupUid:
+        reveal_group_uid(stats);
+        break;
+    case Mode::Group:
+        reveal_group(path, stats);
+        break;
     case Mode::Size:
         reveal_size(stats);
         break;
@@ -211,8 +242,10 @@ int main(int argc, char **argv)
     Mode mode = Mode::Contents;
     std::map<std::string, Mode> flagModes;
     flagModes["--owner-uid"] = Mode::OwnerUid;
-    flagModes["--contents"] = Mode::Contents;
     flagModes["--owner"] = Mode::Owner;
+    flagModes["--group-uid"] = Mode::GroupUid;
+    flagModes["--group"] = Mode::Group;
+    flagModes["--contents"] = Mode::Contents;
     flagModes["--size"] = Mode::Size;
     flagModes["--permissions"] = Mode::Permissions;
 
