@@ -5,17 +5,69 @@
 #include <string.h>
 #include <sys/stat.h>
 
-enum ProcessingOption
+#define PROGRAM_NAME "reveal"
+#define PROGRAM_VERSION "3.0.0"
+#define PROGRAM_LICENSE "Copyright (c) 2023, Sherman Rofeman. MIT license."
+
+enum Mode
 {
     Unknown,
-    Read,
     OwnerUid,
     Owner,
+    Size,
+    Read,
 };
+
+void print_help()
+{
+    std::cout << "Usage: " << PROGRAM_NAME << " [FLAGS]... [PATHS]" << std::endl
+              << "Reveals information about entries in the file system."
+              << std::endl
+              << std::endl
+              << "META FLAGS" << std::endl
+              << "  --help     prints these help instructions." << std::endl
+              << "  --version  prints the version of the program." << std::endl
+              << "  --license  prints the license of the program." << std::endl
+              << std::endl
+              << "MODE FLAGS" << std::endl
+              << "These flags changes the mode the program will use when "
+                 "revealing an entry."
+              << std::endl
+              << "All arguments placed after that flag will be affected by it."
+              << std::endl
+              << std::endl
+              << "  --read (default)  reveals the contents of the entry."
+              << std::endl
+              << "  --owner           reveals the owner of the entry."
+              << std::endl
+              << "  --owner-uid       reveals the owner UID of the entry."
+              << std::endl
+              << std::endl
+              << "ISSUES AND CONTRIBUTIONS" << std::endl
+              << "Report issues find in the program at:" << std::endl
+              << "  https://github.com/skippyr/reveal/issues" << std::endl
+              << "Learn how to contribute to this software by visiting its "
+                 "source code page at:"
+              << std::endl
+              << "  https://github.com/skippyr/reveal" << std::endl;
+    exit(0);
+}
+
+void print_version()
+{
+    std::cout << PROGRAM_VERSION << std::endl;
+    exit(0);
+}
+
+void print_license()
+{
+    std::cout << PROGRAM_LICENSE << std::endl;
+    exit(0);
+}
 
 void print_error(std::string description)
 {
-    std::cerr << "reveal: " << description << std::endl;
+    std::cerr << PROGRAM_NAME << ": " << description << std::endl;
 }
 
 void reveal_owner_uid(struct stat &stats)
@@ -32,6 +84,11 @@ void reveal_owner(const char *path, struct stat &stats)
         return;
     }
     std::cout << pw->pw_name << std::endl;
+}
+
+void reveal_size(struct stat &stats)
+{
+    std::cout << stats.st_size << std::endl;
 }
 
 void reveal_file(const char *path)
@@ -66,7 +123,7 @@ void reveal_directory(const char *path)
     closedir(directory);
 }
 
-void reveal(const char *path, ProcessingOption &option)
+void reveal(const char *path, Mode &mode)
 {
     struct stat stats;
     if (stat(path, &stats) != 0)
@@ -81,15 +138,18 @@ void reveal(const char *path, ProcessingOption &option)
                     std::string(path) + "\".");
         return;
     }
-    switch (option)
+    switch (mode)
     {
-    case ProcessingOption::OwnerUid:
+    case Mode::OwnerUid:
         reveal_owner_uid(stats);
         break;
-    case ProcessingOption::Owner:
+    case Mode::Owner:
         reveal_owner(abs_path, stats);
         break;
-    case ProcessingOption::Read:
+    case Mode::Size:
+        reveal_size(stats);
+        break;
+    case Mode::Read:
         if S_ISREG (stats.st_mode)
         {
             reveal_file(abs_path);
@@ -110,21 +170,39 @@ void reveal(const char *path, ProcessingOption &option)
 
 int main(int argc, char **argv)
 {
-    ProcessingOption option = Read;
-    std::map<std::string, ProcessingOption> flagOptions;
-    flagOptions["--owner-uid"] = ProcessingOption::OwnerUid;
-    flagOptions["--read"] = ProcessingOption::Read;
-    flagOptions["--owner"] = ProcessingOption::Owner;
+    for (int i = 1; i < argc; i++)
+    {
+        char *arg = argv[i];
+        if (!strcmp(arg, "--help"))
+        {
+            print_help();
+        }
+        else if (!strcmp(arg, "--version"))
+        {
+            print_version();
+        }
+        else if (!strcmp(arg, "--license"))
+        {
+            print_license();
+        }
+    }
+
+    Mode mode = Read;
+    std::map<std::string, Mode> flagModes;
+    flagModes["--owner-uid"] = Mode::OwnerUid;
+    flagModes["--read"] = Mode::Read;
+    flagModes["--owner"] = Mode::Owner;
+    flagModes["--size"] = Mode::Size;
 
     for (int i = 1; i < argc; i++)
     {
         char *arg = argv[i];
-        ProcessingOption &flagOption = flagOptions[arg];
-        if (flagOption != ProcessingOption::Unknown)
+        Mode &flagMode = flagModes[arg];
+        if (flagMode != Mode::Unknown)
         {
-            option = flagOption;
+            mode = flagMode;
             continue;
         }
-        reveal(arg, option);
+        reveal(arg, mode);
     }
 }
