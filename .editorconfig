@@ -1,0 +1,12 @@
+root = true
+
+[*]
+charset = utf-8
+trim_trailing_whitespace = true
+
+[*.{cpp,md}]
+indent_size = 4
+indent_style = space
+
+[Makefile]
+indent_style = tab

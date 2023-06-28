@@ -15,8 +15,8 @@ enum Mode
     OwnerUid,
     Owner,
     Size,
-    Read,
     Permissions,
+    Contents,
 };
 
 void print_help()
@@ -37,11 +37,13 @@ void print_help()
         << "All arguments placed after that flag will be affected by it."
         << std::endl
         << std::endl
-        << "  --read (default)  reveals the contents of the entry." << std::endl
-        << "  --owner           reveals the owner of the entry." << std::endl
-        << "  --owner-uid       reveals the owner UID of the entry."
+        << "  --contents (default)  reveals the contents of the entry."
         << std::endl
-        << "  --permissions     reveals the permissions octal of the entry."
+        << "  --owner               reveals the owner of the entry."
+        << std::endl
+        << "  --owner-uid           reveals the owner UID of the entry."
+        << std::endl
+        << "  --permissions         reveals the permissions octal of the entry."
         << std::endl
         << std::endl
         << "ISSUES AND CONTRIBUTIONS" << std::endl
@@ -121,6 +123,11 @@ void reveal_file(const char *path)
 void reveal_directory(const char *path)
 {
     DIR *directory = opendir(path);
+    if (!directory)
+    {
+        print_error("could not open directory \"" + std::string(path) + "\".");
+        return;
+    }
     struct dirent *entry;
     while ((entry = readdir(directory)))
     {
@@ -163,7 +170,7 @@ void reveal(const char *path, Mode &mode)
     case Mode::Permissions:
         reveal_permissions(stats);
         break;
-    case Mode::Read:
+    case Mode::Contents:
         if S_ISREG (stats.st_mode)
         {
             reveal_file(abs_path);
@@ -201,10 +208,10 @@ int main(int argc, char **argv)
         }
     }
 
-    Mode mode = Read;
+    Mode mode = Mode::Contents;
     std::map<std::string, Mode> flagModes;
     flagModes["--owner-uid"] = Mode::OwnerUid;
-    flagModes["--read"] = Mode::Read;
+    flagModes["--contents"] = Mode::Contents;
     flagModes["--owner"] = Mode::Owner;
     flagModes["--size"] = Mode::Size;
     flagModes["--permissions"] = Mode::Permissions;
