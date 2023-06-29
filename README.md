@@ -8,10 +8,46 @@ perfectly with scripting tools, such as Shell scripting.
 
 ![](images/preview.gif)
 
+## Dependencies
+
+You need to install the following dependencies before installing it:
+
+-   `git`.
+
+    This is the terminal utility tool that will be used to download the
+    source code.
+
+-   `clang` and `make`.
+
+    These are the terminal utility tool that will be used to compile the source
+    code.
+
 ## Installation
 
-This version is not available for production yet, but you can still install
-previous versions by visiting the [releases page](https://github.com/skippyr/reveal/releases).
+-   Clone this repository.
+
+```bash
+git clone --depth=1 https://github.com/skippyr/reveal
+```
+
+-   Access the repository's directory.
+
+```bash
+cd reveal
+```
+
+-   Use `make` to compile the source code.
+
+```bash
+make
+```
+
+-   Add the binary `reveal` created in a directory tracked in your system's
+    `${PATH}` variable.
+
+-   Reopen your terminal emulator.
+
+After doing these steps, the program should now be installed.
 
 ## Usage
 
@@ -38,7 +74,7 @@ the contents of the directory `/usr/bin`.
 reveal foo.txt --size foo.txt --permissions / --contents /
 ```
 
-For a full list of flags that you can use, check out its help:
+For a full list of flags that you can use, check out its help page:
 
 ```bash
 reveal --help
@@ -94,4 +130,5 @@ Learn how to report issues and contribute to this project by reading its
 This project is released under the terms of the MIT license. A copy of the
 license is bundled with the source code.
 
+Copyright (c) 2023, Sherman Rofeman. MIT license.
 Copyright (c) 2023, Sherman Rofeman. MIT license.

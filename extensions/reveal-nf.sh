@@ -10,7 +10,7 @@
 function reveal-nf {
   typeset IFS=$'\n'
   typeset -rA name_icons=(
-    # You can add new icons here to be used based on name of files.
+    # You can add new icons here to be used based on files' names.
     ".clang-format" " "
     ".editorconfig" " "
     ".gitignore"    " "
