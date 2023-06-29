@@ -1,7 +1,7 @@
 # Reveals directories entries alphabetically and recursively using a tree view
-# format. It is similar to the `tree` command.
+# format.
 #
-# It will use the first argument given or, if no argument is given, it will
+# It will consider the first argument given or, if no argument is given, it will
 # consider the current directory.
 function reveal-tree {
   typeset IFS=$'\n'
@@ -16,13 +16,15 @@ function reveal-tree {
     typeset path_="$1"
     typeset depth="$2"
     for entry in $(reveal "${path_}" | sort); do
-      printf "│  %.0s" {0..${depth}}
+      [[ ${depth} -gt 0 ]] &&
+        printf "│  %.0s" {1..${depth}}
       printf "├──"
       echo ${entry##*/}
       [[ -d "${entry}" ]] &&
         $0 "${entry}" $((${depth} + 1))
     done
   }
+  echo "${path_}"
   tree-view "${path_}" 0
   unset -f tree-view
 }

@@ -57,10 +57,10 @@ directory.
 
 Check out, these example:
 
--   The `reveal-icons` extension adds Nerd Font icons when revealing
+-   The `reveal-nf` extension adds Nerd Font icons when revealing
     directories:
 
-![](images/preview_reveal_icons.gif)
+![](images/preview_reveal_nf.gif)
 
 -   The `reveal-tree` extension adds tree view format when revealing a
     directory.
