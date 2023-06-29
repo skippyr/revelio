@@ -6,6 +6,8 @@ The Reveal project is terminal utility for Unix-like operating systems that
 reveals information about entries in the file system. It was designed to work
 perfectly with scripting tools, such as Shell scripting.
 
+![](images/preview.gif)
+
 ## Installation
 
 This version is not available for production yet, but you can still install
@@ -48,12 +50,29 @@ Reveal's output is very simple, but that is the perfect format for you to extend
 it by using other commands available in your system. Like this, there is no
 limit of what you can do.
 
-If you are using a POSIX-complient shell, you can use some extensions I have
-made for Reveal under the `extensions` directory. To use them, you just have to
-source them and start using the functions they supply. You can read the comment
-before each of them to see what they do.
+If you are using a POSIX-compliant shell such as Bash or ZSH you can take
+advantage of some scripts I have made to extend Reveal's capabilities: such
+as to enable tree view and to use Nerd Font icons when revealing directories.
+Those are called "extensions" and you can find them under the `extensions`
+directory.
 
-Each function will add new functionalities for Reveal.
+Check out, for example, the `reveal-icons` extension that adds Nerd Font icons
+when revealing directories:
+
+![](images/preview_extensions.gif)
+
+To use them, simple use a source command, for example:
+
+```bash
+source extensions/<EXTENSION>
+```
+
+Where `<EXTENSION>` must be replaced by the name of an extension file. Each
+extension file will add a new function to your shell section that you can
+use just like any other command. Read the extension file to understand what
+each of them do.
+
+As expected, Reveal allows you also create and share your own extensions.
 
 ## Issues And Contributions
 
