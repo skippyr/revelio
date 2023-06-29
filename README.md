@@ -84,7 +84,8 @@ function reveal-tree {
   typeset IFS=$'\n'
   function t {
     for e in $(reveal $1); do
-      printf "  %.0s" {0..$2}
+      printf "│  %.0s" {0..$2}
+      printf "├──"
       echo ${e##*/}
       [[ -d $e ]] &&
         t $e $(($2 + 1))
