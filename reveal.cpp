@@ -57,8 +57,8 @@ void print_help()
         << std::endl
         << "  --permissions         reveals the permissions octal of the entry."
         << std::endl
-        << "  --modified-date       reveals the date of the last modification "
-           "of the entry."
+        << "  --modified-date       reveals the date when the entry was last "
+           "modified."
         << std::endl
         << std::endl
         << "ISSUES AND CONTRIBUTIONS" << std::endl
