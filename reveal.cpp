@@ -27,7 +27,7 @@ enum Mode
 void print_help()
 {
     std::cout
-        << "Usage: " << PROGRAM_NAME << " [FLAGS]... [PATHS]" << std::endl
+        << "Usage: " << PROGRAM_NAME << " [FLAGS]... [PATHS]..." << std::endl
         << "Reveals information about entries in the file system." << std::endl
         << std::endl
         << "META FLAGS" << std::endl

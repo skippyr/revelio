@@ -23,7 +23,7 @@ reveal .
 ```
 
 You can change the mode Reveal is operating by using flags. By default, Reveal
-reveals the contents of the entries, but let's say, for example: you want to
+reveals the contents of the entries, but let's say, for example, you want to
 know the size of a file: for that use the `--size` flag.
 
 ```bash
@@ -50,7 +50,8 @@ Reveal's output is very simple, but that is the perfect format for you to extend
 it by using other commands available in your system. Like this, there is no
 limit of what you can do.
 
-Here are some cool examples for you to try it out in your Shell:
+Here are some cool examples for you to try it out in a POSIX-complient shell,
+such as Bash or ZSH:
 
 -   This function list the contents of directories alphabetically, similar to
     the `ls -A` command.
@@ -72,6 +73,25 @@ function reveal-ls {
     done
     echo
   done | fmt
+}
+```
+
+-   Reveals directories recursively starting from the current directory, similar
+    to the `tree` command.
+
+```bash
+function reveal-tree {
+  typeset IFS=$'\n'
+  function t {
+    for e in $(reveal $1); do
+      printf "  %.0s" {0..$2}
+      echo ${e##*/}
+      [[ -d $e ]] &&
+        t $e $(($2 + 1))
+    done
+  }
+  t . 0
+  unset -f t
 }
 ```
 
