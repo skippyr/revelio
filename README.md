@@ -58,20 +58,39 @@ such as Bash or ZSH:
 
 ```bash
 function reveal-ls {
+  # Temporarily change the internal field separator as paths to disconsider
+  # spaces in paths' names.
   typeset IFS=$'\n'
+
+  # Collect all the paths given as parameters.
   typeset paths=($@)
+
+  # If no path is given, consider the current directory.
   [[ ${#paths[@]} -eq 0 ]] &&
-    paths+=(.)
-  for p in ${paths[@]}; do
-    if [[ ! -d "$p" ]]; then
-      echo -e "$0: \"$p\" is not a directory.\n"
+    paths+=(".")
+
+  #
+  for path_ in ${paths[@]}; do
+    # Checks if the path given is a directory, and prints an error if it is
+    # not.
+    if [[ ! -d "${path_}" ]]; then
+      echo -e "$0: \"${path_}\" is not a directory.\n"
       continue
     fi
-    echo "$p:"
-    for e in $(reveal "$p" | sort); do
-      echo "  ${e##*/}"
+
+    # Prints a title to help visualize the contents.
+    echo "${path_}:"
+
+    # Loop through each entry of the directory and prints its base name.
+    # Use sort to order it alphabetically.
+    for entry in $(reveal "${path_}" | sort); do
+      echo "  ${entry##*/}"
     done
+
     echo
+
+    # In the end, pipe the output to fmt to format it and make it fit better
+    # in the screen.
   done | fmt
 }
 ```
@@ -86,9 +105,8 @@ function reveal-tree {
   typeset IFS=$'\n'
 
   # Create a function that will reveal each entry of a directory in a tree view.
-  function tree_view {
-    typeset path_="$1" # Take care to not replace ${path} as it is used by the
-                       # system.
+  function tree-view {
+    typeset path_="$1"
     typeset depth="$2"
 
     for entry in $(reveal "${path_}"); do
@@ -96,21 +114,21 @@ function reveal-tree {
       printf "│  %.0s" {0..${depth}}
       printf "├──"
 
-      # Prints the basename of the entry.
+      # Prints the base name of the entry.
       echo ${entry##*/}
 
       # If the entry is a directory, it starts a recursion by executing the
       # same function on it again.
       [[ -d "${entry}" ]] &&
-        tree_view "${entry}" $((${depth} + 1))
+        $0 "${entry}" $((${depth} + 1))
     done
   }
 
   # Runs the function in the current directory.
-  tree_view . 0
+  tree-view . 0
 
   # Unsets the function defined previously to avoid exposing it to the shell.
-  unset -f tree_view
+  unset -f tree-view
 }
 ```
 
