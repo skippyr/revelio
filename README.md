@@ -58,8 +58,8 @@ such as Bash or ZSH:
 
 ```bash
 function reveal-ls {
-  # Temporarily change the internal field separator as paths to disconsider
-  # spaces in paths' names.
+  # Temporarily change the internal field separator to disconsider spaces in
+  # paths' names.
   typeset IFS=$'\n'
 
   # Collect all the paths given as parameters.
@@ -69,7 +69,6 @@ function reveal-ls {
   [[ ${#paths[@]} -eq 0 ]] &&
     paths+=(".")
 
-  #
   for path_ in ${paths[@]}; do
     # Checks if the path given is a directory, and prints an error if it is
     # not.
@@ -100,8 +99,8 @@ function reveal-ls {
 
 ```bash
 function reveal-tree {
-  # Temporarily change the internal field separator as paths to disconsider
-  # spaces in paths' names.
+  # Temporarily change the internal field separator to disconsider spaces in
+  # paths' names.
   typeset IFS=$'\n'
 
   # Create a function that will reveal each entry of a directory in a tree view.
@@ -129,6 +128,71 @@ function reveal-tree {
 
   # Unsets the function defined previously to avoid exposing it to the shell.
   unset -f tree-view
+}
+```
+
+-   Now let's make something special, this function lists directories and prints
+    their entries with icons.
+
+```bash
+function reveal-icons {
+  typeset IFS=$'\n'
+  typeset paths=($@)
+
+  function get-icon {
+    typeset -r path_="$1"
+    typeset -r name="$2"
+    typeset -r extension="$3"
+
+    typeset -rA name_icons=(
+      ".clang-format" " "
+      ".editorconfig" " "
+    )
+    typeset -rA extension_icons=(
+      "zsh"  " "
+      "sh"   " "
+      "html" " "
+      "rb"   "󰴭 "
+      "js"   "󰌞 "
+      "java" "󰬷 "
+    )
+
+    typeset -r name_icon="${name_icons[${name}]}"
+
+    if [[ "${name_icon}" != "" ]]; then
+      echo "${name_icon}"
+      return
+    fi
+
+    typeset -r extension_icon="${extension_icons[${extension}]}"
+
+    if [[ "${extension_icon}" != "" ]]; then
+      echo "${extension_icon}"
+      return
+    fi
+
+    if [[ -d "${path_}" ]]; then
+      echo " "
+      return
+    fi
+
+    echo " "
+  }
+
+  [[ ${#paths[@]} -eq 0 ]] &&
+    paths+=(".")
+
+  for path_ in ${paths[@]}; do
+    echo "${path_}:"
+    for entry in $(reveal "${path_}" | sort); do
+      typeset name="${entry##*/}"
+      typeset extension="${entry##*.}"
+      typeset icon="$(get-icon "${entry}" "${name}" "${extension}")"
+      echo "  ${icon} ${name}"
+    done
+  done
+
+  unset -f get-icon
 }
 ```
 
