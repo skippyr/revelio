@@ -31,6 +31,7 @@ void print_help()
         << "Reveals information about entries in the file system." << std::endl
         << std::endl
         << "META FLAGS" << std::endl
+        << "These flags shows metadata about the program." << std::endl
         << "  --help     prints these help instructions." << std::endl
         << "  --version  prints the version of the program." << std::endl
         << "  --license  prints the license of the program." << std::endl
@@ -261,23 +262,23 @@ int main(int argc, char **argv)
     }
 
     Mode mode = Mode::Contents;
-    std::map<std::string, Mode> flagModes;
-    flagModes["--owner-uid"] = Mode::OwnerUid;
-    flagModes["--owner"] = Mode::Owner;
-    flagModes["--group-uid"] = Mode::GroupUid;
-    flagModes["--group"] = Mode::Group;
-    flagModes["--contents"] = Mode::Contents;
-    flagModes["--size"] = Mode::Size;
-    flagModes["--permissions"] = Mode::Permissions;
-    flagModes["--modified-date"] = Mode::ModifiedDate;
+    std::map<std::string, Mode> flag_modes;
+    flag_modes["--owner-uid"] = Mode::OwnerUid;
+    flag_modes["--owner"] = Mode::Owner;
+    flag_modes["--group-uid"] = Mode::GroupUid;
+    flag_modes["--group"] = Mode::Group;
+    flag_modes["--contents"] = Mode::Contents;
+    flag_modes["--size"] = Mode::Size;
+    flag_modes["--permissions"] = Mode::Permissions;
+    flag_modes["--modified-date"] = Mode::ModifiedDate;
 
     for (int i = 1; i < argc; i++)
     {
         char *arg = argv[i];
-        Mode &flagMode = flagModes[arg];
-        if (flagMode != Mode::Unknown)
+        Mode &flag_mode = flag_modes[arg];
+        if (flag_mode != Mode::Unknown)
         {
-            mode = flagMode;
+            mode = flag_mode;
             continue;
         }
         reveal(arg, mode);

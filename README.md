@@ -63,12 +63,12 @@ function reveal-ls {
   [[ ${#paths[@]} -eq 0 ]] &&
     paths+=(.)
   for p in ${paths[@]}; do
-    if [[ ! -d $p ]]; then
+    if [[ ! -d "$p" ]]; then
       echo -e "$0: \"$p\" is not a directory.\n"
       continue
     fi
-    echo $p:
-    for e in $(reveal $p | sort); do
+    echo "$p:"
+    for e in $(reveal "$p" | sort); do
       echo "  ${e##*/}"
     done
     echo
@@ -76,23 +76,41 @@ function reveal-ls {
 }
 ```
 
--   Reveals directories recursively starting from the current directory, similar
-    to the `tree` command.
+-   This function reveals directories recursively starting from the current
+    directory, similar to the `tree` command.
 
 ```bash
 function reveal-tree {
+  # Temporarily change the internal field separator as paths to disconsider
+  # spaces in paths' names.
   typeset IFS=$'\n'
-  function t {
-    for e in $(reveal $1); do
-      printf "│  %.0s" {0..$2}
+
+  # Create a function that will reveal each entry of a directory in a tree view.
+  function tree_view {
+    typeset path_="$1" # Take care to not replace ${path} as it is used by the
+                       # system.
+    typeset depth="$2"
+
+    for entry in $(reveal "${path_}"); do
+      # Prints some decoration to help visualize the contents.
+      printf "│  %.0s" {0..${depth}}
       printf "├──"
-      echo ${e##*/}
-      [[ -d $e ]] &&
-        t $e $(($2 + 1))
+
+      # Prints the basename of the entry.
+      echo ${entry##*/}
+
+      # If the entry is a directory, it starts a recursion by executing the
+      # same function on it again.
+      [[ -d "${entry}" ]] &&
+        tree_view "${entry}" $((${depth} + 1))
     done
   }
-  t . 0
-  unset -f t
+
+  # Runs the function in the current directory.
+  tree_view . 0
+
+  # Unsets the function defined previously to avoid exposing it to the shell.
+  unset -f tree_view
 }
 ```
 
