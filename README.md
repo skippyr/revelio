@@ -51,15 +51,25 @@ it by using other commands available in your system. Like this, there is no
 limit of what you can do.
 
 If you are using a POSIX-compliant shell such as Bash or ZSH you can take
-advantage of some scripts I have made to extend Reveal's capabilities: such
-as to enable tree view and to use Nerd Font icons when revealing directories.
+advantage of some scripts I have made to extend Reveal's capabilities.
 Those are called "extensions" and you can find them under the `extensions`
 directory.
 
-Check out, for example, the `reveal-icons` extension that adds Nerd Font icons
-when revealing directories:
+Check out, these example:
 
-![](images/preview_extensions.gif)
+-   The `reveal-icons` extension adds Nerd Font icons when revealing
+    directories:
+
+![](images/preview_reveal_icons.gif)
+
+-   The `reveal-tree` extension adds tree view format when revealing a
+    directory.
+
+![](images/preview_reveal_tree.gif)
+
+-   The `reveal-ls` extension adds back the format that `ls` uses by default.
+
+![](images/preview_reveal_ls.gif)
 
 To use them, simple use a source command, for example:
 

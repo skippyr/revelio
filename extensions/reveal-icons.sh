@@ -1,4 +1,9 @@
 # Reveals directories entries alphabetically with Nerd Font icons.
+#
+# Requires the use of font patched the Nerd Fonts project. You can download
+# one here:
+#
+# https://github.com/ryanoasis/nerd-fonts/releases
 function reveal-icons {
   typeset IFS=$'\n'
   typeset -rA name_icons=(
