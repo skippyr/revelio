@@ -48,11 +48,12 @@ Reveal's output is very simple, but that is the perfect format for you to extend
 it by using other commands available in your system. Like this, there is no
 limit of what you can do.
 
-If you are using a POSIX-complient shell, you use some extensions I have
-made using Reveal under the `extensions` directory.
+If you are using a POSIX-complient shell, you can use some extensions I have
+made for Reveal under the `extensions` directory. To use them, you just have to
+source them and start using the functions they supply. You can read the comment
+before each of them to see what they do.
 
-To use it, you just have to source them in your shell's startup file and start
-using the function they supply.
+Each function will add new functionalities for Reveal.
 
 ## Issues And Contributions
 
@@ -63,7 +64,5 @@ Learn how to report issues and contribute to this project by reading its
 
 This project is released under the terms of the MIT license. A copy of the
 license is bundled with the source code.
-
-Copyright (c) 2023, Sherman Rofeman. MIT license.
 
 Copyright (c) 2023, Sherman Rofeman. MIT license.
