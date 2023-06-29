@@ -13,8 +13,6 @@ previous versions by visiting the [releases page](https://github.com/skippyr/rev
 
 ## Usage
 
-### First Steps
-
 Reveal expects the paths of entries of your file system. For example: you can
 make it reveal the contents of your current directory:
 
@@ -44,177 +42,17 @@ For a full list of flags that you can use, check out its help:
 reveal --help
 ```
 
-### Examples
+## Extensions
 
 Reveal's output is very simple, but that is the perfect format for you to extend
 it by using other commands available in your system. Like this, there is no
 limit of what you can do.
 
-Here are some cool examples for you to try it out in a POSIX-complient shell,
-such as Bash or ZSH:
+If you are using a POSIX-complient shell, you use some extensions I have
+made using Reveal under the `extensions` directory.
 
--   This function list the contents of directories alphabetically, similar to
-    the `ls -A` command.
-
-```bash
-function reveal-ls {
-  # Temporarily change the internal field separator to disconsider spaces in
-  # paths' names.
-  typeset IFS=$'\n'
-
-  # Collect all the paths given as parameters.
-  typeset paths=($@)
-
-  # If no path is given, consider the current directory.
-  [[ ${#paths[@]} -eq 0 ]] &&
-    paths+=(".")
-
-  for path_ in ${paths[@]}; do
-    # Checks if the path given is a directory, and prints an error if it is
-    # not.
-    if [[ ! -d "${path_}" ]]; then
-      echo -e "$0: \"${path_}\" is not a directory.\n"
-      continue
-    fi
-
-    # Prints a title to help visualize the contents.
-    echo "${path_}:"
-
-    # Loop through each entry of the directory and prints its base name.
-    # Use sort to order it alphabetically.
-    for entry in $(reveal "${path_}" | sort); do
-      echo "  ${entry##*/}"
-    done
-
-    echo
-
-    # In the end, pipe the output to fmt to format it and make it fit better
-    # in the screen.
-  done | fmt
-}
-```
-
--   This function reveals directories recursively starting from the current
-    directory, similar to the `tree` command.
-
-```bash
-function reveal-tree {
-  # Temporarily change the internal field separator to disconsider spaces in
-  # paths' names.
-  typeset IFS=$'\n'
-
-  # Create a function that will reveal each entry of a directory in a tree view.
-  function tree-view {
-    typeset path_="$1"
-    typeset depth="$2"
-
-    for entry in $(reveal "${path_}"); do
-      # Prints some decoration to help visualize the contents.
-      printf "│  %.0s" {0..${depth}}
-      printf "├──"
-
-      # Prints the base name of the entry.
-      echo ${entry##*/}
-
-      # If the entry is a directory, it starts a recursion by executing the
-      # same function on it again.
-      [[ -d "${entry}" ]] &&
-        $0 "${entry}" $((${depth} + 1))
-    done
-  }
-
-  # Runs the function in the current directory.
-  tree-view . 0
-
-  # Unsets the function defined previously to avoid exposing it to the shell.
-  unset -f tree-view
-}
-```
-
--   Now let's make something special, this function lists directories and prints
-    their entries with icons.
-
-```bash
-function reveal-icons {
-  typeset IFS=$'\n'
-  typeset paths=($@)
-
-  function get-icon {
-    typeset -r path_="$1"
-    typeset -r name="$2"
-    typeset -r extension="$3"
-
-    typeset -rA name_icons=(
-      ".clang-format" " "
-      ".editorconfig" " "
-      "LICENSE"       " "
-      "Makefile"      " "
-    )
-    typeset -rA extension_icons=(
-      "zsh"       " "
-      "sh"        " "
-      "zsh-theme" "󰏘 "
-      "html"      " "
-      "xml"       "󰗀 "
-      "rb"        "󰴭 "
-      "js"        "󰌞 "
-      "java"      "󰬷 "
-      "cpp"       " "
-      "hpp"       " "
-      "c"         " "
-      "h"         " "
-      "cs"        " "
-      "rs"        " "
-      "md"        " "
-      "conf"      " "
-      "mk"        " "
-      "ttf"       " "
-      "otf"       " "
-      "ufo"       " "
-      "png"       "󰈟 "
-      "jpg"       "󰈟 "
-      "bmp"       "󰈟 "
-      "o"         " "
-    )
-
-    typeset -r name_icon="${name_icons[${name}]}"
-
-    if [[ "${name_icon}" != "" ]]; then
-      echo "${name_icon}"
-      return
-    fi
-
-    typeset -r extension_icon="${extension_icons[${extension}]}"
-
-    if [[ "${extension_icon}" != "" ]]; then
-      echo "${extension_icon}"
-      return
-    fi
-
-    if [[ -d "${path_}" ]]; then
-      echo " "
-      return
-    fi
-
-    echo " "
-  }
-
-  [[ ${#paths[@]} -eq 0 ]] &&
-    paths+=(".")
-
-  for path_ in ${paths[@]}; do
-    echo "${path_}:"
-    for entry in $(reveal "${path_}" | sort); do
-      typeset name="${entry##*/}"
-      typeset extension="${entry##*.}"
-      typeset icon="$(get-icon "${entry}" "${name}" "${extension}")"
-      echo "  ${icon} ${name}"
-    done
-  done
-
-  unset -f get-icon
-}
-```
+To use it, you just have to source them in your shell's startup file and start
+using the function they supply.
 
 ## Issues And Contributions
 
@@ -225,5 +63,7 @@ Learn how to report issues and contribute to this project by reading its
 
 This project is released under the terms of the MIT license. A copy of the
 license is bundled with the source code.
+
+Copyright (c) 2023, Sherman Rofeman. MIT license.
 
 Copyright (c) 2023, Sherman Rofeman. MIT license.
