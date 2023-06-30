@@ -8,7 +8,7 @@
 #include <time.h>
 
 #define PROGRAM_NAME "reveal"
-#define PROGRAM_VERSION "3.0.0"
+#define PROGRAM_VERSION "3.0.1"
 #define PROGRAM_LICENSE "Copyright (c) 2023, Sherman Rofeman. MIT license."
 
 enum Mode
@@ -128,7 +128,7 @@ void reveal_permissions(struct stat &stats)
                          S_IRGRP | S_IWGRP | S_IXGRP | // Group
                          S_IROTH | S_IWOTH | S_IXOTH   // Others
                         );
-    std::cout << std::oct << permissions << std::endl;
+    std::cout << std::oct << permissions << std::dec << std::endl;
 }
 
 void reveal_size(struct stat &stats)
