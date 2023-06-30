@@ -22,6 +22,7 @@ enum Mode
     Size,
     HumanSize,
     Permissions,
+    HumanPermissions,
     ModifiedDate,
     Contents,
 };
@@ -57,7 +58,16 @@ void print_help()
         << "  --group-uid           reveals the UID of the group that owns the "
            "entry."
         << std::endl
-        << "  --permissions         reveals the permissions octal of the entry."
+        << "  --permissions         reveals the permissions of the entry using "
+           "octal base."
+        << std::endl
+        << "  --human-permissions   reveals the permissions of the entry for: "
+           "user, group"
+        << std::endl
+        << "                        and others, respectively, using a triple "
+           "of characters:"
+        << std::endl
+        << "                        read (r), write (w) and execute (x)."
         << std::endl
         << "  --modified-date       reveals the date when the entry was last "
            "modified."
@@ -131,12 +141,41 @@ void reveal_group(const char *path, struct stat &stats)
 
 void reveal_permissions(struct stat &stats)
 {
-    unsigned int permissions =
+    unsigned permissions =
         stats.st_mode & (S_IRUSR | S_IWUSR | S_IXUSR | // User
                          S_IRGRP | S_IWGRP | S_IXGRP | // Group
                          S_IROTH | S_IWOTH | S_IXOTH   // Others
                         );
     std::cout << std::oct << permissions << std::dec << std::endl;
+}
+
+void reveal_human_permissions(struct stat &stats)
+{
+    unsigned permissions[9] = {S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP, S_IWGRP,
+                               S_IXGRP, S_IROTH, S_IWOTH, S_IXOTH};
+    for (int i = 0; i < 9; i++)
+    {
+        if ((permissions[i] & stats.st_mode) != 0)
+        {
+            if (i == 0 || i == 3 || i == 6)
+            {
+                std::cout << "r";
+            }
+            else if (i == 1 || i == 4 || i == 7)
+            {
+                std::cout << "w";
+            }
+            else
+            {
+                std::cout << "x";
+            }
+        }
+        else
+        {
+            std::cout << "-";
+        }
+    }
+    std::cout << std::endl;
 }
 
 void reveal_size(struct stat &stats)
@@ -260,6 +299,9 @@ void reveal(const char *path, Mode &mode)
     case Mode::Permissions:
         reveal_permissions(stats);
         break;
+    case Mode::HumanPermissions:
+        reveal_human_permissions(stats);
+        break;
     case Mode::ModifiedDate:
         reveal_modified_date(stats);
         break;
@@ -311,6 +353,7 @@ int main(int argc, char **argv)
     flag_modes["--size"] = Mode::Size;
     flag_modes["--human-size"] = Mode::HumanSize;
     flag_modes["--permissions"] = Mode::Permissions;
+    flag_modes["--human-permissions"] = Mode::HumanPermissions;
     flag_modes["--modified-date"] = Mode::ModifiedDate;
 
     for (int i = 1; i < argc; i++)
