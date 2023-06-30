@@ -1,5 +1,6 @@
 #include <dirent.h>
 #include <grp.h>
+#include <iomanip>
 #include <iostream>
 #include <map>
 #include <pwd.h>
@@ -8,7 +9,7 @@
 #include <time.h>
 
 #define PROGRAM_NAME "reveal"
-#define PROGRAM_VERSION "3.0.1"
+#define PROGRAM_VERSION "3.1.0"
 #define PROGRAM_LICENSE "Copyright (c) 2023, Sherman Rofeman. MIT license."
 
 enum Mode
@@ -19,6 +20,7 @@ enum Mode
     GroupUid,
     Group,
     Size,
+    HumanSize,
     Permissions,
     ModifiedDate,
     Contents,
@@ -60,6 +62,12 @@ void print_help()
         << "  --modified-date       reveals the date when the entry was last "
            "modified."
         << std::endl
+        << "  --size                reveals the size in bytes of the entry."
+        << std::endl
+        << "  --human-size          reveals the size of the entry using the "
+           "most convenient"
+        << std::endl
+        << "                        unit for a human to read." << std::endl
         << std::endl
         << "ISSUES AND CONTRIBUTIONS" << std::endl
         << "Report issues found in the program at:" << std::endl
@@ -134,6 +142,35 @@ void reveal_permissions(struct stat &stats)
 void reveal_size(struct stat &stats)
 {
     std::cout << stats.st_size << std::endl;
+}
+
+void print_float_size(float size, std::string unit)
+{
+    std::cout << std::fixed << std::setprecision(1) << size << unit
+              << std::defaultfloat << std::endl;
+}
+
+void reveal_human_size(struct stat &stats)
+{
+    float gb = stats.st_size / 1e9;
+    if ((int)gb > 0)
+    {
+        print_float_size(gb, "GB");
+        return;
+    }
+    float mb = stats.st_size / 1e6;
+    if ((int)mb > 0)
+    {
+        print_float_size(mb, "MB");
+        return;
+    }
+    float kb = stats.st_size / 1e3;
+    if ((int)kb > 0)
+    {
+        print_float_size(kb, "kB");
+        return;
+    }
+    std::cout << stats.st_size << "B" << std::endl;
 }
 
 void reveal_modified_date(struct stat &stats)
@@ -217,6 +254,9 @@ void reveal(const char *path, Mode &mode)
     case Mode::Size:
         reveal_size(stats);
         break;
+    case Mode::HumanSize:
+        reveal_human_size(stats);
+        break;
     case Mode::Permissions:
         reveal_permissions(stats);
         break;
@@ -269,6 +309,7 @@ int main(int argc, char **argv)
     flag_modes["--group"] = Mode::Group;
     flag_modes["--contents"] = Mode::Contents;
     flag_modes["--size"] = Mode::Size;
+    flag_modes["--human-size"] = Mode::HumanSize;
     flag_modes["--permissions"] = Mode::Permissions;
     flag_modes["--modified-date"] = Mode::ModifiedDate;
 
