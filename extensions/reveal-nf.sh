@@ -72,34 +72,39 @@ function reveal-nf {
     "zsh"       " :2"
     "zsh-theme" "󰏘 :7"
   )
+  typeset -r directory_icon=" :3"
+  typeset -r file_icon=" :7"
   typeset paths=($@)
   [[ ${#paths[@]} -eq 0 ]] &&
     paths+=(".")
+  typeset output=""
   for path_ in ${paths[@]}; do
     if [[ ! -d "${path_}" ]]; then
-      echo -e "$0: \"${path_}\" is not a directory.\n"
+      output+="$0: \"${path_}\" is not a directory.\n"
       continue
     fi
-    echo "${path_}:"
+    output+="${path_}:\n"
     for entry in $(reveal "${path_}" | sort); do
       typeset name="${entry##*/}"
-      typeset extension="${entry##*.}"
-      printf "  "
+      output+="  "
       if [[ -d "${entry}" ]]; then
-        printf "\x1b[33m \x1b[0m"
+        output+="\x1b[3${directory_icon:3:3}m${directory_icon:0:2}\x1b[0m"
       else
+        typeset extension="${entry##*.}"
         typeset name_icon="${name_icons[${name}]:0:2}"
-        typeset extension_icon="${extension_icons[${extension}]:0:2}"
         if [[ "${name_icon}" != "" ]]; then
-          printf "\x1b[3${name_icons[${name}]:3:3}m${name_icon}\x1b[0m"
-        elif [[ "${extension_icon}" != "" ]]; then
-          printf "\x1b[3${extension_icons[${extension}]:3:3}m${extension_icon}\x1b[0m"
+          output+="\x1b[3${name_icons[${name}]:3:3}m${name_icon}\x1b[0m"
         else
-          printf " "
+          typeset extension_icon="${extension_icons[${extension}]:0:2}"
+          if [[ "${extension_icon}" != "" ]]; then
+            output+="\x1b[3${extension_icons[${extension}]:3:3}m${extension_icon}\x1b[0m"
+          else
+            output+="\x1b[3${file_icon:3:3}m${file_icon:0:2}\x1b[0m"
+          fi
         fi
       fi
-      echo " ${name}"
+      output+="  ${name}\n"
     done
-    echo
   done
+  echo -e "${output}"
 }
