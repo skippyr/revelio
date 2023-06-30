@@ -70,9 +70,10 @@ void print_help()
         << std::endl
         << "                        read (r), write (w) and execute (x)."
         << std::endl
-        << "  --modified-date       reveals the date when the entry was last "
-           "modified."
+        << "  --modified-date       reveals the date when the contents of the "
+           "entry were "
         << std::endl
+        << "                        last modified." << std::endl
         << "  --size                reveals the size in bytes of the entry."
         << std::endl
         << "  --human-size          reveals the size of the entry using the "
