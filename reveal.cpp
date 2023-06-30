@@ -24,6 +24,7 @@ enum Mode
     Permissions,
     HumanPermissions,
     ModifiedDate,
+    Inode,
     Contents,
 };
 
@@ -78,6 +79,9 @@ void print_help()
            "most convenient"
         << std::endl
         << "                        unit for a human to read." << std::endl
+        << "  --inode               reveals the serial number that identifies "
+           "the entry."
+        << std::endl
         << std::endl
         << "ISSUES AND CONTRIBUTIONS" << std::endl
         << "Report issues found in the program at:" << std::endl
@@ -261,6 +265,11 @@ void reveal_directory(const char *path)
     closedir(directory);
 }
 
+void reveal_inode(struct stat &stats)
+{
+    std::cout << stats.st_ino << std::endl;
+}
+
 void reveal(const char *path, Mode &mode)
 {
     struct stat stats;
@@ -304,6 +313,9 @@ void reveal(const char *path, Mode &mode)
         break;
     case Mode::ModifiedDate:
         reveal_modified_date(stats);
+        break;
+    case Mode::Inode:
+        reveal_inode(stats);
         break;
     case Mode::Contents:
         if S_ISREG (stats.st_mode)
@@ -354,6 +366,7 @@ int main(int argc, char **argv)
     flag_modes["--human-size"] = Mode::HumanSize;
     flag_modes["--permissions"] = Mode::Permissions;
     flag_modes["--human-permissions"] = Mode::HumanPermissions;
+    flag_modes["--inode"] = Mode::Inode;
     flag_modes["--modified-date"] = Mode::ModifiedDate;
 
     for (int i = 1; i < argc; i++)
