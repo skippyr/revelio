@@ -83,6 +83,8 @@ function reveal-nf {
       output+="$0: \"${path_}\" is not a directory.\n"
       continue
     fi
+    [[ -n "${output}" ]] &&
+      output+="\n"
     output+="${path_}:\n"
     for entry in $(reveal "${path_}" | sort); do
       typeset name="${entry##*/}"
