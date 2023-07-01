@@ -111,6 +111,11 @@ project installed.
 
 ![](images/preview_reveal_ls.gif)
 
+-   The `reveal-stat` extension formats the metadata of the entries, similarly
+    to the `stat` command.
+
+![](images/preview_reveal_stat.gif)
+
 To use them, simple use a source command on the file. You can use this as
 a template:
 
