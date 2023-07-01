@@ -3,7 +3,14 @@
 # It expects a list of paths as arguments.
 function reveal-stat {
   typeset IFS=$'\n'
-  for path_ in $@; do
+  typeset paths=($@)
+  [[ ${#paths[@]} -eq 0 ]] &&
+    paths+=(".")
+  for path_ in ${paths[@]}; do
+    if [[ ! -e "${path_}" ]]; then
+      echo "$0: the path \"${path_}\" does not exists."
+      continue
+    fi
     typeset metadata=($(reveal\
       --human-size ${path_}\
       --inode ${path_}\
