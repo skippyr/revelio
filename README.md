@@ -98,6 +98,10 @@ Check out these examples:
 
 ![](images/preview_reveal_nf.gif)
 
+As you would probably expect, you will only be able to see the icons if you
+have a font patched by the [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts/releases)
+project installed.
+
 -   The `reveal-tree` extension adds tree view format when revealing a
     directory.
 

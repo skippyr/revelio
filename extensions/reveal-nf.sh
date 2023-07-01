@@ -9,6 +9,11 @@
 # https://github.com/ryanoasis/nerd-fonts/releases
 function reveal-nf {
   typeset IFS=$'\n'
+
+  # The icons use the following format:
+  #
+  # "<NAME/EXTENSION>"   "<ICON>:<ANSI_COLOR>"
+
   typeset -rA name_icons=(
     # You can add new icons here to be used based on files' names.
     ".clang-format" " :3"
@@ -30,13 +35,18 @@ function reveal-nf {
     "avi"       "󰈫 :6"
     "bmp"       "󰈟 :5"
     "c"         " :4"
+    "coffee"    " :3"
     "conf"      " :8"
     "cpp"       " :5"
     "cs"        " :4"
     "css"       " :4"
+    "cur"       " :8"
+    "dart"      " :6"
     "diff"      "󰦓 :1"
+    "djvu"      "󰈙 :6"
     "doc"       " :4"
     "docx"      " :4"
+    "gif"       "󰈫 :6"
     "go"        " :4"
     "gz"        "󰛫 :8"
     "h"         " :4"
@@ -44,11 +54,12 @@ function reveal-nf {
     "html"      " :1"
     "info"      " :4"
     "iso"       "󱛟 :8"
-    "java"      "󰬷 :8"
+    "java"      "󰬷 :1"
     "jpeg"      "󰈟 :5"
     "jpg"       "󰈟 :5"
     "js"        "󰌞 :3"
     "json"      "󰘦 :3"
+    "jsx"       " :4"
     "lua"       " :4"
     "md"        " :4"
     "mk"        " :8"
@@ -63,16 +74,21 @@ function reveal-nf {
     "png"       "󰈟 :5"
     "ppt"       "󱎐 :1"
     "pptx"      "󱎐 :1"
+    "pug"       " :1"
     "py"        "󰌠 :4"
     "rb"        "󰴭 :1"
     "rs"        " :1"
     "scss"      " :5"
     "sh"        " :2"
+    "srt"       "󰨖 :6"
+    "sum"       "󰠥 :6"
+    "swift"     " :1"
     "tar"       "󰛫 :8"
     "tex"       " :4"
     "toml"      "󰬛 :1"
     "ts"        "󰛦 :4"
     "ttf"       " :4"
+    "txt"       " :8"
     "ufo"       " :4"
     "vbox"      " :8"
     "vbox-prev" " :8"
