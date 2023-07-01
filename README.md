@@ -91,7 +91,7 @@ advantage of some scripts I have made to extend Reveal's capabilities.
 Those are called "extensions" and you can find them under the `extensions`
 directory.
 
-Check out, these example:
+Check out these examples:
 
 -   The `reveal-nf` extension adds Nerd Font icons when revealing
     directories:
@@ -107,18 +107,23 @@ Check out, these example:
 
 ![](images/preview_reveal_ls.gif)
 
-To use them, simple use a source command, for example:
+To use them, simple use a source command on the file. You can use this as
+a template:
 
 ```bash
 source extensions/<EXTENSION>
 ```
 
-Where `<EXTENSION>` must be replaced by the name of an extension file. Each
-extension file will add a new function to your shell section that you can
-use just like any other command. Read the extension file to understand what
+Where `<EXTENSION>` must be replaced by the name of an extension file.
+
+Each extension will add a new function to your current shell section that you
+can use just like any other command. Read the extension file to understand what
 each of them do.
 
-As expected, Reveal allows you also create and share your own extensions.
+To make extensions persistent, source them in your shell's startup file.
+
+Along with the ones that come bundled with the source code, you can also
+create and share your own extensions.
 
 ## Issues And Contributions
 
@@ -130,5 +135,4 @@ Learn how to report issues and contribute to this project by reading its
 This project is released under the terms of the MIT license. A copy of the
 license is bundled with the source code.
 
-Copyright (c) 2023, Sherman Rofeman. MIT license.
 Copyright (c) 2023, Sherman Rofeman. MIT license.
