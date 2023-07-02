@@ -87,7 +87,7 @@ reveal --size reveal.cpp
 You can also request for multiple data types of multiple entries at once:
 
 ```bash
-reveal --human-size reveal.cpp --group reveal.cpp ~ --permissions / --owner-uid ~
+reveal --human-size reveal.cpp Makefile --group reveal.cpp ~ --permissions / --owner-uid ~
 ```
 
 ### Transpassing Flags
