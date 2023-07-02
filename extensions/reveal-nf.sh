@@ -132,6 +132,8 @@ function reveal-nf {
     [[ -n "${output}" ]] &&
       output+="\n"
     output+="${path_}:\n"
+    [[ -L "${path_}" ]] &&
+      path_=$(readlink -f ${path_})
     for entry in $(reveal "${path_}" | sort); do
       typeset name="${entry##*/}"
       output+="  "

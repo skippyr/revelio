@@ -93,15 +93,17 @@ void print_help()
         << "TRANSPASSING FLAGS" << std::endl
         << "These flags change how metadata is gattered for symlink entries."
         << std::endl
-        << "  --untranspass (default)  does not follow symlinks." << std::endl
-        << "  --transpass              follows symlinks." << std::endl
+        << std::endl
+        << "  --untranspass (default)  does not resolve symlinks." << std::endl
+        << "  --transpass              resolves all levels of symlinks."
+        << std::endl
         << std::endl
         << "EXIT CODES" << std::endl
-        << "Reveal will throw exit code 1 in the end of its execution if an "
+        << "It will throw exit code 1 in the end of its execution if an "
            "error happens."
         << std::endl
         << std::endl
-        << "However, while still able to continue, Reveal will not stop "
+        << "However, while still able to continue, it will not stop "
            "revealing the"
         << std::endl
         << "remaining arguments." << std::endl
