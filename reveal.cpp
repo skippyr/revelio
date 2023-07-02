@@ -96,6 +96,18 @@ void print_help()
         << "  --untranspass (default)  does not follow symlinks." << std::endl
         << "  --transpass              follows symlinks." << std::endl
         << std::endl
+        << "EXIT CODES" << std::endl
+        << "Reveal will throw exit code 1 in the end of its execution if an "
+           "error happens."
+        << std::endl
+        << std::endl
+        << "However, while still able to continue, Reveal will not stop "
+           "revealing the"
+        << std::endl
+        << "remaining arguments." << std::endl
+        << std::endl
+        << "All the errors encountered will be printed to stderr." << std::endl
+        << std::endl
         << "ISSUES AND CONTRIBUTIONS" << std::endl
         << "Report issues found in the program at:" << std::endl
         << "  https://github.com/skippyr/reveal/issues" << std::endl
