@@ -3,8 +3,8 @@
 ## Starting Point
 
 The Reveal project is terminal utility for Unix-like operating systems that
-reveals information about entries in the file system. It was designed to work
-perfectly with scripting tools, such as Shell scripting.
+reveals information about entries in the file system. It was designed to
+perfectly suit scripting languages and allow you to create more robust programs.
 
 ![](images/preview.gif)
 
@@ -100,7 +100,12 @@ reveal --transpass --size link.txt --human-permissions link.txt
 ```
 
 This flag will also affect when revealing directories: if set, it will resolve
-the path of symlink entries.
+the path of symlink entries. For example, you can compare its output when
+reading `/`:
+
+```bash
+diff <(reveal /) <(reveal --transpass /)
+```
 
 You can counter this flag using `--untranspass` flag.
 

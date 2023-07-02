@@ -8,6 +8,8 @@
 #include <sys/stat.h>
 #include <time.h>
 
+int exit_code = 0;
+
 enum Mode
 {
     Unknown,
@@ -121,6 +123,7 @@ void print_license()
 void print_error(std::string description)
 {
     std::cerr << "reveal: " << description << std::endl;
+    exit_code = 1;
 }
 
 void reveal_owner_uid(struct stat &stats)
@@ -426,4 +429,6 @@ int main(int argc, char **argv)
             reveal(arg, mode, isTranspassing);
         }
     }
+
+    return exit_code;
 }
