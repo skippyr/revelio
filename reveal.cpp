@@ -273,13 +273,20 @@ void reveal_file(const char *path)
 
 void reveal_directory(const char *path)
 {
+    char abs_path[PATH_MAX];
+    if (!realpath(path, abs_path))
+    {
+        print_error("could not resolve absolute path of \"" +
+                    std::string(path) + "\".");
+        return;
+    }
     DIR *directory = opendir(path);
     if (!directory)
     {
         print_error("could not open directory \"" + std::string(path) + "\".");
         return;
     }
-    const char *separator = !strcmp(path, "/") ? "" : "/";
+    const char *separator = !strcmp(abs_path, "/") ? "" : "/";
     struct dirent *entry;
     while ((entry = readdir(directory)))
     {
@@ -287,7 +294,7 @@ void reveal_directory(const char *path)
         {
             continue;
         }
-        std::cout << path << separator << entry->d_name << std::endl;
+        std::cout << abs_path << separator << entry->d_name << std::endl;
     }
     closedir(directory);
 }
@@ -305,20 +312,13 @@ void reveal(const char *path, Mode &mode, bool is_transpassing)
         print_error("the path \"" + std::string(path) + "\" does not exists.");
         return;
     }
-    char abs_path[PATH_MAX];
-    if (!realpath(path, abs_path))
-    {
-        print_error("could not resolve absolute path of \"" +
-                    std::string(path) + "\".");
-        return;
-    }
     switch (mode)
     {
     case Mode::OwnerUid:
         reveal_owner_uid(stats);
         break;
     case Mode::Owner:
-        reveal_owner(abs_path, stats);
+        reveal_owner(path, stats);
         break;
     case Mode::GroupUid:
         reveal_group_uid(stats);
@@ -347,11 +347,11 @@ void reveal(const char *path, Mode &mode, bool is_transpassing)
     case Mode::Contents:
         if S_ISREG (stats.st_mode)
         {
-            reveal_file(abs_path);
+            reveal_file(path);
         }
         else if S_ISDIR (stats.st_mode)
         {
-            reveal_directory(abs_path);
+            reveal_directory(path);
         }
         else
         {
