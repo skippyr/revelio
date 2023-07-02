@@ -64,13 +64,13 @@ reveal .
 Or you can make it reveal the contents of a file:
 
 ```bash
-reveal foo.txt
+reveal reveal.cpp
 ```
 
 Or even both:
 
 ```bash
-reveal . foo.txt
+reveal . reveal.cpp
 ```
 
 ### Mode Flags
@@ -81,13 +81,13 @@ changing the mode Reveal is operating using mode flags.
 For example, you can make it reveal the size in bytes of a file.
 
 ```bash
-reveal --size foo.txt
+reveal --size reveal.cpp
 ```
 
 You can also request for multiple data types of multiple entries at once:
 
 ```bash
-reveal --size foo.txt ~ --permission / --owner-uid ~
+reveal --human-size reveal.cpp --group reveal.cpp ~ --permissions / --owner-uid ~
 ```
 
 ### Transpassing Flags
