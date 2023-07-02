@@ -271,16 +271,15 @@ void reveal_file(const char *path)
     fclose(file);
 }
 
-void reveal_directory(const char *directory_path, bool isTranspassing)
+void reveal_directory(const char *path)
 {
-    DIR *directory = opendir(directory_path);
+    DIR *directory = opendir(path);
     if (!directory)
     {
-        print_error("could not open directory \"" +
-                    std::string(directory_path) + "\".");
+        print_error("could not open directory \"" + std::string(path) + "\".");
         return;
     }
-    const char *separator = !strcmp(directory_path, "/") ? "" : "/";
+    const char *separator = !strcmp(path, "/") ? "" : "/";
     struct dirent *entry;
     while ((entry = readdir(directory)))
     {
@@ -288,30 +287,7 @@ void reveal_directory(const char *directory_path, bool isTranspassing)
         {
             continue;
         }
-        char entry_path[PATH_MAX];
-        if (snprintf(entry_path, sizeof(entry_path), "%s%s%s", directory_path,
-                     separator, entry->d_name) < 0)
-        {
-            print_error("could not get path of entry \"" +
-                        std::string(entry->d_name) + "\".");
-            continue;
-        }
-        if (isTranspassing)
-        {
-            char resolved_entry_path[PATH_MAX];
-            if (!realpath(entry_path, resolved_entry_path))
-            {
-                std::cout << entry_path << std::endl;
-            }
-            else
-            {
-                std::cout << resolved_entry_path << std::endl;
-            }
-        }
-        else
-        {
-            std::cout << entry_path << std::endl;
-        }
+        std::cout << path << separator << entry->d_name << std::endl;
     }
     closedir(directory);
 }
@@ -321,10 +297,10 @@ void reveal_inode(struct stat &stats)
     std::cout << stats.st_ino << std::endl;
 }
 
-void reveal(const char *path, Mode &mode, bool isTranspassing)
+void reveal(const char *path, Mode &mode, bool is_transpassing)
 {
     struct stat stats;
-    if (isTranspassing ? stat(path, &stats) : lstat(path, &stats) != 0)
+    if (is_transpassing ? stat(path, &stats) : lstat(path, &stats) != 0)
     {
         print_error("the path \"" + std::string(path) + "\" does not exists.");
         return;
@@ -375,7 +351,7 @@ void reveal(const char *path, Mode &mode, bool isTranspassing)
         }
         else if S_ISDIR (stats.st_mode)
         {
-            reveal_directory(abs_path, isTranspassing);
+            reveal_directory(abs_path);
         }
         else
         {
@@ -420,7 +396,7 @@ int main(int argc, char **argv)
     flag_modes["--inode"] = Mode::Inode;
     flag_modes["--modified-date"] = Mode::ModifiedDate;
 
-    bool isTranspassing = false;
+    bool is_transpassing = false;
 
     for (int i = 1; i < argc; i++)
     {
@@ -432,15 +408,15 @@ int main(int argc, char **argv)
         }
         else if (!strcmp(arg, "--transpass"))
         {
-            isTranspassing = true;
+            is_transpassing = true;
         }
         else if (!strcmp(arg, "--untranspass"))
         {
-            isTranspassing = false;
+            is_transpassing = false;
         }
         else
         {
-            reveal(arg, mode, isTranspassing);
+            reveal(arg, mode, is_transpassing);
         }
     }
 

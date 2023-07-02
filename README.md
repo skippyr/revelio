@@ -99,14 +99,6 @@ can use the `--transpass` flag. For example:
 reveal --transpass --size link.txt --human-permissions link.txt
 ```
 
-This flag will also affect when revealing directories: if set, it will resolve
-the path of symlink entries. For example, you can compare its output when
-reading `/`:
-
-```bash
-diff <(reveal /) <(reveal --transpass /)
-```
-
 You can counter this flag using `--untranspass` flag.
 
 ### Help
