@@ -256,14 +256,16 @@ void reveal_file(const char *path)
     fclose(file);
 }
 
-void reveal_directory(const char *path)
+void reveal_directory(const char *directory_path, bool isTranspassing)
 {
-    DIR *directory = opendir(path);
+    DIR *directory = opendir(directory_path);
     if (!directory)
     {
-        print_error("could not open directory \"" + std::string(path) + "\".");
+        print_error("could not open directory \"" +
+                    std::string(directory_path) + "\".");
         return;
     }
+    const char *separator = !strcmp(directory_path, "/") ? "" : "/";
     struct dirent *entry;
     while ((entry = readdir(directory)))
     {
@@ -271,8 +273,30 @@ void reveal_directory(const char *path)
         {
             continue;
         }
-        const char *s = !strcmp(path, "/") ? "" : "/";
-        std::cout << path << s << entry->d_name << std::endl;
+        char entry_path[PATH_MAX];
+        if (snprintf(entry_path, sizeof(entry_path), "%s%s%s", directory_path,
+                     separator, entry->d_name) < 0)
+        {
+            print_error("could not get path of entry \"" +
+                        std::string(entry->d_name) + "\".");
+            continue;
+        }
+        if (isTranspassing)
+        {
+            char resolved_entry_path[PATH_MAX];
+            if (!realpath(entry_path, resolved_entry_path))
+            {
+                std::cout << entry_path << std::endl;
+            }
+            else
+            {
+                std::cout << resolved_entry_path << std::endl;
+            }
+        }
+        else
+        {
+            std::cout << entry_path << std::endl;
+        }
     }
     closedir(directory);
 }
@@ -336,7 +360,7 @@ void reveal(const char *path, Mode &mode, bool isTranspassing)
         }
         else if S_ISDIR (stats.st_mode)
         {
-            reveal_directory(abs_path);
+            reveal_directory(abs_path, isTranspassing);
         }
         else
         {
