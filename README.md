@@ -51,30 +51,62 @@ After doing these steps, the program should now be installed.
 
 ## Usage
 
-Reveal expects the paths of entries of your file system. For example: you can
-make it reveal the contents of your current directory:
+### First Uses
+
+Reveal expects the paths of entries of your file system. By default, it will
+reveal its contents. For example: you can make it reveal the contents of your
+current directory:
 
 ```bash
 reveal .
 ```
 
-You can change the mode Reveal is operating by using flags. By default, Reveal
-reveals the contents of the entries, but let's say, for example, you want to
-know the size of a file: for that use the `--size` flag.
+Or you can make it reveal the contents of a file:
+
+```bash
+reveal foo.txt
+```
+
+Or even both:
+
+```bash
+reveal . foo.txt
+```
+
+### Mode Flags
+
+You can change what type of information to retrive from your entries by
+changing the mode Reveal is operating using mode flags.
+
+For example, you can make it reveal the size in bytes of a file.
 
 ```bash
 reveal --size foo.txt
 ```
 
-You can also request for multiple types of data of multiple entries at once:
-this one will print the contents and size of a file, the permissions of `/` and
-the contents of the directory `/usr/bin`.
+You can also request for multiple data types of multiple entries at once:
 
 ```bash
-reveal foo.txt --size foo.txt --permissions / --contents /
+reveal --size foo.txt ~ --permission / --owner-uid ~
 ```
 
-For a full list of flags that you can use, check out its help page:
+### Transpassing Flags
+
+By default, Reveal does not follows symlinks. To change this behavior, you
+can use the `--transpass` flag. For example:
+
+```bash
+reveal --transpass --size link.txt --human-permissions link.txt
+```
+
+This flag will also affect when revealing directories: if set, it will resolve
+the path of symlink entries.
+
+You can counter this flag using `--untranspass` flag.
+
+### Help
+
+For a list of description and flags for the program, check out its help page:
 
 ```bash
 reveal --help

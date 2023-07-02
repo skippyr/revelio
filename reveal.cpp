@@ -158,10 +158,8 @@ void reveal_group(const char *path, struct stat &stats)
 void reveal_permissions(struct stat &stats)
 {
     unsigned permissions =
-        stats.st_mode & (S_IRUSR | S_IWUSR | S_IXUSR | // User
-                         S_IRGRP | S_IWGRP | S_IXGRP | // Group
-                         S_IROTH | S_IWOTH | S_IXOTH   // Others
-                        );
+        stats.st_mode & (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP |
+                         S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH);
     std::cout << std::oct << 0 << permissions << std::dec << std::endl;
 }
 
