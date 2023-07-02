@@ -7,7 +7,7 @@ function reveal-stat {
   [[ ${#paths[@]} -eq 0 ]] &&
     paths+=(".")
   for path_ in ${paths[@]}; do
-    if [[ ! -e "${path_}" ]]; then
+    if [[ ! -L "${path_}" && ! -e "${path_}" ]]; then
       echo "$0: the path \"${path_}\" does not exists."
       continue
     fi

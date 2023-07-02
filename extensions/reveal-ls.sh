@@ -13,7 +13,7 @@ function reveal-ls {
       continue
     fi
     echo "${path_}:"
-    for entry in $(reveal "${path_}" | sort); do
+    for entry in $(reveal --transpass "${path_}" | sort); do
       echo "  ${entry##*/}"
     done
     echo
