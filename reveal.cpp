@@ -123,7 +123,7 @@ void print_help()
 
 void print_version()
 {
-    std::cout << "4.0.0" << std::endl;
+    std::cout << "v4.0.0" << std::endl;
     exit(0);
 }
 
@@ -357,7 +357,6 @@ void reveal(const char *path, Mode &mode, bool is_transpassing)
         {
             print_error("the path \"" + std::string(path) +
                         "\" contains a type that can not be read.");
-            return;
         }
     default:;
     }
