@@ -1,6 +1,7 @@
 # Reveals the metadata of entries similarly to the stat command.
 #
-# It expects a list of paths as arguments.
+# It will consider any path given as argument or, if no argument is provided,
+# the current directory.
 function reveal-stat {
   typeset IFS=$'\n'
   typeset paths=($@)
