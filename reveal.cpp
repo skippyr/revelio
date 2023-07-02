@@ -8,10 +8,6 @@
 #include <sys/stat.h>
 #include <time.h>
 
-#define PROGRAM_NAME "reveal"
-#define PROGRAM_VERSION "3.1.0"
-#define PROGRAM_LICENSE "Copyright (c) 2023, Sherman Rofeman. MIT license."
-
 enum Mode
 {
     Unknown,
@@ -31,17 +27,17 @@ enum Mode
 void print_help()
 {
     std::cout
-        << "Usage: " << PROGRAM_NAME << " [FLAGS]... [PATHS]..." << std::endl
+        << "Usage: reveal [FLAGS]... [PATHS]..." << std::endl
         << "Reveals information about entries in the file system." << std::endl
         << std::endl
         << "META FLAGS" << std::endl
-        << "These flags shows metadata about the program." << std::endl
+        << "These flags show metadata about the program." << std::endl
         << "  --help     prints these help instructions." << std::endl
         << "  --version  prints the version of the program." << std::endl
         << "  --license  prints the license of the program." << std::endl
         << std::endl
         << "MODE FLAGS" << std::endl
-        << "These flags changes the mode the program will use when "
+        << "These flags change the mode the program will use when "
            "revealing an entry. All"
         << std::endl
         << "arguments placed after that flag will be affected by it."
@@ -51,38 +47,52 @@ void print_help()
         << std::endl
         << "  --owner               reveals the user that owns the entry."
         << std::endl
-        << "  --owner-uid           reveals the UID of the user that owns the "
+        << "  --owner-uid           reveals the UID of the user that owns "
+           "the "
            "entry."
         << std::endl
         << "  --group               reveals the group that owns the entry."
         << std::endl
-        << "  --group-uid           reveals the UID of the group that owns the "
+        << "  --group-uid           reveals the UID of the group that owns "
+           "the "
            "entry."
         << std::endl
-        << "  --permissions         reveals the permissions of the entry using "
+        << "  --permissions         reveals the permissions of the entry "
+           "using "
            "octal base."
         << std::endl
-        << "  --human-permissions   reveals the permissions of the entry for: "
+        << "  --human-permissions   reveals the permissions of the entry "
+           "for: "
            "user, group"
         << std::endl
-        << "                        and others, respectively, using a triple "
+        << "                        and others, respectively, using a "
+           "triple "
            "of characters:"
         << std::endl
         << "                        read (r), write (w) and execute (x)."
         << std::endl
-        << "  --modified-date       reveals the date when the contents of the "
+        << "  --modified-date       reveals the date when the contents of "
+           "the "
            "entry were "
         << std::endl
         << "                        last modified." << std::endl
         << "  --size                reveals the size in bytes of the entry."
         << std::endl
-        << "  --human-size          reveals the size of the entry using the "
+        << "  --human-size          reveals the size of the entry using "
+           "the "
            "most convenient"
         << std::endl
         << "                        unit for a human to read." << std::endl
-        << "  --inode               reveals the serial number that identifies "
+        << "  --inode               reveals the serial number that "
+           "identifies "
            "the entry."
         << std::endl
+        << std::endl
+        << "TRANSPASSING FLAGS" << std::endl
+        << "These flags change how metadata is gattered for symlink entries."
+        << std::endl
+        << "  --untranspass (default)  does not follow symlinks." << std::endl
+        << "  --transpass              follows symlinks." << std::endl
         << std::endl
         << "ISSUES AND CONTRIBUTIONS" << std::endl
         << "Report issues found in the program at:" << std::endl
@@ -97,19 +107,20 @@ void print_help()
 
 void print_version()
 {
-    std::cout << PROGRAM_VERSION << std::endl;
+    std::cout << "4.0.0" << std::endl;
     exit(0);
 }
 
 void print_license()
 {
-    std::cout << PROGRAM_LICENSE << std::endl;
+    std::cout << "Copyright (c) 2023, Sherman Rofeman. MIT license."
+              << std::endl;
     exit(0);
 }
 
 void print_error(std::string description)
 {
-    std::cerr << PROGRAM_NAME << ": " << description << std::endl;
+    std::cerr << "reveal: " << description << std::endl;
 }
 
 void reveal_owner_uid(struct stat &stats)
@@ -151,7 +162,7 @@ void reveal_permissions(struct stat &stats)
                          S_IRGRP | S_IWGRP | S_IXGRP | // Group
                          S_IROTH | S_IWOTH | S_IXOTH   // Others
                         );
-    std::cout << std::oct << permissions << std::dec << std::endl;
+    std::cout << std::oct << 0 << permissions << std::dec << std::endl;
 }
 
 void reveal_human_permissions(struct stat &stats)
@@ -271,10 +282,10 @@ void reveal_inode(struct stat &stats)
     std::cout << stats.st_ino << std::endl;
 }
 
-void reveal(const char *path, Mode &mode)
+void reveal(const char *path, Mode &mode, bool isTranspassing)
 {
     struct stat stats;
-    if (stat(path, &stats) != 0)
+    if (isTranspassing ? stat(path, &stats) : lstat(path, &stats) != 0)
     {
         print_error("the path \"" + std::string(path) + "\" does not exists.");
         return;
@@ -341,7 +352,7 @@ int main(int argc, char **argv)
 {
     for (int i = 1; i < argc; i++)
     {
-        char *arg = argv[i];
+        char *arg = *(argv + i);
         if (!strcmp(arg, "--help"))
         {
             print_help();
@@ -370,15 +381,27 @@ int main(int argc, char **argv)
     flag_modes["--inode"] = Mode::Inode;
     flag_modes["--modified-date"] = Mode::ModifiedDate;
 
+    bool isTranspassing = false;
+
     for (int i = 1; i < argc; i++)
     {
-        char *arg = argv[i];
+        char *arg = *(argv + i);
         Mode &flag_mode = flag_modes[arg];
         if (flag_mode != Mode::Unknown)
         {
             mode = flag_mode;
-            continue;
         }
-        reveal(arg, mode);
+        else if (!strcmp(arg, "--transpass"))
+        {
+            isTranspassing = true;
+        }
+        else if (!strcmp(arg, "--untranspass"))
+        {
+            isTranspassing = false;
+        }
+        else
+        {
+            reveal(arg, mode, isTranspassing);
+        }
     }
 }
