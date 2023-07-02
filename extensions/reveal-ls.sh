@@ -7,15 +7,23 @@ function reveal-ls {
   typeset paths=($@)
   [[ ${#paths[@]} -eq 0 ]] &&
     paths+=(".")
+  typeset output=""
   for path_ in ${paths[@]}; do
     if [[ ! -d "${path_}" ]]; then
-      echo -e "$0: \"${path_}\" is not a directory.\n"
+      output+="$0: \"${path_}\" is not a directory.\n"
       continue
     fi
-    echo "${path_}:"
+    [[ -n "${output}" ]] &&
+      output+="\n"
+    output+="${path_}:\n"
     for entry in $(reveal --transpass "${path_}" | sort); do
-      echo "  ${entry##*/}"
+      typeset base_name="${entry##*/}"
+      output+="  "
+      [[ "${base_name}" =~ " " ]] &&
+        output+="'${base_name}'" ||
+        output+="${base_name}"
+        output+="\n"
     done
-    echo
-  done | fmt
+  done
+  echo "${output}" | fmt
 }
