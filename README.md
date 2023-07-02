@@ -132,7 +132,8 @@ have a font patched by the [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts/
 project installed.
 
 -   The `reveal-tree` extension adds tree view format when revealing a
-    directory.
+    directory. It reveals up to 5 levels of subdirectories not including
+    symlinks that point to directories.
 
 ![](images/preview_reveal_tree.gif)
 

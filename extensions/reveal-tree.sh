@@ -1,5 +1,6 @@
 # Reveals directories entries alphabetically and recursively using a tree view
-# format.
+# format. It reveals up to 5 levels of subdirectories not including symlinks
+# that point to directories.
 #
 # It will consider the first argument given or, if no argument is given, it will
 # consider the current directory.
@@ -15,12 +16,12 @@ function reveal-tree {
   function tree-view {
     typeset path_="$1"
     typeset depth="$2"
-    for entry in $(reveal "${path_}" | sort); do
+    for entry in $(reveal --transpass "${path_}" | sort); do
       [[ ${depth} -gt 0 ]] &&
         printf "│  %.0s" {1..${depth}}
       printf "├──"
       echo ${entry##*/}
-      [[ -d "${entry}" ]] &&
+      [[ ! -L "${entry}" && -d "${entry}" && ${depth} -le 5 ]] &&
         $0 "${entry}" $((${depth} + 1))
     done
   }
