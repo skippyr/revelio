@@ -125,12 +125,12 @@ function reveal-nf {
     paths+=(".")
   typeset output=""
   for path_ in ${paths[@]}; do
+    [[ -n "${output}" ]] &&
+      output+="\n"
     if [[ ! -d "${path_}" ]]; then
       output+="$0: \"${path_}\" is not a directory.\n"
       continue
     fi
-    [[ -n "${output}" ]] &&
-      output+="\n"
     output+="${path_}:\n"
     for entry in $(reveal --transpass "${path_}" | sort); do
       typeset name="${entry##*/}"
