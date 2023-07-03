@@ -1,4 +1,5 @@
 #include <dirent.h>
+#include <grp.h>
 #include <pwd.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -13,6 +14,11 @@
 #define GIGA 1e9
 #define MEGA 1e6
 #define KILO 1e3
+
+#define READ_CHAR 'r'
+#define WRITE_CHAR 'w'
+#define EXEC_CHAR 'x'
+#define LACK_CHAR '-'
 
 uint8_t exitCode = 0;
 
@@ -53,8 +59,9 @@ void printHelp()
     printf(
         "                        respectively, using three set of characters "
         "each:\n");
-    printf("                        read (r), write (w), execute (x) and not "
-           "set (-).\n");
+    printf("                        read (r), write (w), execute (x) and lack "
+           "(-).\n");
+    printf("  --inode               prints its serial number.\n");
     printf("  --modified-date       prints the date where its contents were "
            "last modified.\n\n");
     printf("TRANSPASSING FLAGS\n");
@@ -158,6 +165,37 @@ void revealOwner(struct stat *const metadata, const char *const path)
     printf("%s\n", owner->pw_name);
 }
 
+void revealGroup(struct stat *const metadata, const char *const path)
+{
+    struct group *const group = getgrgid(metadata->st_gid);
+    if (!group)
+    {
+        printErr("could not get group of \"", path, "\".");
+        return;
+    }
+    printf("%s\n", group->gr_name);
+}
+
+void revealHumanPermissions(struct stat *const metadata)
+{
+    unsigned permissions[9] = {S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP, S_IWGRP,
+                               S_IXGRP, S_IROTH, S_IWOTH, S_IXOTH};
+    for (uint8_t i = 0; i < 9; i++)
+    {
+        char c;
+        if (!(metadata->st_mode & permissions[i]))
+            c = LACK_CHAR;
+        else if (i == 0 || i == 3 || i == 6)
+            c = READ_CHAR;
+        else if (i == 1 || i == 4 || i == 7)
+            c = WRITE_CHAR;
+        else
+            c = EXEC_CHAR;
+        putchar(c);
+    }
+    printf("\n");
+}
+
 void reveal(const char *const path, uint8_t mode, uint8_t isTranspassing)
 {
     struct stat metadata;
@@ -180,7 +218,21 @@ void reveal(const char *const path, uint8_t mode, uint8_t isTranspassing)
     case 4: // owner-uid
         printf("%u\n", metadata.st_uid);
         break;
-    default:
+    case 5: // group
+        revealGroup(&metadata, path);
+        break;
+    case 6: // group-uid
+        printf("%u\n", metadata.st_gid);
+        break;
+    case 7: // permissions
+        printf("0%o\n", metadata.st_mode &
+                            (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP |
+                             S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH));
+        break;
+    case 8: // human-permissions
+        revealHumanPermissions(&metadata);
+        break;
+    default: // contents
         if (S_ISREG(metadata.st_mode))
             revealFile(path);
         else if (S_ISDIR(metadata.st_mode))
@@ -204,11 +256,10 @@ int main(int argc, const char **argv)
             }
     uint8_t mode = 0;
     uint8_t isTranspassing = 0;
-    const char *modeFlags[] = {"--contents",          "--size",
-                               "--human-size",        "--owner",
-                               "--owner-uid",         "--group",
-                               "--group-uid",         "--permissions",
-                               "--human-permissions", "--modified-date"};
+    const char *modeFlags[] = {
+        "--contents",          "--size",  "--human-size",   "--owner",
+        "--owner-uid",         "--group", "--group-uid",    "--permissions",
+        "--human-permissions", "--inode", "--modified-date"};
     for (int i = 1; i < argc; i++)
     {
         uint8_t changedMode = 0;
