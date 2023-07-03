@@ -1,8 +1,8 @@
 file=reveal
-std=c++20
+opt=z
 
 ${file}:
-	clang++ ${file}.cpp -std=${std} -o ${file}
+	clang ${file}.c -o ${file} -O${opt}
 
 run: ${file}
 	./${file}
