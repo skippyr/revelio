@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <time.h>
 
 #define PROGRAM_NAME "reveal"
 #define PROGRAM_LICENSE "Copyright (c) 2023, Sherman Rofeman. MIT license."
@@ -77,13 +78,14 @@ void printHelp()
     printf("  https://github.com/skippyr/reveal/issues\n\n");
 }
 
-void printErr(const char *start, const char *middle, const char *end)
+void printErr(const char *const start, const char *const middle,
+              const char *const end)
 {
     fprintf(stderr, "%s: %s%s%s\n", PROGRAM_NAME, start, middle, end);
     exitCode = 1;
 }
 
-void revealFile(const char *path)
+void revealFile(const char *const path)
 {
     FILE *file = fopen(path, "r");
     if (!file)
@@ -99,7 +101,7 @@ void revealFile(const char *path)
     fclose(file);
 }
 
-void revealDirectory(const char *path)
+void revealDirectory(const char *const path)
 {
     char absPath[PATH_MAX];
     if (!realpath(path, absPath))
@@ -126,12 +128,12 @@ void revealDirectory(const char *path)
     closedir(directory);
 }
 
-void printFloatSize(float value, const char *const separator)
+void printFloatSize(const float value, const char *const separator)
 {
     printf("%.1f%s\n", value, separator);
 }
 
-void revealHumanSize(struct stat *const metadata)
+void revealHumanSize(const struct stat *const metadata)
 {
     float gb = metadata->st_size / GIGA;
     if ((int)gb > 0)
@@ -154,7 +156,7 @@ void revealHumanSize(struct stat *const metadata)
     printf("%ldB\n", metadata->st_size);
 }
 
-void revealOwner(struct stat *const metadata, const char *const path)
+void revealOwner(const struct stat *const metadata, const char *const path)
 {
     struct passwd *const owner = getpwuid(metadata->st_uid);
     if (!owner)
@@ -165,7 +167,7 @@ void revealOwner(struct stat *const metadata, const char *const path)
     printf("%s\n", owner->pw_name);
 }
 
-void revealGroup(struct stat *const metadata, const char *const path)
+void revealGroup(const struct stat *const metadata, const char *const path)
 {
     struct group *const group = getgrgid(metadata->st_gid);
     if (!group)
@@ -176,7 +178,7 @@ void revealGroup(struct stat *const metadata, const char *const path)
     printf("%s\n", group->gr_name);
 }
 
-void revealHumanPermissions(struct stat *const metadata)
+void revealHumanPermissions(const struct stat *const metadata)
 {
     unsigned permissions[9] = {S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP, S_IWGRP,
                                S_IXGRP, S_IROTH, S_IWOTH, S_IXOTH};
@@ -194,6 +196,18 @@ void revealHumanPermissions(struct stat *const metadata)
         putchar(c);
     }
     printf("\n");
+}
+
+void revealModifiedDate(const struct stat *const metadata)
+{
+    char date[29];
+    if (!strftime(date, sizeof(date), "%a %b %d %T %Z %Y",
+                  localtime(&metadata->st_mtime)))
+    {
+        printErr("overflowed buffer to store date.", "", "");
+        return;
+    }
+    printf("%s\n", date);
 }
 
 void reveal(const char *const path, uint8_t mode, uint8_t isTranspassing)
@@ -231,6 +245,12 @@ void reveal(const char *const path, uint8_t mode, uint8_t isTranspassing)
         break;
     case 8: // human-permissions
         revealHumanPermissions(&metadata);
+        break;
+    case 9: // inode
+        printf("%lu\n", metadata.st_ino);
+        break;
+    case 10: // modified-date
+        revealModifiedDate(&metadata);
         break;
     default: // contents
         if (S_ISREG(metadata.st_mode))
