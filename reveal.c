@@ -9,6 +9,10 @@
 #define PROGRAM_LICENSE "Copyright (c) 2023, Sherman Rofeman. MIT license."
 #define PROGRAM_VERSION "v4.0.1"
 
+#define GIGA 1e9
+#define MEGA 1e6
+#define KILO 1e3
+
 uint8_t exitCode = 0;
 
 void printVersion()
@@ -101,7 +105,7 @@ void revealDirectory(const char *path)
         printErr("could not open directory \"", path, "\".");
         return;
     }
-    const char *separator = !strcmp(absPath, "/") ? "" : "/";
+    const char *const separator = !strcmp(absPath, "/") ? "" : "/";
     struct dirent *entry;
     while ((entry = readdir(directory)))
     {
@@ -114,16 +118,50 @@ void revealDirectory(const char *path)
     closedir(directory);
 }
 
-void reveal(const char *path, uint8_t mode, uint8_t isTranspassing)
+void printFloatSize(float value, const char *const separator)
+{
+    printf("%.1f%s\n", value, separator);
+}
+
+void revealHumanSize(struct stat *const metadata)
+{
+    float gb = metadata->st_size / GIGA;
+    if ((int)gb > 0)
+    {
+        printFloatSize(gb, "GB");
+        return;
+    }
+    float mb = metadata->st_size / MEGA;
+    if ((int)mb > 0)
+    {
+        printFloatSize(mb, "MB");
+        return;
+    }
+    float kb = metadata->st_size / KILO;
+    if ((int)kb > 0)
+    {
+        printFloatSize(kb, "kB");
+        return;
+    }
+    printf("%ldB\n", metadata->st_size);
+}
+
+void reveal(const char *const path, uint8_t mode, uint8_t isTranspassing)
 {
     struct stat metadata;
-    if (stat(path, &metadata))
+    if (isTranspassing ? stat(path, &metadata) : lstat(path, &metadata))
     {
         printErr("the path \"", path, "\" does not exists.");
         return;
     }
     switch (mode)
     {
+    case 1: // size
+        printf("%ld\n", metadata.st_size);
+        break;
+    case 2: // human-size
+        revealHumanSize(&metadata);
+        break;
     default:
         if (S_ISREG(metadata.st_mode))
             revealFile(path);
