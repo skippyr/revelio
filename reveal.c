@@ -1,6 +1,8 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #define PROGRAM_NAME "reveal"
 #define PROGRAM_LICENSE "Copyright (c) 2023, Sherman Rofeman. MIT license."
@@ -60,16 +62,46 @@ void printHelp()
     printf("  https://github.com/skippyr/reveal/issues\n\n");
 }
 
+void reveal(const char *path, uint8_t mode, uint8_t isTranspassing)
+{
+}
+
 int main(int argc, const char **argv)
 {
-    void *flags[][2] = {{"--version", printVersion},
-                        {"--license", printLicense},
-                        {"--help", printHelp}};
-    for (int i = 0; i < argc; i++)
-        for (int j = 0; j < sizeof(flags) / (sizeof(NULL) * 2); j++)
-            if (!strcmp(flags[j][0], argv[i]))
+    void *metaFlags[][2] = {{"--version", printVersion},
+                            {"--license", printLicense},
+                            {"--help", printHelp}};
+    for (int i = 1; i < argc; i++)
+        for (uint8_t j = 0; j < sizeof(metaFlags) / (sizeof(NULL) * 2); j++)
+            if (!strcmp(metaFlags[j][0], argv[i]))
             {
-                ((void (*)())flags[j][1])();
+                ((void (*)())metaFlags[j][1])();
                 exit(0);
             }
+    uint8_t mode = 0;
+    uint8_t isTranspassing = 0;
+    const char *modeFlags[] = {"--contents",          "--size",
+                               "--human-size",        "--owner",
+                               "--owner-uid",         "--group",
+                               "--group-uid",         "--permissions",
+                               "--human-permissions", "--modified-date"};
+    for (int i = 1; i < argc; i++)
+    {
+        uint8_t changedMode = 0;
+        for (uint8_t j = 0; j < sizeof(modeFlags) / sizeof(NULL); j++)
+            if (!strcmp(modeFlags[j], argv[i]))
+            {
+                mode = j;
+                changedMode = 1;
+                break;
+            }
+        if (changedMode)
+            continue;
+        if (!strcmp("--transpass", argv[i]))
+            isTranspassing = 1;
+        else if (!strcmp("--untranspass", argv[i]))
+            isTranspassing = 0;
+        else
+            reveal(argv[i], mode, isTranspassing);
+    }
 }
