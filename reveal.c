@@ -1,3 +1,4 @@
+#include <dirent.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,6 +8,8 @@
 #define PROGRAM_NAME "reveal"
 #define PROGRAM_LICENSE "Copyright (c) 2023, Sherman Rofeman. MIT license."
 #define PROGRAM_VERSION "v4.0.1"
+
+uint8_t exitCode = 0;
 
 void printVersion()
 {
@@ -22,7 +25,7 @@ void printHelp()
 {
     printf("Usage: %s [FLAGS]... [PATHS]...\n", PROGRAM_NAME);
     printf("Reveals informations about entries in the file system.\n\n");
-    printf("META FLAGS\n");
+    printf("METADATA FLAGS\n");
     printf("These flags show metadata about the program.\n\n");
     printf("  --help     prints theses help instructions.\n");
     printf("  --version  prints its version.\n");
@@ -62,20 +65,85 @@ void printHelp()
     printf("  https://github.com/skippyr/reveal/issues\n\n");
 }
 
+void printErr(const char *start, const char *middle, const char *end)
+{
+    fprintf(stderr, "%s: %s%s%s\n", PROGRAM_NAME, start, middle, end);
+    exitCode = 1;
+}
+
+void revealFile(const char *path)
+{
+    FILE *file = fopen(path, "r");
+    if (!file)
+    {
+        printErr("could not open file \"", path, "\".");
+        return;
+    }
+    char c;
+    while ((c = fgetc(file)) != EOF)
+    {
+        putchar(c);
+    }
+    fclose(file);
+}
+
+void revealDirectory(const char *path)
+{
+    char absPath[PATH_MAX];
+    if (!realpath(path, absPath))
+    {
+        printErr("could not resolve absolute path of \"", path, "\".");
+        return;
+    }
+    DIR *directory = opendir(path);
+    if (!directory)
+    {
+        printErr("could not open directory \"", path, "\".");
+        return;
+    }
+    const char *separator = !strcmp(absPath, "/") ? "" : "/";
+    struct dirent *entry;
+    while ((entry = readdir(directory)))
+    {
+        if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
+        {
+            continue;
+        }
+        printf("%s%s%s\n", absPath, separator, entry->d_name);
+    }
+    closedir(directory);
+}
+
 void reveal(const char *path, uint8_t mode, uint8_t isTranspassing)
 {
+    struct stat metadata;
+    if (stat(path, &metadata))
+    {
+        printErr("the path \"", path, "\" does not exists.");
+        return;
+    }
+    switch (mode)
+    {
+    default:
+        if (S_ISREG(metadata.st_mode))
+            revealFile(path);
+        else if (S_ISDIR(metadata.st_mode))
+            revealDirectory(path);
+        else
+            printErr("can not reveal the contents of \"", path, "\" type.");
+    }
 }
 
 int main(int argc, const char **argv)
 {
-    void *metaFlags[][2] = {{"--version", printVersion},
-                            {"--license", printLicense},
-                            {"--help", printHelp}};
+    void *metadataFlags[][2] = {{"--version", printVersion},
+                                {"--license", printLicense},
+                                {"--help", printHelp}};
     for (int i = 1; i < argc; i++)
-        for (uint8_t j = 0; j < sizeof(metaFlags) / (sizeof(NULL) * 2); j++)
-            if (!strcmp(metaFlags[j][0], argv[i]))
+        for (uint8_t j = 0; j < sizeof(metadataFlags) / (sizeof(NULL) * 2); j++)
+            if (!strcmp(metadataFlags[j][0], argv[i]))
             {
-                ((void (*)())metaFlags[j][1])();
+                ((void (*)())metadataFlags[j][1])();
                 exit(0);
             }
     uint8_t mode = 0;
@@ -104,4 +172,5 @@ int main(int argc, const char **argv)
         else
             reveal(argv[i], mode, isTranspassing);
     }
+    return exitCode;
 }
