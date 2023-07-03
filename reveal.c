@@ -1,4 +1,5 @@
 #include <dirent.h>
+#include <pwd.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -146,6 +147,17 @@ void revealHumanSize(struct stat *const metadata)
     printf("%ldB\n", metadata->st_size);
 }
 
+void revealOwner(struct stat *const metadata, const char *const path)
+{
+    struct passwd *const owner = getpwuid(metadata->st_uid);
+    if (!owner)
+    {
+        printErr("could not get owner of \"", path, "\".");
+        return;
+    }
+    printf("%s\n", owner->pw_name);
+}
+
 void reveal(const char *const path, uint8_t mode, uint8_t isTranspassing)
 {
     struct stat metadata;
@@ -161,6 +173,12 @@ void reveal(const char *const path, uint8_t mode, uint8_t isTranspassing)
         break;
     case 2: // human-size
         revealHumanSize(&metadata);
+        break;
+    case 3: // owner
+        revealOwner(&metadata, path);
+        break;
+    case 4: // owner-uid
+        printf("%u\n", metadata.st_uid);
         break;
     default:
         if (S_ISREG(metadata.st_mode))
