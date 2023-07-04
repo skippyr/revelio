@@ -10,7 +10,7 @@
 
 #define PROGRAM_NAME "reveal"
 #define PROGRAM_LICENSE "Copyright (c) 2023, Sherman Rofeman. MIT license."
-#define PROGRAM_VERSION "v5.0.1"
+#define PROGRAM_VERSION "v5.0.2"
 
 #define GIGA 1e9
 #define MEGA 1e6
@@ -70,6 +70,12 @@ void printHelp()
            "treated.\n\n");
     printf("  --untranspass (default)  does not resolve symlinks.\n");
     printf("  --transpass              resolves all levels of symlinks.\n\n");
+    printf("EXIT CODES\n");
+    printf("It will throw exit code 1 in the end of its execution if an "
+           "error happened.\n\n");
+    printf("However, while still able to continue, it will keep revealing the "
+           "remaining\n");
+    printf("arguments.\n\n");
     printf("SOURCE CODE\n");
     printf("Its source code is available at:\n");
     printf("  https://github.com/skippyr/reveal\n\n");
