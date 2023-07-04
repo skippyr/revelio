@@ -39,7 +39,7 @@ void printHelp()
     printf("Reveals informations about entries in the file system.\n\n");
     printf("METADATA FLAGS\n");
     printf("These flags show metadata about the program.\n\n");
-    printf("  --help     prints theses help instructions.\n");
+    printf("  --help     prints these help instructions.\n");
     printf("  --version  prints its version.\n");
     printf("  --license  prints its license.\n\n");
     printf("MODE FLAGS\n");
@@ -47,11 +47,10 @@ void printHelp()
            "entry.\n\n");
     printf("  --contents (default)  prints its contents.\n");
     printf("  --size                prints its size in bytes.\n");
-    printf("  --human-size          prints its size using the most formidable "
+    printf("  --human-size          prints its size using the most readable "
            "unit.\n");
-    printf("  --user                prints the ID of the user that owns it.\n");
-    printf(
-        "  --user-id             prints the ID of the group that owns it.\n");
+    printf("  --user                prints the user that owns it.\n");
+    printf("  --user-id             prints the ID of the user that owns it.\n");
     printf("  --group               prints the group that owns it.\n");
     printf(
         "  --group-id            prints the ID of the group that owns it.\n");
