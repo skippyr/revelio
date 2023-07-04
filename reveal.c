@@ -10,7 +10,7 @@
 
 #define PROGRAM_NAME "reveal"
 #define PROGRAM_LICENSE "Copyright (c) 2023, Sherman Rofeman. MIT license."
-#define PROGRAM_VERSION "v5.0.0"
+#define PROGRAM_VERSION "v5.0.1"
 
 #define GIGA 1e9
 #define MEGA 1e6
