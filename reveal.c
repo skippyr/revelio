@@ -93,7 +93,7 @@ void printErr(const char *const start, const char *const middle,
 
 void revealFile(const char *const path)
 {
-    FILE *file = fopen(path, "r");
+    FILE *const file = fopen(path, "r");
     if (!file)
     {
         printErr("could not open file \"", path, "\".");
@@ -115,14 +115,14 @@ void revealDirectory(const char *const path)
         printErr("could not resolve absolute path of \"", path, "\".");
         return;
     }
-    DIR *directory = opendir(path);
+    DIR *const directory = opendir(path);
     if (!directory)
     {
         printErr("could not open directory \"", path, "\".");
         return;
     }
     const char *const separator = !strcmp(absPath, "/") ? "" : "/";
-    struct dirent *entry;
+    const struct dirent *entry;
     while ((entry = readdir(directory)))
     {
         if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
@@ -141,19 +141,19 @@ void printFloatSize(const float value, const char *const separator)
 
 void revealHumanSize(const struct stat *const metadata)
 {
-    float gb = metadata->st_size / GIGA;
+    const float gb = metadata->st_size / GIGA;
     if ((int)gb > 0)
     {
         printFloatSize(gb, "GB");
         return;
     }
-    float mb = metadata->st_size / MEGA;
+    const float mb = metadata->st_size / MEGA;
     if ((int)mb > 0)
     {
         printFloatSize(mb, "MB");
         return;
     }
-    float kb = metadata->st_size / KILO;
+    const float kb = metadata->st_size / KILO;
     if ((int)kb > 0)
     {
         printFloatSize(kb, "kB");
@@ -164,7 +164,7 @@ void revealHumanSize(const struct stat *const metadata)
 
 void revealUser(const struct stat *const metadata, const char *const path)
 {
-    struct passwd *const owner = getpwuid(metadata->st_uid);
+    const struct passwd *const owner = getpwuid(metadata->st_uid);
     if (!owner)
     {
         printErr("could not get owner of \"", path, "\".");
@@ -175,7 +175,7 @@ void revealUser(const struct stat *const metadata, const char *const path)
 
 void revealGroup(const struct stat *const metadata, const char *const path)
 {
-    struct group *const group = getgrgid(metadata->st_gid);
+    const struct group *const group = getgrgid(metadata->st_gid);
     if (!group)
     {
         printErr("could not get group of \"", path, "\".");
