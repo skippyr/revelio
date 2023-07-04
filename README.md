@@ -64,13 +64,13 @@ reveal .
 Or you can make it reveal the contents of a file:
 
 ```bash
-reveal reveal.cpp
+reveal foo.txt
 ```
 
 Or even both:
 
 ```bash
-reveal . reveal.cpp
+reveal . foo.txt
 ```
 
 ### Mode Flags
@@ -81,18 +81,18 @@ changing the mode Reveal is operating using mode flags.
 For example, you can make it reveal the size in bytes of a file.
 
 ```bash
-reveal --size reveal.cpp
+reveal --size foo.txt
 ```
 
 You can also request for multiple data types of multiple entries at once:
 
 ```bash
-reveal --human-size reveal.cpp Makefile --group reveal.cpp ~ --permissions / --owner-uid ~
+reveal --human-size foo.txt ~ --group foo.txt bar.pdf --permissions / --owner-uid ~
 ```
 
 ### Transpassing Flags
 
-By default, Reveal does not follows symlinks. To change this behavior, you
+By default, Reveal does not resolve symlinks. To change this behavior, you
 can use the `--transpass` flag. For example:
 
 ```bash

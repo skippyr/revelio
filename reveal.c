@@ -68,8 +68,8 @@ void printHelp()
     printf("TRANSPASSING FLAGS\n");
     printf("These flags changes the way the metadata of symlinks are "
            "treated.\n\n");
-    printf("  --untranspass (default)  do not resolve symlinks.\n");
-    printf("  --transpass              resolve all levels of symlinks.\n\n");
+    printf("  --untranspass (default)  does not resolve symlinks.\n");
+    printf("  --transpass              resolves all levels of symlinks.\n\n");
     printf("SOURCE CODE\n");
     printf("Its source code is available at:\n");
     printf("  https://github.com/skippyr/reveal\n\n");
