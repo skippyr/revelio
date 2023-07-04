@@ -36,7 +36,7 @@ void printLicense()
 void printHelp()
 {
     printf("Usage: %s [FLAGS]... [PATHS]...\n", PROGRAM_NAME);
-    printf("Reveals informations about entries in the file system.\n\n");
+    printf("Reveals information about entries in the file system.\n\n");
     printf("METADATA FLAGS\n");
     printf("These flags show metadata about the program.\n\n");
     printf("  --help     prints these help instructions.\n");
