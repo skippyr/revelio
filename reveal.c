@@ -10,7 +10,7 @@
 
 #define PROGRAM_NAME "reveal"
 #define PROGRAM_LICENSE "Copyright (c) 2023, Sherman Rofeman. MIT license."
-#define PROGRAM_VERSION "v4.0.1"
+#define PROGRAM_VERSION "v5.0.0"
 
 #define GIGA 1e9
 #define MEGA 1e6
@@ -49,13 +49,14 @@ void printHelp()
     printf("  --size                prints its size in bytes.\n");
     printf("  --human-size          prints its size using the most formidable "
            "unit.\n");
-    printf("  --owner               prints its owner.\n");
-    printf("  --owner-uid           prints its owner's UID.\n");
+    printf("  --user                prints the ID of the user that owns it.\n");
+    printf(
+        "  --user-id             prints the ID of the group that owns it.\n");
     printf("  --group               prints the group that owns it.\n");
     printf(
-        "  --group-uid           prints the UID of the group that owns it.\n");
+        "  --group-id            prints the ID of the group that owns it.\n");
     printf("  --permissions         prints its permissions in octal base.\n");
-    printf("  --human-permissions   prints its permissions for owner, group "
+    printf("  --human-permissions   prints its permissions for user, group "
            "and others,\n");
     printf(
         "                        respectively, using three set of characters "
@@ -68,14 +69,14 @@ void printHelp()
     printf("TRANSPASSING FLAGS\n");
     printf("These flags changes the way the metadata of symlinks are "
            "treated.\n\n");
-    printf("  --untranspass (default)  do not follow symlinks.\n");
+    printf("  --untranspass (default)  do not resolve symlinks.\n");
     printf("  --transpass              resolve all levels of symlinks.\n\n");
     printf("SOURCE CODE\n");
     printf("Its source code is available at:\n");
     printf("  https://github.com/skippyr/reveal\n\n");
     printf("ISSUES\n");
     printf("Report issues found in this program at:\n");
-    printf("  https://github.com/skippyr/reveal/issues\n\n");
+    printf("  https://github.com/skippyr/reveal/issues\n");
 }
 
 void printErr(const char *const start, const char *const middle,
@@ -156,7 +157,7 @@ void revealHumanSize(const struct stat *const metadata)
     printf("%ldB\n", metadata->st_size);
 }
 
-void revealOwner(const struct stat *const metadata, const char *const path)
+void revealUser(const struct stat *const metadata, const char *const path)
 {
     struct passwd *const owner = getpwuid(metadata->st_uid);
     if (!owner)
@@ -210,7 +211,8 @@ void revealModifiedDate(const struct stat *const metadata)
     printf("%s\n", date);
 }
 
-void reveal(const char *const path, uint8_t mode, uint8_t isTranspassing)
+void reveal(const char *const path, const uint8_t mode,
+            const uint8_t isTranspassing)
 {
     struct stat metadata;
     if (isTranspassing ? stat(path, &metadata) : lstat(path, &metadata))
@@ -226,10 +228,10 @@ void reveal(const char *const path, uint8_t mode, uint8_t isTranspassing)
     case 2: // human-size
         revealHumanSize(&metadata);
         break;
-    case 3: // owner
-        revealOwner(&metadata, path);
+    case 3: // user
+        revealUser(&metadata, path);
         break;
-    case 4: // owner-uid
+    case 4: // user-uid
         printf("%u\n", metadata.st_uid);
         break;
     case 5: // group
@@ -277,8 +279,8 @@ int main(int argc, const char **argv)
     uint8_t mode = 0;
     uint8_t isTranspassing = 0;
     const char *modeFlags[] = {
-        "--contents",          "--size",  "--human-size",   "--owner",
-        "--owner-uid",         "--group", "--group-uid",    "--permissions",
+        "--contents",          "--size",  "--human-size",   "--user",
+        "--user-id",           "--group", "--group-id",     "--permissions",
         "--human-permissions", "--inode", "--modified-date"};
     for (int i = 1; i < argc; i++)
     {
