@@ -10,7 +10,7 @@
 
 #define PROGRAM_NAME "reveal"
 #define PROGRAM_LICENSE "Copyright (c) 2023, Sherman Rofeman. MIT license."
-#define PROGRAM_VERSION "v5.0.2"
+#define PROGRAM_VERSION "v5.1.0"
 
 #define GIGA 1e9
 #define MEGA 1e6
@@ -42,10 +42,11 @@ void printHelp()
     printf("  --help     prints these help instructions.\n");
     printf("  --version  prints its version.\n");
     printf("  --license  prints its license.\n\n");
-    printf("MODE FLAGS\n");
-    printf("These flags change the mode the program will use when revealing an "
-           "entry.\n\n");
+    printf("DATA TYPE FLAGS\n");
+    printf("These flags change what data type the program will reveal from the "
+           "entries.\n\n");
     printf("  --contents (default)  prints its contents.\n");
+    printf("  --type                prints its type.\n");
     printf("  --size                prints its size in bytes.\n");
     printf("  --human-size          prints its size using the most readable "
            "unit.\n");
@@ -66,8 +67,7 @@ void printHelp()
     printf("  --modified-date       prints the date where its contents were "
            "last modified.\n\n");
     printf("TRANSPASSING FLAGS\n");
-    printf("These flags changes the way the metadata of symlinks are "
-           "treated.\n\n");
+    printf("These flags changes the way the symlinks must be handled.\n\n");
     printf("  --untranspass (default)  does not resolve symlinks.\n");
     printf("  --transpass              resolves all levels of symlinks.\n\n");
     printf("EXIT CODES\n");
@@ -76,6 +76,7 @@ void printHelp()
     printf("However, while still able to continue, it will keep revealing the "
            "remaining\n");
     printf("arguments.\n\n");
+    printf("All the errors found will be reported through stderr.\n\n");
     printf("SOURCE CODE\n");
     printf("Its source code is available at:\n");
     printf("  https://github.com/skippyr/reveal\n\n");
@@ -134,6 +135,26 @@ void revealDirectory(const char *const path)
     closedir(directory);
 }
 
+void revealType(const struct stat *const metadata)
+{
+    if (S_ISREG(metadata->st_mode))
+        printf("File\n");
+    else if (S_ISDIR(metadata->st_mode))
+        printf("Directory\n");
+    else if (S_ISBLK(metadata->st_mode))
+        printf("Block\n");
+    else if (S_ISCHR(metadata->st_mode))
+        printf("Character\n");
+    else if (S_ISFIFO(metadata->st_mode))
+        printf("Fifo\n");
+    else if (S_ISLNK(metadata->st_mode))
+        printf("Symlink\n");
+    else if (S_ISSOCK(metadata->st_mode))
+        printf("Socket\n");
+    else
+        printf("Broken\n");
+}
+
 void printFloatSize(const float value, const char *const separator)
 {
     printf("%.1f%s\n", value, separator);
@@ -142,19 +163,19 @@ void printFloatSize(const float value, const char *const separator)
 void revealHumanSize(const struct stat *const metadata)
 {
     const float gb = metadata->st_size / GIGA;
-    if ((int)gb > 0)
+    if ((int)gb)
     {
         printFloatSize(gb, "GB");
         return;
     }
     const float mb = metadata->st_size / MEGA;
-    if ((int)mb > 0)
+    if ((int)mb)
     {
         printFloatSize(mb, "MB");
         return;
     }
     const float kb = metadata->st_size / KILO;
-    if ((int)kb > 0)
+    if ((int)kb)
     {
         printFloatSize(kb, "kB");
         return;
@@ -216,7 +237,7 @@ void revealModifiedDate(const struct stat *const metadata)
     printf("%s\n", date);
 }
 
-void reveal(const char *const path, const uint8_t mode,
+void reveal(const char *const path, const uint8_t dataType,
             const uint8_t isTranspassing)
 {
     struct stat metadata;
@@ -225,38 +246,41 @@ void reveal(const char *const path, const uint8_t mode,
         printErr("the path \"", path, "\" does not exists.");
         return;
     }
-    switch (mode)
+    switch (dataType)
     {
-    case 1: // size
+    case 1: // type
+        revealType(&metadata);
+        break;
+    case 2: // size
         printf("%ld\n", metadata.st_size);
         break;
-    case 2: // human-size
+    case 3: // human-size
         revealHumanSize(&metadata);
         break;
-    case 3: // user
+    case 4: // user
         revealUser(&metadata, path);
         break;
-    case 4: // user-uid
+    case 5: // user-uid
         printf("%u\n", metadata.st_uid);
         break;
-    case 5: // group
+    case 6: // group
         revealGroup(&metadata, path);
         break;
-    case 6: // group-uid
+    case 7: // group-uid
         printf("%u\n", metadata.st_gid);
         break;
-    case 7: // permissions
+    case 8: // permissions
         printf("0%o\n", metadata.st_mode &
                             (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP |
                              S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH));
         break;
-    case 8: // human-permissions
+    case 9: // human-permissions
         revealHumanPermissions(&metadata);
         break;
-    case 9: // inode
+    case 10: // inode
         printf("%lu\n", metadata.st_ino);
         break;
-    case 10: // modified-date
+    case 11: // modified-date
         revealModifiedDate(&metadata);
         break;
     default: // contents
@@ -281,19 +305,21 @@ int main(int argc, const char **argv)
                 ((void (*)())metadataFlags[j][1])();
                 exit(0);
             }
-    uint8_t mode = 0;
+    uint8_t dataType = 0;
     uint8_t isTranspassing = 0;
-    const char *modeFlags[] = {
-        "--contents",          "--size",  "--human-size",   "--user",
-        "--user-id",           "--group", "--group-id",     "--permissions",
-        "--human-permissions", "--inode", "--modified-date"};
+    const char *dataTypeFlags[] = {"--contents",    "--type",
+                                   "--size",        "--human-size",
+                                   "--user",        "--user-id",
+                                   "--group",       "--group-id",
+                                   "--permissions", "--human-permissions",
+                                   "--inode",       "--modified-date"};
     for (int i = 1; i < argc; i++)
     {
         uint8_t changedMode = 0;
-        for (uint8_t j = 0; j < sizeof(modeFlags) / sizeof(NULL); j++)
-            if (!strcmp(modeFlags[j], argv[i]))
+        for (uint8_t j = 0; j < sizeof(dataTypeFlags) / sizeof(NULL); j++)
+            if (!strcmp(dataTypeFlags[j], argv[i]))
             {
-                mode = j;
+                dataType = j;
                 changedMode = 1;
                 break;
             }
@@ -304,7 +330,7 @@ int main(int argc, const char **argv)
         else if (!strcmp("--untranspass", argv[i]))
             isTranspassing = 0;
         else
-            reveal(argv[i], mode, isTranspassing);
+            reveal(argv[i], dataType, isTranspassing);
     }
     return exitCode;
 }

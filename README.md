@@ -73,12 +73,13 @@ Or even both:
 reveal . foo.txt
 ```
 
-### Mode Flags
+### Data Type Flags
 
-You can change what type of information to retrive from your entries by
-changing the mode Reveal is operating using mode flags.
+You can change what is the data type you want to retrive from your entries by
+using the data type flags.
 
-For example, you can make it reveal the size in bytes of a file.
+By default, it will reveal the contents of the entries, but let's say, for
+example, you want instead to make it reveal the size in bytes of a file:
 
 ```bash
 reveal --size foo.txt
@@ -90,6 +91,8 @@ You can also request for multiple data types of multiple entries at once:
 reveal --human-size foo.txt ~ --group foo.txt bar.pdf --permissions / --owner-uid ~
 ```
 
+Each flag used will affect the arguments that follow it.
+
 ### Transpassing Flags
 
 By default, Reveal does not resolve symlinks. To change this behavior, you
@@ -100,6 +103,9 @@ reveal --transpass --size link.txt --human-permissions link.txt
 ```
 
 You can counter this flag using `--untranspass` flag.
+
+And similarly to the data type flags, each flag used will affect the arguments
+that follow it.
 
 ### Help
 
