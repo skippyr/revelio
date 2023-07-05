@@ -1,8 +1,8 @@
 file=reveal
-opt=z
+optz=z
 
 ${file}:
-	clang ${file}.c -o ${file} -O${opt}
+	clang ${file}.c -o ${file} -O${optz}
 
-.PHONY: ${file} run
+.PHONY: ${file}
 
