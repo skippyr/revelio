@@ -9,11 +9,22 @@
 #define PROGRAM_LICENSE "Copyright (c) 2023, Sherman Rofeman. MIT license."
 #define PROGRAM_VERSION "v5.2.0"
 
+#define GIGA 1e9
+#define MEGA 1e6
+#define KILO 1e3
+
 #define PARSE_METADATA_FLAG(flag, function, argument)                          \
     if (!strcmp(flag, argument))                                               \
     {                                                                          \
         function;                                                              \
         exit(EXIT_SUCCESS);                                                    \
+    }
+#define PARSE_SIZE(buffer, metadata, multiplier, unit)                         \
+    buffer = metadata->st_size / (multiplier);                                 \
+    if ((int)buffer)                                                           \
+    {                                                                          \
+        printf("%.1f%s\n", buffer, unit);                                      \
+        return;                                                                \
     }
 #define CASE_FUNCTION(value, function)                                         \
     case (value):                                                              \
@@ -22,16 +33,6 @@
 #define CASE_PUTS(value, text) CASE_FUNCTION(value, puts(text))
 
 uint8_t exitCode = EXIT_SUCCESS;
-
-void PrintLicense()
-{
-    puts(PROGRAM_LICENSE);
-}
-
-void PrintVersion()
-{
-    puts(PROGRAM_VERSION);
-}
 
 void PrintHelp()
 {
@@ -119,6 +120,15 @@ void RevealType(const struct stat *const metadata)
     }
 }
 
+void RevealHumanSize(const struct stat *const metadata)
+{
+    float size;
+    PARSE_SIZE(size, metadata, GIGA, "GB")
+    PARSE_SIZE(size, metadata, MEGA, "MB")
+    PARSE_SIZE(size, metadata, KILO, "KB")
+    printf("%ldB\n", metadata->st_size);
+}
+
 void RevealFile(const char *const path)
 {
     FILE *const file = fopen(path, "r");
@@ -171,10 +181,10 @@ void Reveal(const char *const path, const uint8_t dataType,
     }
     switch (dataType)
     {
-    case 1: // --type
-        RevealType(&metadata);
-        break;
-    default: // --contents
+        CASE_FUNCTION(1, RevealType(&metadata))             // --type
+        CASE_FUNCTION(2, printf("%ld\n", metadata.st_size)) // --size
+        CASE_FUNCTION(3, RevealHumanSize(&metadata))        // --human-size
+    default:                                                // --contents
         switch (metadata.st_mode & S_IFMT)
         {
             CASE_FUNCTION(S_IFREG, RevealFile(path))
@@ -190,9 +200,9 @@ int main(int quantityOfArguments, const char **arguments)
 {
     for (int i = 1; i < quantityOfArguments; i++)
     {
-        PARSE_METADATA_FLAG("--license", PrintLicense(), arguments[i]);
+        PARSE_METADATA_FLAG("--license", puts(PROGRAM_LICENSE), arguments[i]);
         PARSE_METADATA_FLAG("--help", PrintHelp(), arguments[i]);
-        PARSE_METADATA_FLAG("--version", PrintVersion(), arguments[i]);
+        PARSE_METADATA_FLAG("--version", puts(PROGRAM_VERSION), arguments[i]);
     }
     const char *dataTypeFlags[] = {"--contents",    "--type",
                                    "--size",        "--human-size",
