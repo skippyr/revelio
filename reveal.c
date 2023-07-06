@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <time.h>
 
 #define PROGRAM_NAME "reveal"
 #define PROGRAM_LICENSE "Copyright (c) 2023, Sherman Rofeman. MIT license."
@@ -38,6 +39,7 @@
         function;                                                              \
         break;
 #define CASE_PUTS(value, text) CASE_FUNCTION(value, puts(text))
+#define PRINT_ERROR(description) PrintComposedError(description, "", "")
 
 uint8_t exitCode = EXIT_SUCCESS;
 
@@ -79,6 +81,10 @@ void PrintHelp()
     puts("  --inode               prints its serial number.");
     puts("  --modified-date       prints the date where its contents were "
          "last modified.");
+    puts("  --changed-date        prints the date where its status was last "
+         "changed.");
+    puts("  --accessed-date       prints the date where its contents were "
+         "last accessed.");
     puts("");
     puts("TRANSPASSING FLAGS");
     puts("These flags changes the way the symlinks must be handled.");
@@ -177,6 +183,17 @@ void RevealHumanPermissions(const struct stat *const metadata)
     putchar('\n');
 }
 
+void RevealDate(const time_t *const date)
+{
+    char buffer[29];
+    if (!strftime(buffer, sizeof(buffer), "%a %b %d %T %Z %Y", localtime(date)))
+    {
+        PRINT_ERROR("overflowed buffer to store date.");
+        return;
+    }
+    puts(buffer);
+}
+
 void RevealFile(const char *const path)
 {
     FILE *const file = fopen(path, "r");
@@ -244,7 +261,11 @@ void Reveal(const char *const path, const uint8_t dataType,
                                     S_IXOTH))) // --permissions
         CASE_FUNCTION(10,
                       RevealHumanPermissions(&metadata)) // --human-permissions
-    default:                                             // --contents
+        CASE_FUNCTION(11, printf("%lu\n", metadata.st_ino)) // --inode
+        CASE_FUNCTION(12, RevealDate(&metadata.st_mtime))   // --modified-date
+        CASE_FUNCTION(13, RevealDate(&metadata.st_ctime))   // --changed-date
+        CASE_FUNCTION(14, RevealDate(&metadata.st_atime))   // --accessed-date
+    default:                                                // --contents
         switch (metadata.st_mode & S_IFMT)
         {
             CASE_FUNCTION(S_IFREG, RevealFile(path))
@@ -276,7 +297,9 @@ int main(int quantityOfArguments, const char **arguments)
                                    "--permissions",
                                    "--human-permissions",
                                    "--inode",
-                                   "--modified-date"};
+                                   "--modified-date",
+                                   "--changed-date",
+                                   "--accessed-date"};
     uint8_t dataType = 0, isTranspassing = 0;
     for (int i = 1; i < quantityOfArguments; i++)
     {
