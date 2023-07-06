@@ -10,7 +10,7 @@
 
 #define PROGRAM_NAME "reveal"
 #define PROGRAM_LICENSE "Copyright (c) 2023, Sherman Rofeman. MIT license."
-#define PROGRAM_VERSION "v5.1.0"
+#define PROGRAM_VERSION "v5.2.0"
 
 #define GIGA 1e9
 #define MEGA 1e6
@@ -23,17 +23,17 @@
 
 uint8_t exitCode = 0;
 
-void printVersion()
+void PrintVersion()
 {
     printf("%s\n", PROGRAM_VERSION);
 }
 
-void printLicense()
+void PrintLicense()
 {
     printf("%s\n", PROGRAM_LICENSE);
 }
 
-void printHelp()
+void PrintHelp()
 {
     printf("Usage: %s [FLAGS]... [PATHS]...\n", PROGRAM_NAME);
     printf("Reveals information about entries in the file system.\n\n");
@@ -85,19 +85,19 @@ void printHelp()
     printf("  https://github.com/skippyr/reveal/issues\n");
 }
 
-void printErr(const char *const start, const char *const middle,
-              const char *const end)
+void PrintError(const char *const start, const char *const middle,
+                const char *const end)
 {
     fprintf(stderr, "%s: %s%s%s\n", PROGRAM_NAME, start, middle, end);
     exitCode = 1;
 }
 
-void revealFile(const char *const path)
+void RevealFile(const char *const path)
 {
     FILE *const file = fopen(path, "r");
     if (!file)
     {
-        printErr("could not open file \"", path, "\".");
+        PrintError("could not open file \"", path, "\".");
         return;
     }
     char c;
@@ -108,18 +108,18 @@ void revealFile(const char *const path)
     fclose(file);
 }
 
-void revealDirectory(const char *const path)
+void RevealDirectory(const char *const path)
 {
     char absPath[PATH_MAX];
     if (!realpath(path, absPath))
     {
-        printErr("could not resolve absolute path of \"", path, "\".");
+        PrintError("could not resolve absolute path of \"", path, "\".");
         return;
     }
     DIR *const directory = opendir(path);
     if (!directory)
     {
-        printErr("could not open directory \"", path, "\".");
+        PrintError("could not open directory \"", path, "\".");
         return;
     }
     const char *const separator = !strcmp(absPath, "/") ? "" : "/";
@@ -135,7 +135,7 @@ void revealDirectory(const char *const path)
     closedir(directory);
 }
 
-void revealType(const struct stat *const metadata)
+void RevealType(const struct stat *const metadata)
 {
     if (S_ISREG(metadata->st_mode))
         printf("File\n");
@@ -155,7 +155,7 @@ void revealType(const struct stat *const metadata)
         printf("Broken\n");
 }
 
-void printFloatSize(const float value, const char *const separator)
+void PrintFloatSize(const float value, const char *const separator)
 {
     printf("%.1f%s\n", value, separator);
 }
@@ -165,47 +165,47 @@ void revealHumanSize(const struct stat *const metadata)
     const float gb = metadata->st_size / GIGA;
     if ((int)gb)
     {
-        printFloatSize(gb, "GB");
+        PrintFloatSize(gb, "GB");
         return;
     }
     const float mb = metadata->st_size / MEGA;
     if ((int)mb)
     {
-        printFloatSize(mb, "MB");
+        PrintFloatSize(mb, "MB");
         return;
     }
     const float kb = metadata->st_size / KILO;
     if ((int)kb)
     {
-        printFloatSize(kb, "kB");
+        PrintFloatSize(kb, "kB");
         return;
     }
     printf("%ldB\n", metadata->st_size);
 }
 
-void revealUser(const struct stat *const metadata, const char *const path)
+void RevealUser(const struct stat *const metadata, const char *const path)
 {
     const struct passwd *const owner = getpwuid(metadata->st_uid);
     if (!owner)
     {
-        printErr("could not get owner of \"", path, "\".");
+        PrintError("could not get owner of \"", path, "\".");
         return;
     }
     printf("%s\n", owner->pw_name);
 }
 
-void revealGroup(const struct stat *const metadata, const char *const path)
+void RevealGroup(const struct stat *const metadata, const char *const path)
 {
     const struct group *const group = getgrgid(metadata->st_gid);
     if (!group)
     {
-        printErr("could not get group of \"", path, "\".");
+        PrintError("could not get group of \"", path, "\".");
         return;
     }
     printf("%s\n", group->gr_name);
 }
 
-void revealHumanPermissions(const struct stat *const metadata)
+void RevealHumanPermissions(const struct stat *const metadata)
 {
     unsigned permissions[9] = {S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP, S_IWGRP,
                                S_IXGRP, S_IROTH, S_IWOTH, S_IXOTH};
@@ -225,31 +225,31 @@ void revealHumanPermissions(const struct stat *const metadata)
     printf("\n");
 }
 
-void revealModifiedDate(const struct stat *const metadata)
+void RevealModifiedDate(const struct stat *const metadata)
 {
     char date[29];
     if (!strftime(date, sizeof(date), "%a %b %d %T %Z %Y",
                   localtime(&metadata->st_mtime)))
     {
-        printErr("overflowed buffer to store date.", "", "");
+        PrintError("overflowed buffer to store date.", "", "");
         return;
     }
     printf("%s\n", date);
 }
 
-void reveal(const char *const path, const uint8_t dataType,
+void Reveal(const char *const path, const uint8_t dataType,
             const uint8_t isTranspassing)
 {
     struct stat metadata;
     if (isTranspassing ? stat(path, &metadata) : lstat(path, &metadata))
     {
-        printErr("the path \"", path, "\" does not exists.");
+        PrintError("the path \"", path, "\" does not exists.");
         return;
     }
     switch (dataType)
     {
     case 1: // type
-        revealType(&metadata);
+        RevealType(&metadata);
         break;
     case 2: // size
         printf("%ld\n", metadata.st_size);
@@ -258,13 +258,13 @@ void reveal(const char *const path, const uint8_t dataType,
         revealHumanSize(&metadata);
         break;
     case 4: // user
-        revealUser(&metadata, path);
+        RevealUser(&metadata, path);
         break;
     case 5: // user-uid
         printf("%u\n", metadata.st_uid);
         break;
     case 6: // group
-        revealGroup(&metadata, path);
+        RevealGroup(&metadata, path);
         break;
     case 7: // group-uid
         printf("%u\n", metadata.st_gid);
@@ -275,29 +275,29 @@ void reveal(const char *const path, const uint8_t dataType,
                              S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH));
         break;
     case 9: // human-permissions
-        revealHumanPermissions(&metadata);
+        RevealHumanPermissions(&metadata);
         break;
     case 10: // inode
         printf("%lu\n", metadata.st_ino);
         break;
     case 11: // modified-date
-        revealModifiedDate(&metadata);
+        RevealModifiedDate(&metadata);
         break;
     default: // contents
         if (S_ISREG(metadata.st_mode))
-            revealFile(path);
+            RevealFile(path);
         else if (S_ISDIR(metadata.st_mode))
-            revealDirectory(path);
+            RevealDirectory(path);
         else
-            printErr("can not reveal the contents of \"", path, "\" type.");
+            PrintError("can not reveal the contents of \"", path, "\" type.");
     }
 }
 
 int main(int argc, const char **argv)
 {
-    void *metadataFlags[][2] = {{"--version", printVersion},
-                                {"--license", printLicense},
-                                {"--help", printHelp}};
+    void *metadataFlags[][2] = {{"--version", PrintVersion},
+                                {"--license", PrintLicense},
+                                {"--help", PrintHelp}};
     for (int i = 1; i < argc; i++)
         for (uint8_t j = 0; j < sizeof(metadataFlags) / (sizeof(NULL) * 2); j++)
             if (!strcmp(metadataFlags[j][0], argv[i]))
@@ -330,7 +330,7 @@ int main(int argc, const char **argv)
         else if (!strcmp("--untranspass", argv[i]))
             isTranspassing = 0;
         else
-            reveal(argv[i], dataType, isTranspassing);
+            Reveal(argv[i], dataType, isTranspassing);
     }
     return exitCode;
 }
