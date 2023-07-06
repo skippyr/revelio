@@ -9,12 +9,17 @@
 #define PROGRAM_LICENSE "Copyright (c) 2023, Sherman Rofeman. MIT license."
 #define PROGRAM_VERSION "v5.2.0"
 
-#define PARSE_METADATA_FLAG(flag, fct, arg)                                    \
-    if (!strcmp(flag, arg))                                                    \
+#define PARSE_METADATA_FLAG(flag, function, argument)                          \
+    if (!strcmp(flag, argument))                                               \
     {                                                                          \
-        fct();                                                                 \
-        exit(0);                                                               \
+        function;                                                              \
+        exit(EXIT_SUCCESS);                                                    \
     }
+#define CASE_FUNCTION(value, function)                                         \
+    case (value):                                                              \
+        function;                                                              \
+        break;
+#define CASE_PUTS(value, text) CASE_FUNCTION(value, puts(text))
 
 uint8_t exitCode = EXIT_SUCCESS;
 
@@ -102,27 +107,13 @@ void RevealType(const struct stat *const metadata)
 {
     switch (metadata->st_mode & S_IFMT)
     {
-    case S_IFBLK:
-        puts("Block");
-        break;
-    case S_IFCHR:
-        puts("Character");
-        break;
-    case S_IFDIR:
-        puts("Directory");
-        break;
-    case S_IFIFO:
-        puts("Fifo");
-        break;
-    case S_IFLNK:
-        puts("Symlink");
-        break;
-    case S_IFREG:
-        puts("File");
-        break;
-    case S_IFSOCK:
-        puts("Socket");
-        break;
+        CASE_PUTS(S_IFBLK, "Block")
+        CASE_PUTS(S_IFCHR, "Character")
+        CASE_PUTS(S_IFDIR, "Directory")
+        CASE_PUTS(S_IFIFO, "Fifo")
+        CASE_PUTS(S_IFLNK, "Symlink")
+        CASE_PUTS(S_IFREG, "File")
+        CASE_PUTS(S_IFSOCK, "Socket");
     default:
         puts("Unknown");
     }
@@ -186,12 +177,8 @@ void Reveal(const char *const path, const uint8_t dataType,
     default: // --contents
         switch (metadata.st_mode & S_IFMT)
         {
-        case S_IFREG:
-            RevealFile(path);
-            break;
-        case S_IFDIR:
-            RevealDirectory(path);
-            break;
+            CASE_FUNCTION(S_IFREG, RevealFile(path))
+            CASE_FUNCTION(S_IFDIR, RevealDirectory(path))
         default:
             PrintComposedError("can not reveal the contents of \"", path,
                                "\" type.");
@@ -203,9 +190,9 @@ int main(int quantityOfArguments, const char **arguments)
 {
     for (int i = 1; i < quantityOfArguments; i++)
     {
-        PARSE_METADATA_FLAG("--license", PrintLicense, arguments[i]);
-        PARSE_METADATA_FLAG("--help", PrintHelp, arguments[i]);
-        PARSE_METADATA_FLAG("--version", PrintVersion, arguments[i]);
+        PARSE_METADATA_FLAG("--license", PrintLicense(), arguments[i]);
+        PARSE_METADATA_FLAG("--help", PrintHelp(), arguments[i]);
+        PARSE_METADATA_FLAG("--version", PrintVersion(), arguments[i]);
     }
     const char *dataTypeFlags[] = {"--contents",    "--type",
                                    "--size",        "--human-size",
