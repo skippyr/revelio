@@ -1,336 +1,96 @@
-#include <dirent.h>
-#include <grp.h>
-#include <pwd.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <time.h>
 
 #define PROGRAM_NAME "reveal"
 #define PROGRAM_LICENSE "Copyright (c) 2023, Sherman Rofeman. MIT license."
 #define PROGRAM_VERSION "v5.2.0"
 
-#define GIGA 1e9
-#define MEGA 1e6
-#define KILO 1e3
-
-#define READ_CHAR 'r'
-#define WRITE_CHAR 'w'
-#define EXEC_CHAR 'x'
-#define LACK_CHAR '-'
-
-uint8_t exitCode = 0;
-
-void PrintVersion()
-{
-    printf("%s\n", PROGRAM_VERSION);
-}
+#define PARSE_METADATA_FLAG(flag, fct, arg)                                    \
+    if (!strcmp(flag, arg))                                                    \
+    {                                                                          \
+        fct();                                                                 \
+        exit(0);                                                               \
+    }
 
 void PrintLicense()
 {
-    printf("%s\n", PROGRAM_LICENSE);
+    puts(PROGRAM_LICENSE);
+}
+
+void PrintVersion()
+{
+    puts(PROGRAM_VERSION);
 }
 
 void PrintHelp()
 {
     printf("Usage: %s [FLAGS]... [PATHS]...\n", PROGRAM_NAME);
-    printf("Reveals information about entries in the file system.\n\n");
-    printf("METADATA FLAGS\n");
-    printf("These flags show metadata about the program.\n\n");
-    printf("  --help     prints these help instructions.\n");
-    printf("  --version  prints its version.\n");
-    printf("  --license  prints its license.\n\n");
-    printf("DATA TYPE FLAGS\n");
-    printf("These flags change what data type the program will reveal from the "
-           "entries.\n\n");
-    printf("  --contents (default)  prints its contents.\n");
-    printf("  --type                prints its type.\n");
-    printf("  --size                prints its size in bytes.\n");
-    printf("  --human-size          prints its size using the most readable "
-           "unit.\n");
-    printf("  --user                prints the user that owns it.\n");
-    printf("  --user-id             prints the ID of the user that owns it.\n");
-    printf("  --group               prints the group that owns it.\n");
-    printf(
-        "  --group-id            prints the ID of the group that owns it.\n");
-    printf("  --permissions         prints its permissions in octal base.\n");
-    printf("  --human-permissions   prints its permissions for user, group "
-           "and others,\n");
-    printf(
-        "                        respectively, using three set of characters "
-        "each:\n");
-    printf("                        read (r), write (w), execute (x) and lack "
-           "(-).\n");
-    printf("  --inode               prints its serial number.\n");
-    printf("  --modified-date       prints the date where its contents were "
-           "last modified.\n\n");
-    printf("TRANSPASSING FLAGS\n");
-    printf("These flags changes the way the symlinks must be handled.\n\n");
-    printf("  --untranspass (default)  does not resolve symlinks.\n");
-    printf("  --transpass              resolves all levels of symlinks.\n\n");
-    printf("EXIT CODES\n");
-    printf("It will throw exit code 1 in the end of its execution if an "
-           "error happened.\n\n");
-    printf("However, while still able to continue, it will keep revealing the "
-           "remaining\n");
-    printf("arguments.\n\n");
-    printf("All the errors found will be reported through stderr.\n\n");
-    printf("SOURCE CODE\n");
-    printf("Its source code is available at:\n");
-    printf("  https://github.com/skippyr/reveal\n\n");
-    printf("ISSUES\n");
-    printf("Report issues found in this program at:\n");
-    printf("  https://github.com/skippyr/reveal/issues\n");
-}
-
-void PrintError(const char *const start, const char *const middle,
-                const char *const end)
-{
-    fprintf(stderr, "%s: %s%s%s\n", PROGRAM_NAME, start, middle, end);
-    exitCode = 1;
-}
-
-void RevealFile(const char *const path)
-{
-    FILE *const file = fopen(path, "r");
-    if (!file)
-    {
-        PrintError("could not open file \"", path, "\".");
-        return;
-    }
-    char c;
-    while ((c = fgetc(file)) != EOF)
-    {
-        putchar(c);
-    }
-    fclose(file);
-}
-
-void RevealDirectory(const char *const path)
-{
-    char absPath[PATH_MAX];
-    if (!realpath(path, absPath))
-    {
-        PrintError("could not resolve absolute path of \"", path, "\".");
-        return;
-    }
-    DIR *const directory = opendir(path);
-    if (!directory)
-    {
-        PrintError("could not open directory \"", path, "\".");
-        return;
-    }
-    const char *const separator = !strcmp(absPath, "/") ? "" : "/";
-    const struct dirent *entry;
-    while ((entry = readdir(directory)))
-    {
-        if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
-        {
-            continue;
-        }
-        printf("%s%s%s\n", absPath, separator, entry->d_name);
-    }
-    closedir(directory);
-}
-
-void RevealType(const struct stat *const metadata)
-{
-    if (S_ISREG(metadata->st_mode))
-        printf("File\n");
-    else if (S_ISDIR(metadata->st_mode))
-        printf("Directory\n");
-    else if (S_ISBLK(metadata->st_mode))
-        printf("Block\n");
-    else if (S_ISCHR(metadata->st_mode))
-        printf("Character\n");
-    else if (S_ISFIFO(metadata->st_mode))
-        printf("Fifo\n");
-    else if (S_ISLNK(metadata->st_mode))
-        printf("Symlink\n");
-    else if (S_ISSOCK(metadata->st_mode))
-        printf("Socket\n");
-    else
-        printf("Broken\n");
-}
-
-void PrintFloatSize(const float value, const char *const separator)
-{
-    printf("%.1f%s\n", value, separator);
-}
-
-void revealHumanSize(const struct stat *const metadata)
-{
-    const float gb = metadata->st_size / GIGA;
-    if ((int)gb)
-    {
-        PrintFloatSize(gb, "GB");
-        return;
-    }
-    const float mb = metadata->st_size / MEGA;
-    if ((int)mb)
-    {
-        PrintFloatSize(mb, "MB");
-        return;
-    }
-    const float kb = metadata->st_size / KILO;
-    if ((int)kb)
-    {
-        PrintFloatSize(kb, "kB");
-        return;
-    }
-    printf("%ldB\n", metadata->st_size);
-}
-
-void RevealUser(const struct stat *const metadata, const char *const path)
-{
-    const struct passwd *const owner = getpwuid(metadata->st_uid);
-    if (!owner)
-    {
-        PrintError("could not get owner of \"", path, "\".");
-        return;
-    }
-    printf("%s\n", owner->pw_name);
-}
-
-void RevealGroup(const struct stat *const metadata, const char *const path)
-{
-    const struct group *const group = getgrgid(metadata->st_gid);
-    if (!group)
-    {
-        PrintError("could not get group of \"", path, "\".");
-        return;
-    }
-    printf("%s\n", group->gr_name);
-}
-
-void RevealHumanPermissions(const struct stat *const metadata)
-{
-    unsigned permissions[9] = {S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP, S_IWGRP,
-                               S_IXGRP, S_IROTH, S_IWOTH, S_IXOTH};
-    for (uint8_t i = 0; i < 9; i++)
-    {
-        char c;
-        if (!(metadata->st_mode & permissions[i]))
-            c = LACK_CHAR;
-        else if (i == 0 || i == 3 || i == 6)
-            c = READ_CHAR;
-        else if (i == 1 || i == 4 || i == 7)
-            c = WRITE_CHAR;
-        else
-            c = EXEC_CHAR;
-        putchar(c);
-    }
-    printf("\n");
-}
-
-void RevealModifiedDate(const struct stat *const metadata)
-{
-    char date[29];
-    if (!strftime(date, sizeof(date), "%a %b %d %T %Z %Y",
-                  localtime(&metadata->st_mtime)))
-    {
-        PrintError("overflowed buffer to store date.", "", "");
-        return;
-    }
-    printf("%s\n", date);
-}
-
-void Reveal(const char *const path, const uint8_t dataType,
-            const uint8_t isTranspassing)
-{
-    struct stat metadata;
-    if (isTranspassing ? stat(path, &metadata) : lstat(path, &metadata))
-    {
-        PrintError("the path \"", path, "\" does not exists.");
-        return;
-    }
-    switch (dataType)
-    {
-    case 1: // type
-        RevealType(&metadata);
-        break;
-    case 2: // size
-        printf("%ld\n", metadata.st_size);
-        break;
-    case 3: // human-size
-        revealHumanSize(&metadata);
-        break;
-    case 4: // user
-        RevealUser(&metadata, path);
-        break;
-    case 5: // user-uid
-        printf("%u\n", metadata.st_uid);
-        break;
-    case 6: // group
-        RevealGroup(&metadata, path);
-        break;
-    case 7: // group-uid
-        printf("%u\n", metadata.st_gid);
-        break;
-    case 8: // permissions
-        printf("0%o\n", metadata.st_mode &
-                            (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP |
-                             S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH));
-        break;
-    case 9: // human-permissions
-        RevealHumanPermissions(&metadata);
-        break;
-    case 10: // inode
-        printf("%lu\n", metadata.st_ino);
-        break;
-    case 11: // modified-date
-        RevealModifiedDate(&metadata);
-        break;
-    default: // contents
-        if (S_ISREG(metadata.st_mode))
-            RevealFile(path);
-        else if (S_ISDIR(metadata.st_mode))
-            RevealDirectory(path);
-        else
-            PrintError("can not reveal the contents of \"", path, "\" type.");
-    }
+    puts("Reveals information about entries in the file system.");
+    puts("");
+    puts("METADATA FLAGS");
+    puts("These flags show metadata about the program.");
+    puts("");
+    puts("  --help     prints these help instructions.");
+    puts("  --version  prints its version.");
+    puts("  --license  prints its license.");
+    puts("");
+    puts("DATA TYPE FLAGS");
+    puts("These flags change what data type the program will reveal from the "
+         "entries.");
+    puts("");
+    puts("  --contents (default)  prints its contents.");
+    puts("  --type                prints its type.");
+    puts("  --size                prints its size in bytes.");
+    puts("  --human-size          prints its size using the most readable "
+         "unit.");
+    puts("  --user                prints the user that owns it.");
+    puts("  --user-id             prints the ID of the user that owns it.");
+    puts("  --group               prints the group that owns it.");
+    puts("  --group-id            prints the ID of the group that owns it.");
+    puts("  --permissions         prints its permissions in octal base.");
+    puts("  --human-permissions   prints its permissions for user, group "
+         "and others,");
+    puts("                        respectively, using three set of characters "
+         "each:");
+    puts("                        read (r), write (w), execute (x) and lack "
+         "(-).");
+    puts("  --inode               prints its serial number.");
+    puts("  --modified-date       prints the date where its contents were "
+         "last modified.");
+    puts("");
+    puts("TRANSPASSING FLAGS");
+    puts("These flags changes the way the symlinks must be handled.");
+    puts("");
+    puts("  --untranspass (default)  does not resolve symlinks.");
+    puts("  --transpass              resolves all levels of symlinks.");
+    puts("");
+    puts("EXIT CODES");
+    puts("It will throw exit code 1 in the end of its execution if an "
+         "error happened.");
+    puts("");
+    puts("However, while still able to continue, it will keep revealing the "
+         "remaining");
+    puts("arguments.");
+    puts("");
+    puts("All the errors found will be reported through stderr.");
+    puts("");
+    puts("SOURCE CODE");
+    puts("Its source code is available at:");
+    puts("  https://github.com/skippyr/reveal");
+    puts("");
+    puts("ISSUES");
+    puts("Report issues found in this program at:");
+    puts("  https://github.com/skippyr/reveal/issues");
 }
 
 int main(int argc, const char **argv)
 {
-    void *metadataFlags[][2] = {{"--version", PrintVersion},
-                                {"--license", PrintLicense},
-                                {"--help", PrintHelp}};
-    for (int i = 1; i < argc; i++)
-        for (uint8_t j = 0; j < sizeof(metadataFlags) / (sizeof(NULL) * 2); j++)
-            if (!strcmp(metadataFlags[j][0], argv[i]))
-            {
-                ((void (*)())metadataFlags[j][1])();
-                exit(0);
-            }
-    uint8_t dataType = 0;
-    uint8_t isTranspassing = 0;
-    const char *dataTypeFlags[] = {"--contents",    "--type",
-                                   "--size",        "--human-size",
-                                   "--user",        "--user-id",
-                                   "--group",       "--group-id",
-                                   "--permissions", "--human-permissions",
-                                   "--inode",       "--modified-date"};
-    for (int i = 1; i < argc; i++)
+    for (int i = 0; i < argc; i++)
     {
-        uint8_t changedMode = 0;
-        for (uint8_t j = 0; j < sizeof(dataTypeFlags) / sizeof(NULL); j++)
-            if (!strcmp(dataTypeFlags[j], argv[i]))
-            {
-                dataType = j;
-                changedMode = 1;
-                break;
-            }
-        if (changedMode)
-            continue;
-        if (!strcmp("--transpass", argv[i]))
-            isTranspassing = 1;
-        else if (!strcmp("--untranspass", argv[i]))
-            isTranspassing = 0;
-        else
-            Reveal(argv[i], dataType, isTranspassing);
+        PARSE_METADATA_FLAG("--license", PrintLicense, argv[i]);
+        PARSE_METADATA_FLAG("--help", PrintHelp, argv[i]);
+        PARSE_METADATA_FLAG("--version", PrintVersion, argv[i]);
     }
-    return exitCode;
 }
