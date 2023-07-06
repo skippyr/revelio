@@ -1,7 +1,9 @@
+#include <dirent.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #define PROGRAM_NAME "reveal"
 #define PROGRAM_LICENSE "Copyright (c) 2023, Sherman Rofeman. MIT license."
@@ -13,6 +15,8 @@
         fct();                                                                 \
         exit(0);                                                               \
     }
+
+uint8_t exitCode = 0;
 
 void PrintLicense()
 {
@@ -85,9 +89,81 @@ void PrintHelp()
     puts("  https://github.com/skippyr/reveal/issues");
 }
 
+void PrintComposedError(const char *const descriptionStart,
+                        const char *const descriptionMiddle,
+                        const char *const descriptionEnd)
+{
+    fprintf(stderr, "%s: %s%s%s\n", PROGRAM_NAME, descriptionStart,
+            descriptionMiddle, descriptionEnd);
+    exitCode = 1;
+}
+
+void RevealFile(const char *const path)
+{
+    FILE *const file = fopen(path, "r");
+    if (!file)
+    {
+        PrintComposedError("could not open file \"", path, "\".");
+        return;
+    }
+    char character;
+    while ((character = fgetc(file)) != EOF)
+        putchar(character);
+    fclose(file);
+}
+
+void RevealDirectory(const char *const path)
+{
+    char absolutePath[PATH_MAX];
+    if (!realpath(path, absolutePath))
+    {
+        PrintComposedError("could not resolve absolute path of \"", path,
+                           "\".");
+        return;
+    }
+    DIR *const directory = opendir(path);
+    if (!directory)
+    {
+        PrintComposedError("could not open directory \"", path, "\".");
+        return;
+    }
+    const char *const separator = !strcmp(absolutePath, "/") ? "" : "/";
+    const struct dirent *entry;
+    while ((entry = readdir(directory)))
+    {
+        if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
+            continue;
+        printf("%s%s%s\n", absolutePath, separator, entry->d_name);
+    }
+    closedir(directory);
+}
+
 void Reveal(const char *const path, const uint8_t dataType,
             const uint8_t isTranspassing)
 {
+    struct stat metadata;
+    if (isTranspassing ? stat(path, &metadata) : lstat(path, &metadata))
+    {
+        PrintComposedError("the path \"", path,
+                           "\" does not points to anything.");
+        return;
+    }
+    switch (dataType)
+    {
+    default: // --contents
+        switch (metadata.st_mode & S_IFMT)
+        {
+        case S_IFREG:
+            RevealFile(path);
+            break;
+        case S_IFDIR:
+            RevealDirectory(path);
+            break;
+        default:
+            PrintComposedError("can not reveal the contents of \"", path,
+                               "\" type.");
+        }
+    }
 }
 
 int main(int argc, const char **argv)
