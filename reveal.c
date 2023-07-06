@@ -16,7 +16,7 @@
         exit(0);                                                               \
     }
 
-uint8_t exitCode = 0;
+uint8_t exitCode = EXIT_SUCCESS;
 
 void PrintLicense()
 {
@@ -95,7 +95,37 @@ void PrintComposedError(const char *const descriptionStart,
 {
     fprintf(stderr, "%s: %s%s%s\n", PROGRAM_NAME, descriptionStart,
             descriptionMiddle, descriptionEnd);
-    exitCode = 1;
+    exitCode = EXIT_FAILURE;
+}
+
+void RevealType(const struct stat *const metadata)
+{
+    switch (metadata->st_mode & S_IFMT)
+    {
+    case S_IFBLK:
+        puts("Block");
+        break;
+    case S_IFCHR:
+        puts("Character");
+        break;
+    case S_IFDIR:
+        puts("Directory");
+        break;
+    case S_IFIFO:
+        puts("Fifo");
+        break;
+    case S_IFLNK:
+        puts("Symlink");
+        break;
+    case S_IFREG:
+        puts("File");
+        break;
+    case S_IFSOCK:
+        puts("Socket");
+        break;
+    default:
+        puts("Unknown");
+    }
 }
 
 void RevealFile(const char *const path)
@@ -150,6 +180,9 @@ void Reveal(const char *const path, const uint8_t dataType,
     }
     switch (dataType)
     {
+    case 1: // --type
+        RevealType(&metadata);
+        break;
     default: // --contents
         switch (metadata.st_mode & S_IFMT)
         {
@@ -166,13 +199,13 @@ void Reveal(const char *const path, const uint8_t dataType,
     }
 }
 
-int main(int argc, const char **argv)
+int main(int quantityOfArguments, const char **arguments)
 {
-    for (int i = 1; i < argc; i++)
+    for (int i = 1; i < quantityOfArguments; i++)
     {
-        PARSE_METADATA_FLAG("--license", PrintLicense, argv[i]);
-        PARSE_METADATA_FLAG("--help", PrintHelp, argv[i]);
-        PARSE_METADATA_FLAG("--version", PrintVersion, argv[i]);
+        PARSE_METADATA_FLAG("--license", PrintLicense, arguments[i]);
+        PARSE_METADATA_FLAG("--help", PrintHelp, arguments[i]);
+        PARSE_METADATA_FLAG("--version", PrintVersion, arguments[i]);
     }
     const char *dataTypeFlags[] = {"--contents",    "--type",
                                    "--size",        "--human-size",
@@ -181,22 +214,23 @@ int main(int argc, const char **argv)
                                    "--permissions", "--human-permissions",
                                    "--inode",       "--modified-date"};
     uint8_t dataType = 0, isTranspassing = 0;
-    for (int i = 1; i < argc; i++)
+    for (int i = 1; i < quantityOfArguments; i++)
     {
         for (uint8_t j = 0; j < sizeof(dataTypeFlags) / sizeof(NULL); j++)
         {
-            if (!strcmp(dataTypeFlags[j], argv[i]))
+            if (!strcmp(dataTypeFlags[j], arguments[i]))
             {
                 dataType = j;
                 goto end;
             }
         }
-        if (!strcmp("--transpass", argv[i]))
+        if (!strcmp("--transpass", arguments[i]))
             isTranspassing = 1;
-        else if (!strcmp("--untranspass", argv[i]))
+        else if (!strcmp("--untranspass", arguments[i]))
             isTranspassing = 0;
         else
-            Reveal(argv[i], dataType, isTranspassing);
+            Reveal(arguments[i], dataType, isTranspassing);
     end:;
     }
+    return exitCode;
 }
