@@ -18,6 +18,7 @@ function reveal-stat {
     typeset metadata=($(reveal\
       --human-size ${path_}\
       --inode ${path_}\
+      --mode ${path_}\
       --type ${path_}\
       --permissions ${path_}\
       --human-permissions ${path_}\
@@ -25,8 +26,10 @@ function reveal-stat {
       --user ${path_}\
       --group-id ${path_}\
       --group ${path_}\
-      --modified-date ${path_}))
-    output+="Path: \"${path_}\".  Size: ${metadata[1]}.  Inode: ${metadata[2]}.  Type: ${metadata[3]}.\nPermissions: (${metadata[4]}/${metadata[5]}).  UID: (${metadata[6]}/${metadata[7]}).  GID: (${metadata[8]}/${metadata[9]}).\nModified Date: ${metadata[10]}.\n"
+      --modified-date ${path_}\
+      --changed-date ${path_}\
+      --accessed-date ${path_}))
+    output+="Path: \"${path_}\".\nSize: ${metadata[1]}.  Inode: ${metadata[2]}.  Mode:${metadata[3]}.  Type: ${metadata[4]}.\nPermissions: (${metadata[5]}/${metadata[6]}).  UID: (${metadata[7]}/${metadata[8]}).  GID: (${metadata[9]}/${metadata[10]}).\nModified Date: ${metadata[11]}.\nChanged Date: ${metadata[12]}.\nAccessed Date: ${metadata[13]}.\n"
   done
   echo "${output}"
 }

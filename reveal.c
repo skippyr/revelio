@@ -40,6 +40,8 @@
         break;
 #define CASE_PUTS(value, text) CASE_FUNCTION(value, puts(text))
 #define PRINT_ERROR(description) PrintComposedError(description, "", "")
+#define PRINT_LONG(value) printf("%ld\n", value);
+#define PRINT_UNSIGNED(value) printf("%u\n", value);
 
 uint8_t exitCode = EXIT_SUCCESS;
 
@@ -81,8 +83,9 @@ void PrintHelp()
     puts("  --inode               prints its serial number.");
     puts("  --modified-date       prints the date where its contents were "
          "last modified.");
-    puts("  --changed-date        prints the date where its status was last "
-         "changed.");
+    puts("  --changed-date        prints the date where its metadata in the "
+         "inode table");
+    puts("                        was last changed.");
     puts("  --accessed-date       prints the date where its contents were "
          "last accessed.");
     puts("");
@@ -223,13 +226,13 @@ void RevealDirectory(const char *const path)
         PrintComposedError("could not open directory \"", path, "\".");
         return;
     }
-    const char *const separator = !strcmp(absolutePath, "/") ? "" : "/";
     const struct dirent *entry;
     while ((entry = readdir(directory)))
     {
         if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
             continue;
-        printf("%s%s%s\n", absolutePath, separator, entry->d_name);
+        printf("%s%s%s\n", absolutePath, !strcmp(absolutePath, "/") ? "" : "/",
+               entry->d_name);
     }
     closedir(directory);
 }
@@ -246,25 +249,26 @@ void Reveal(const char *const path, const uint8_t dataType,
     }
     switch (dataType)
     {
-        CASE_FUNCTION(1, RevealType(&metadata))             // --type
-        CASE_FUNCTION(2, printf("%ld\n", metadata.st_size)) // --size
-        CASE_FUNCTION(3, RevealHumanSize(&metadata))        // --human-size
-        CASE_FUNCTION(4, RevealUser(&metadata, path))       // --user
-        CASE_FUNCTION(5, printf("%u\n", metadata.st_uid))   // --user-uid
-        CASE_FUNCTION(6, RevealGroup(&metadata, path))      // --group
-        CASE_FUNCTION(7, printf("%u\n", metadata.st_gid))   // --group-id
-        CASE_FUNCTION(8, printf("%u\n", metadata.st_mode))  // --mode
+        CASE_FUNCTION(1, RevealType(&metadata))            // --type
+        CASE_FUNCTION(2, PRINT_LONG(metadata.st_size))     // --size
+        CASE_FUNCTION(3, RevealHumanSize(&metadata))       // --human-size
+        CASE_FUNCTION(4, PRINT_LONG(metadata.st_blocks))   // --blocks
+        CASE_FUNCTION(5, RevealUser(&metadata, path))      // --user
+        CASE_FUNCTION(6, PRINT_UNSIGNED(metadata.st_uid))  // --user-uid
+        CASE_FUNCTION(7, RevealGroup(&metadata, path))     // --group
+        CASE_FUNCTION(8, PRINT_UNSIGNED(metadata.st_gid))  // --group-id
+        CASE_FUNCTION(9, PRINT_UNSIGNED(metadata.st_mode)) // --mode
         CASE_FUNCTION(
-            9, printf("0%o\n", metadata.st_mode &
-                                   (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP |
-                                    S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH |
-                                    S_IXOTH))) // --permissions
-        CASE_FUNCTION(10,
+            10, printf("0%o\n", metadata.st_mode &
+                                    (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP |
+                                     S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH |
+                                     S_IXOTH))) // --permissions
+        CASE_FUNCTION(11,
                       RevealHumanPermissions(&metadata)) // --human-permissions
-        CASE_FUNCTION(11, printf("%lu\n", metadata.st_ino)) // --inode
-        CASE_FUNCTION(12, RevealDate(&metadata.st_mtime))   // --modified-date
-        CASE_FUNCTION(13, RevealDate(&metadata.st_ctime))   // --changed-date
-        CASE_FUNCTION(14, RevealDate(&metadata.st_atime))   // --accessed-date
+        CASE_FUNCTION(12, printf("%lu\n", metadata.st_ino)) // --inode
+        CASE_FUNCTION(13, RevealDate(&metadata.st_mtime))   // --modified-date
+        CASE_FUNCTION(15, RevealDate(&metadata.st_ctime))   // --changed-date
+        CASE_FUNCTION(16, RevealDate(&metadata.st_atime))   // --accessed-date
     default:                                                // --contents
         switch (metadata.st_mode & S_IFMT)
         {
@@ -285,21 +289,13 @@ int main(int quantityOfArguments, const char **arguments)
         PARSE_METADATA_FLAG("--help", PrintHelp(), arguments[i]);
         PARSE_METADATA_FLAG("--version", puts(PROGRAM_VERSION), arguments[i]);
     }
-    const char *dataTypeFlags[] = {"--contents",
-                                   "--type",
-                                   "--size",
-                                   "--human-size",
-                                   "--user",
-                                   "--user-id",
-                                   "--group",
-                                   "--group-id",
-                                   "--mode",
-                                   "--permissions",
-                                   "--human-permissions",
-                                   "--inode",
-                                   "--modified-date",
-                                   "--changed-date",
-                                   "--accessed-date"};
+    const char *dataTypeFlags[] = {
+        "--contents",     "--type",          "--size",
+        "--human-size",   "--blocks",        "--user",
+        "--user-id",      "--group",         "--group-id",
+        "--mode",         "--permissions",   "--human-permissions",
+        "--inode",        "--modified-date", "--changed-date",
+        "--accessed-date"};
     uint8_t dataType = 0, isTranspassing = 0;
     for (int i = 1; i < quantityOfArguments; i++)
     {
