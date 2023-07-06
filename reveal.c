@@ -85,12 +85,42 @@ void PrintHelp()
     puts("  https://github.com/skippyr/reveal/issues");
 }
 
+void Reveal(const char *const path, const uint8_t dataType,
+            const uint8_t isTranspassing)
+{
+}
+
 int main(int argc, const char **argv)
 {
-    for (int i = 0; i < argc; i++)
+    for (int i = 1; i < argc; i++)
     {
         PARSE_METADATA_FLAG("--license", PrintLicense, argv[i]);
         PARSE_METADATA_FLAG("--help", PrintHelp, argv[i]);
         PARSE_METADATA_FLAG("--version", PrintVersion, argv[i]);
+    }
+    const char *dataTypeFlags[] = {"--contents",    "--type",
+                                   "--size",        "--human-size",
+                                   "--user",        "--user-id",
+                                   "--group",       "--group-id",
+                                   "--permissions", "--human-permissions",
+                                   "--inode",       "--modified-date"};
+    uint8_t dataType = 0, isTranspassing = 0;
+    for (int i = 1; i < argc; i++)
+    {
+        for (uint8_t j = 0; j < sizeof(dataTypeFlags) / sizeof(NULL); j++)
+        {
+            if (!strcmp(dataTypeFlags[j], argv[i]))
+            {
+                dataType = j;
+                goto end;
+            }
+        }
+        if (!strcmp("--transpass", argv[i]))
+            isTranspassing = 1;
+        else if (!strcmp("--untranspass", argv[i]))
+            isTranspassing = 0;
+        else
+            Reveal(argv[i], dataType, isTranspassing);
+    end:;
     }
 }
