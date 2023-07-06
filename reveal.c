@@ -66,6 +66,8 @@ void PrintHelp()
     puts("  --size                prints its size in bytes.");
     puts("  --human-size          prints its size using the most readable "
          "unit.");
+    puts("  --blocks              prints the quantity of file system's blocks "
+         "it occupies.");
     puts("  --user                prints the user that owns it.");
     puts("  --user-id             prints the ID of the user that owns it.");
     puts("  --group               prints the group that owns it.");
@@ -84,8 +86,8 @@ void PrintHelp()
     puts("  --modified-date       prints the date where its contents were "
          "last modified.");
     puts("  --changed-date        prints the date where its metadata in the "
-         "inode table");
-    puts("                        was last changed.");
+         "file system's");
+    puts("                        inode table was last changed.");
     puts("  --accessed-date       prints the date where its contents were "
          "last accessed.");
     puts("");
