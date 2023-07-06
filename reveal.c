@@ -1,4 +1,6 @@
 #include <dirent.h>
+#include <grp.h>
+#include <pwd.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -129,6 +131,24 @@ void RevealHumanSize(const struct stat *const metadata)
     printf("%ldB\n", metadata->st_size);
 }
 
+void RevealUser(const struct stat *const metadata, const char *const path)
+{
+    const struct passwd *const owner = getpwuid(metadata->st_uid);
+    if (owner)
+        puts(owner->pw_name);
+    else
+        PrintComposedError("could not get user that owns \"", path, "\".");
+}
+
+void RevealGroup(const struct stat *const metadata, const char *const path)
+{
+    const struct group *const group = getgrgid(metadata->st_gid);
+    if (group)
+        puts(group->gr_name);
+    else
+        PrintComposedError("could not get group that owns \"", path, "\".");
+}
+
 void RevealFile(const char *const path)
 {
     FILE *const file = fopen(path, "r");
@@ -184,6 +204,10 @@ void Reveal(const char *const path, const uint8_t dataType,
         CASE_FUNCTION(1, RevealType(&metadata))             // --type
         CASE_FUNCTION(2, printf("%ld\n", metadata.st_size)) // --size
         CASE_FUNCTION(3, RevealHumanSize(&metadata))        // --human-size
+        CASE_FUNCTION(4, RevealUser(&metadata, path))       // --user
+        CASE_FUNCTION(5, printf("%u\n", metadata.st_uid))   // --user-uid
+        CASE_FUNCTION(6, RevealGroup(&metadata, path))      // --group
+        CASE_FUNCTION(7, printf("%u\n", metadata.st_gid))   // --group-id
     default:                                                // --contents
         switch (metadata.st_mode & S_IFMT)
         {
