@@ -15,6 +15,11 @@
 #define MEGA 1e6
 #define KILO 1e3
 
+#define READ_CHARACTER 'r'
+#define WRITE_CHARACTER 'w'
+#define EXECUTE_CHARACTER 'x'
+#define LACK_CHARACTER '-'
+
 #define PARSE_METADATA_FLAG(flag, function, argument)                          \
     if (!strcmp(flag, argument))                                               \
     {                                                                          \
@@ -61,6 +66,9 @@ void PrintHelp()
     puts("  --user-id             prints the ID of the user that owns it.");
     puts("  --group               prints the group that owns it.");
     puts("  --group-id            prints the ID of the group that owns it.");
+    puts("  --mode                prints a bit set containing its "
+         "properties and");
+    puts("                        permissions.");
     puts("  --permissions         prints its permissions in octal base.");
     puts("  --human-permissions   prints its permissions for user, group "
          "and others,");
@@ -149,6 +157,26 @@ void RevealGroup(const struct stat *const metadata, const char *const path)
         PrintComposedError("could not get group that owns \"", path, "\".");
 }
 
+void RevealHumanPermissions(const struct stat *const metadata)
+{
+    uint16_t permissions[9] = {S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP, S_IWGRP,
+                               S_IXGRP, S_IROTH, S_IWOTH, S_IXOTH};
+    for (uint8_t i = 0; i < 9; i++)
+    {
+        char character;
+        if (!(metadata->st_mode & permissions[i]))
+            character = LACK_CHARACTER;
+        else if (i == 0 || i == 3 || i == 6)
+            character = READ_CHARACTER;
+        else if (i == 1 || i == 4 || i == 7)
+            character = WRITE_CHARACTER;
+        else
+            character = EXECUTE_CHARACTER;
+        putchar(character);
+    }
+    putchar('\n');
+}
+
 void RevealFile(const char *const path)
 {
     FILE *const file = fopen(path, "r");
@@ -208,7 +236,15 @@ void Reveal(const char *const path, const uint8_t dataType,
         CASE_FUNCTION(5, printf("%u\n", metadata.st_uid))   // --user-uid
         CASE_FUNCTION(6, RevealGroup(&metadata, path))      // --group
         CASE_FUNCTION(7, printf("%u\n", metadata.st_gid))   // --group-id
-    default:                                                // --contents
+        CASE_FUNCTION(8, printf("%u\n", metadata.st_mode))  // --mode
+        CASE_FUNCTION(
+            9, printf("0%o\n", metadata.st_mode &
+                                   (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP |
+                                    S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH |
+                                    S_IXOTH))) // --permissions
+        CASE_FUNCTION(10,
+                      RevealHumanPermissions(&metadata)) // --human-permissions
+    default:                                             // --contents
         switch (metadata.st_mode & S_IFMT)
         {
             CASE_FUNCTION(S_IFREG, RevealFile(path))
@@ -228,12 +264,19 @@ int main(int quantityOfArguments, const char **arguments)
         PARSE_METADATA_FLAG("--help", PrintHelp(), arguments[i]);
         PARSE_METADATA_FLAG("--version", puts(PROGRAM_VERSION), arguments[i]);
     }
-    const char *dataTypeFlags[] = {"--contents",    "--type",
-                                   "--size",        "--human-size",
-                                   "--user",        "--user-id",
-                                   "--group",       "--group-id",
-                                   "--permissions", "--human-permissions",
-                                   "--inode",       "--modified-date"};
+    const char *dataTypeFlags[] = {"--contents",
+                                   "--type",
+                                   "--size",
+                                   "--human-size",
+                                   "--user",
+                                   "--user-id",
+                                   "--group",
+                                   "--group-id",
+                                   "--mode",
+                                   "--permissions",
+                                   "--human-permissions",
+                                   "--inode",
+                                   "--modified-date"};
     uint8_t dataType = 0, isTranspassing = 0;
     for (int i = 1; i < quantityOfArguments; i++)
     {
