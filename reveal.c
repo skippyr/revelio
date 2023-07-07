@@ -21,24 +21,32 @@
 #define EXECUTE_CHARACTER 'x'
 #define LACK_CHARACTER '-'
 
-#define MAX_DATA_TYPE_BIT_SET 0b111111
+#define MAX_DATA_TYPE_BIT_SET 0b111111 // 63
 #define IS_TRANSPASSING_BIT (1 << 6)
 #define EXIT_CODE_BIT (1 << 7)
 #define IS_TRANSPASSING (options & IS_TRANSPASSING_BIT)
 #define EXIT_CODE (options & EXIT_CODE_BIT)
 #define PARSED_EXIT_CODE !!(EXIT_CODE)
+#define DATA_TYPE options & ~(IS_TRANSPASSING_BIT | EXIT_CODE_BIT)
 #define SET_IS_TRANSPASSING options |= IS_TRANSPASSING_BIT;
 #define UNSET_IS_TRANSPASSING options &= ~IS_TRANSPASSING_BIT;
 #define SET_FAILED_EXIT_CODE options |= EXIT_CODE_BIT;
 #define SET_DATA_TYPE(dataType)                                                \
-    options = dataType <= MAX_DATA_TYPE_BIT_SET                                \
-        ? dataType || 0 | IS_TRANSPASSING | EXIT_CODE;
+    options = dataType >= 0 && dataType <= MAX_DATA_TYPE_BIT_SET               \
+                  ? dataType                                                   \
+                  : 0 | IS_TRANSPASSING | EXIT_CODE;
 
 #define PARSE_METADATA_FLAG(flag, function, argument)                          \
-    if (!strcmp(flag, argument))                                               \
+    if (!strcmp("--" flag, argument))                                          \
     {                                                                          \
         function;                                                              \
         exit(EXIT_SUCCESS);                                                    \
+    }
+#define PARSE_DATA_TYPE_FLAG(flag, value, argument)                            \
+    if (!strcmp("--" flag, argument))                                          \
+    {                                                                          \
+        SET_DATA_TYPE(value)                                                   \
+        continue;                                                              \
     }
 #define PARSE_SIZE(buffer, metadata, multiplier, unit)                         \
     buffer = metadata->st_size / (multiplier);                                 \
@@ -255,7 +263,7 @@ void RevealDirectory(const char *const path)
     closedir(directory);
 }
 
-void Reveal(const char *const path, const uint8_t dataType)
+void Reveal(const char *const path)
 {
     struct stat metadata;
     if (IS_TRANSPASSING ? stat(path, &metadata) : lstat(path, &metadata))
@@ -264,7 +272,7 @@ void Reveal(const char *const path, const uint8_t dataType)
                            "\" does not point to anything.");
         return;
     }
-    switch (dataType)
+    switch (DATA_TYPE)
     {
         CASE_FUNCTION(1, RevealType(&metadata))                  // --type
         CASE_FUNCTION(2, PRINT_LONG(metadata.st_size))           // --size
@@ -303,44 +311,35 @@ int main(int quantityOfArguments, const char **arguments)
 {
     for (int i = 1; i < quantityOfArguments; i++)
     {
-        PARSE_METADATA_FLAG("--license", puts(PROGRAM_LICENSE), arguments[i]);
-        PARSE_METADATA_FLAG("--help", PrintHelp(), arguments[i]);
-        PARSE_METADATA_FLAG("--version", puts(PROGRAM_VERSION), arguments[i]);
+        PARSE_METADATA_FLAG("license", puts(PROGRAM_LICENSE), arguments[i]);
+        PARSE_METADATA_FLAG("help", PrintHelp(), arguments[i]);
+        PARSE_METADATA_FLAG("version", puts(PROGRAM_VERSION), arguments[i]);
     }
-    const char *dataTypeFlags[] = {"--contents",
-                                   "--type",
-                                   "--size",
-                                   "--human-size",
-                                   "--blocks",
-                                   "--hard-links",
-                                   "--user",
-                                   "--user-id",
-                                   "--group",
-                                   "--group-id",
-                                   "--mode",
-                                   "--permissions",
-                                   "--human-permissions",
-                                   "--inode",
-                                   "--modified-date",
-                                   "--changed-date",
-                                   "--accessed-date"};
-    uint8_t dataType = 0;
     for (int i = 1; i < quantityOfArguments; i++)
     {
-        for (uint8_t j = 0; j < sizeof(dataTypeFlags) / sizeof(NULL); j++)
-        {
-            if (!strcmp(dataTypeFlags[j], arguments[i]))
-            {
-                dataType = j;
-                goto end;
-            }
-        }
+        PARSE_DATA_TYPE_FLAG("contents", 0, arguments[i])
+        PARSE_DATA_TYPE_FLAG("type", 1, arguments[i])
+        PARSE_DATA_TYPE_FLAG("size", 2, arguments[i])
+        PARSE_DATA_TYPE_FLAG("human-size", 3, arguments[i])
+        PARSE_DATA_TYPE_FLAG("blocks", 4, arguments[i])
+        PARSE_DATA_TYPE_FLAG("hard-links", 5, arguments[i])
+        PARSE_DATA_TYPE_FLAG("user", 6, arguments[i])
+        PARSE_DATA_TYPE_FLAG("user-id", 7, arguments[i])
+        PARSE_DATA_TYPE_FLAG("group", 8, arguments[i])
+        PARSE_DATA_TYPE_FLAG("group-id", 9, arguments[i])
+        PARSE_DATA_TYPE_FLAG("mode", 10, arguments[i])
+        PARSE_DATA_TYPE_FLAG("permissions", 11, arguments[i])
+        PARSE_DATA_TYPE_FLAG("human-permissions", 12, arguments[i])
+        PARSE_DATA_TYPE_FLAG("inode", 13, arguments[i])
+        PARSE_DATA_TYPE_FLAG("modified-date", 14, arguments[i])
+        PARSE_DATA_TYPE_FLAG("changed-date", 15, arguments[i])
+        PARSE_DATA_TYPE_FLAG("accessed-date", 16, arguments[i])
         if (!strcmp("--transpass", arguments[i]))
             SET_IS_TRANSPASSING
         else if (!strcmp("--untranspass", arguments[i]))
             UNSET_IS_TRANSPASSING
         else
-            Reveal(arguments[i], dataType);
+            Reveal(arguments[i]);
     end:;
     }
     return PARSED_EXIT_CODE;
