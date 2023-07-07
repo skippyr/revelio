@@ -273,8 +273,8 @@ void Reveal(const char *const path, const uint8_t dataType,
                       RevealHumanPermissions(&metadata)) // --human-permissions
         CASE_FUNCTION(13, PRINT_UNSIGNED_LONG(metadata.st_ino)) // --inode
         CASE_FUNCTION(14, RevealDate(&metadata.st_mtime)) // --modified-date
-        CASE_FUNCTION(16, RevealDate(&metadata.st_ctime)) // --changed-date
-        CASE_FUNCTION(17, RevealDate(&metadata.st_atime)) // --accessed-date
+        CASE_FUNCTION(15, RevealDate(&metadata.st_ctime)) // --changed-date
+        CASE_FUNCTION(16, RevealDate(&metadata.st_atime)) // --accessed-date
     default:                                              // --contents
         switch (metadata.st_mode & S_IFMT)
         {
