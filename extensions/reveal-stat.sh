@@ -17,11 +17,11 @@ function reveal-stat {
     fi
     typeset metadata=($(reveal\
       --human-size ${path_}\
+      --type ${path_}\
       --inode ${path_}\
       --mode ${path_}\
       --blocks ${path_}\
       --hard-links ${path_}\
-      --type ${path_}\
       --permissions ${path_}\
       --human-permissions ${path_}\
       --user-id ${path_}\
@@ -31,7 +31,7 @@ function reveal-stat {
       --modified-date ${path_}\
       --changed-date ${path_}\
       --accessed-date ${path_}))
-      output+="Path: \"${path_}\".\nSize: ${metadata[1]}.  Inode: ${metadata[2]}.  Mode: ${metadata[3]}.  Blocks: ${metadata[4]}.\nHard Links: ${metadata[5]}.  Type: ${metadata[6]}.\nPermissions: (${metadata[7]}/${metadata[8]}).  UID: (${metadata[9]}/${metadata[10]}).  GID: (${metadata[11]}/${metadata[12]}).\nModified Date: ${metadata[13]}.\nChanged Date: ${metadata[14]}.\nAccessed Date: ${metadata[15]}.\n"
+          output+="Path: \"${path_}\".\nSize: ${metadata[1]}.  Type: ${metadata[2]}.\nInode: ${metadata[3]}.  Mode: ${metadata[4]}.  Blocks: ${metadata[5]}.  Hard Links: ${metadata[6]}.\nPermissions: (${metadata[7]}/${metadata[8]}).  UID: (${metadata[9]}/${metadata[10]}).  GID: (${metadata[11]}/${metadata[12]}).\nModified Date: ${metadata[13]}.\nChanged Date: ${metadata[14]}.\nAccessed Date: ${metadata[15]}.\n"
   done
   echo "${output}"
 }
