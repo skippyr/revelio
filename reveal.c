@@ -55,6 +55,8 @@
         printf("%.1f%s\n", buffer, unit);                                      \
         return;                                                                \
     }
+#define PARSE_PERMISSION(permission, character, mode)                          \
+    putchar(mode &permission ? character : LACK_CHARACTER);
 #define CASE_FUNCTION(value, function)                                         \
     case (value):                                                              \
         function;                                                              \
@@ -194,21 +196,15 @@ void RevealGroup(const struct stat *const metadata, const char *const path)
 
 void RevealHumanPermissions(const struct stat *const metadata)
 {
-    uint16_t permissions[9] = {S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP, S_IWGRP,
-                               S_IXGRP, S_IROTH, S_IWOTH, S_IXOTH};
-    for (uint8_t i = 0; i < 9; i++)
-    {
-        char character;
-        if (!(metadata->st_mode & permissions[i]))
-            character = LACK_CHARACTER;
-        else if (i == 0 || i == 3 || i == 6)
-            character = READ_CHARACTER;
-        else if (i == 1 || i == 4 || i == 7)
-            character = WRITE_CHARACTER;
-        else
-            character = EXECUTE_CHARACTER;
-        putchar(character);
-    }
+    PARSE_PERMISSION(S_IRUSR, READ_CHARACTER, metadata->st_mode)
+    PARSE_PERMISSION(S_IWUSR, WRITE_CHARACTER, metadata->st_mode)
+    PARSE_PERMISSION(S_IXUSR, EXECUTE_CHARACTER, metadata->st_mode)
+    PARSE_PERMISSION(S_IRGRP, READ_CHARACTER, metadata->st_mode)
+    PARSE_PERMISSION(S_IWGRP, WRITE_CHARACTER, metadata->st_mode)
+    PARSE_PERMISSION(S_IXGRP, EXECUTE_CHARACTER, metadata->st_mode)
+    PARSE_PERMISSION(S_IROTH, READ_CHARACTER, metadata->st_mode)
+    PARSE_PERMISSION(S_IWOTH, WRITE_CHARACTER, metadata->st_mode)
+    PARSE_PERMISSION(S_IXOTH, EXECUTE_CHARACTER, metadata->st_mode)
     putchar('\n');
 }
 
