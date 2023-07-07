@@ -44,7 +44,17 @@
 #define PRINT_UNSIGNED(value) printf("%u\n", value);
 #define PRINT_UNSIGNED_LONG(value) printf("%lu\n", value);
 
-uint8_t exitCode = EXIT_SUCCESS;
+#define MAX_DATA_TYPE_VALUE 0b111111
+#define IS_TRANSPASSING_BIT (1 << 6)
+#define EXIT_CODE_BIT (1 << 7)
+#define IS_TRANSPASSING options &IS_TRANSPASSING_BIT
+#define EXIT_CODE !!(options & EXIT_CODE_BIT)
+#define SET_FAILED_EXIT_CODE options |= EXIT_CODE_BIT;
+#define SET_DATA_TYPE(dataType)                                                \
+    options = dataType <= MAX_DATA_TYPE_VALUE                                  \
+        ? dataType || 0 | IS_TRANSPASSING | options & EXIT_CODE_BIT;
+
+uint8_t options = 0;
 
 void PrintHelp()
 {
@@ -125,7 +135,7 @@ void PrintComposedError(const char *const descriptionStart,
 {
     fprintf(stderr, "%s: %s%s%s\n", PROGRAM_NAME, descriptionStart,
             descriptionMiddle, descriptionEnd);
-    exitCode = EXIT_FAILURE;
+    SET_FAILED_EXIT_CODE
 }
 
 void RevealType(const struct stat *const metadata)
@@ -331,5 +341,5 @@ int main(int quantityOfArguments, const char **arguments)
             Reveal(arguments[i], dataType, isTranspassing);
     end:;
     }
-    return exitCode;
+    return EXIT_CODE;
 }
