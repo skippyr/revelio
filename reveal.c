@@ -21,6 +21,19 @@
 #define EXECUTE_CHARACTER 'x'
 #define LACK_CHARACTER '-'
 
+#define MAX_DATA_TYPE_BIT_SET 0b111111
+#define IS_TRANSPASSING_BIT (1 << 6)
+#define EXIT_CODE_BIT (1 << 7)
+#define IS_TRANSPASSING (options & IS_TRANSPASSING_BIT)
+#define EXIT_CODE (options & EXIT_CODE_BIT)
+#define PARSED_EXIT_CODE !!(EXIT_CODE)
+#define SET_IS_TRANSPASSING options |= IS_TRANSPASSING_BIT;
+#define UNSET_IS_TRANSPASSING options &= ~IS_TRANSPASSING_BIT;
+#define SET_FAILED_EXIT_CODE options |= EXIT_CODE_BIT;
+#define SET_DATA_TYPE(dataType)                                                \
+    options = dataType <= MAX_DATA_TYPE_BIT_SET                                \
+        ? dataType || 0 | IS_TRANSPASSING | EXIT_CODE;
+
 #define PARSE_METADATA_FLAG(flag, function, argument)                          \
     if (!strcmp(flag, argument))                                               \
     {                                                                          \
@@ -43,16 +56,6 @@
 #define PRINT_LONG(value) printf("%ld\n", value);
 #define PRINT_UNSIGNED(value) printf("%u\n", value);
 #define PRINT_UNSIGNED_LONG(value) printf("%lu\n", value);
-
-#define MAX_DATA_TYPE_VALUE 0b111111
-#define IS_TRANSPASSING_BIT (1 << 6)
-#define EXIT_CODE_BIT (1 << 7)
-#define IS_TRANSPASSING options &IS_TRANSPASSING_BIT
-#define EXIT_CODE !!(options & EXIT_CODE_BIT)
-#define SET_FAILED_EXIT_CODE options |= EXIT_CODE_BIT;
-#define SET_DATA_TYPE(dataType)                                                \
-    options = dataType <= MAX_DATA_TYPE_VALUE                                  \
-        ? dataType || 0 | IS_TRANSPASSING | options & EXIT_CODE_BIT;
 
 uint8_t options = 0;
 
@@ -252,11 +255,10 @@ void RevealDirectory(const char *const path)
     closedir(directory);
 }
 
-void Reveal(const char *const path, const uint8_t dataType,
-            const uint8_t isTranspassing)
+void Reveal(const char *const path, const uint8_t dataType)
 {
     struct stat metadata;
-    if (isTranspassing ? stat(path, &metadata) : lstat(path, &metadata))
+    if (IS_TRANSPASSING ? stat(path, &metadata) : lstat(path, &metadata))
     {
         PrintComposedError("the path \"", path,
                            "\" does not point to anything.");
@@ -322,7 +324,7 @@ int main(int quantityOfArguments, const char **arguments)
                                    "--modified-date",
                                    "--changed-date",
                                    "--accessed-date"};
-    uint8_t dataType = 0, isTranspassing = 0;
+    uint8_t dataType = 0;
     for (int i = 1; i < quantityOfArguments; i++)
     {
         for (uint8_t j = 0; j < sizeof(dataTypeFlags) / sizeof(NULL); j++)
@@ -334,12 +336,12 @@ int main(int quantityOfArguments, const char **arguments)
             }
         }
         if (!strcmp("--transpass", arguments[i]))
-            isTranspassing = 1;
+            SET_IS_TRANSPASSING
         else if (!strcmp("--untranspass", arguments[i]))
-            isTranspassing = 0;
+            UNSET_IS_TRANSPASSING
         else
-            Reveal(arguments[i], dataType, isTranspassing);
+            Reveal(arguments[i], dataType);
     end:;
     }
-    return EXIT_CODE;
+    return PARSED_EXIT_CODE;
 }
