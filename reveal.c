@@ -62,7 +62,8 @@
         function;                                                              \
         break;
 #define CASE_PUTS(value, text) CASE_FUNCTION(value, puts(text))
-#define PRINT_ERROR(description) PrintComposedError(description, "", "")
+#define PRINT_ERROR(description, suggestion)                                   \
+    PrintComposedError(description, "", "", suggestion)
 #define PRINT_LONG(value) printf("%ld\n", value);
 #define PRINT_UNSIGNED(value) printf("%u\n", value);
 #define PRINT_UNSIGNED_LONG(value) printf("%lu\n", value);
@@ -93,7 +94,7 @@ void PrintHelp()
          "other");
     puts("flag of this type.");
     puts("");
-    puts("If none of this flag is used, the one marked as default is "
+    puts("If none of these flags is used, the one marked as default is "
          "considered in");
     puts("use.");
     puts("");
@@ -164,10 +165,11 @@ void PrintHelp()
 
 void PrintComposedError(const char *const descriptionStart,
                         const char *const descriptionMiddle,
-                        const char *const descriptionEnd)
+                        const char *const descriptionEnd,
+                        const char *const suggestion)
 {
-    fprintf(stderr, "%s: %s%s%s\n", PROGRAM_NAME, descriptionStart,
-            descriptionMiddle, descriptionEnd);
+    fprintf(stderr, "%s: %s%s%s %s\n", PROGRAM_NAME, descriptionStart,
+            descriptionMiddle, descriptionEnd, suggestion ? suggestion : "");
     SET_FAILED_EXIT_CODE
 }
 
@@ -202,7 +204,8 @@ void RevealUser(const struct stat *const metadata, const char *const path)
     if (owner)
         puts(owner->pw_name);
     else
-        PrintComposedError("could not get user that owns \"", path, "\".");
+        PrintComposedError("could not get user that owns \"", path, "\".",
+                           NULL);
 }
 
 void RevealGroup(const struct stat *const metadata, const char *const path)
@@ -211,7 +214,8 @@ void RevealGroup(const struct stat *const metadata, const char *const path)
     if (group)
         puts(group->gr_name);
     else
-        PrintComposedError("could not get group that owns \"", path, "\".");
+        PrintComposedError("could not get group that owns \"", path, "\".",
+                           NULL);
 }
 
 void RevealHumanPermissions(const struct stat *const metadata)
@@ -233,7 +237,7 @@ void RevealDate(const time_t *const date)
     char buffer[29];
     if (!strftime(buffer, sizeof(buffer), "%a %b %d %T %Z %Y", localtime(date)))
     {
-        PRINT_ERROR("overflowed buffer to store date.");
+        PRINT_ERROR("overflowed buffer to store date.", NULL);
         return;
     }
     puts(buffer);
@@ -244,7 +248,8 @@ void RevealFile(const char *const path)
     FILE *const file = fopen(path, "r");
     if (!file)
     {
-        PrintComposedError("could not open file \"", path, "\".");
+        PrintComposedError("could not open file \"", path, "\".",
+                           "Do you have enough permissions?");
         return;
     }
     char character;
@@ -258,14 +263,15 @@ void RevealDirectory(const char *const path)
     char absolutePath[PATH_MAX];
     if (!realpath(path, absolutePath))
     {
-        PrintComposedError("could not resolve absolute path of \"", path,
-                           "\".");
+        PrintComposedError("could not resolve absolute path of \"", path, "\".",
+                           NULL);
         return;
     }
     DIR *const directory = opendir(path);
     if (!directory)
     {
-        PrintComposedError("could not open directory \"", path, "\".");
+        PrintComposedError("could not open directory \"", path, "\".",
+                           "Do you have enough permissions?");
         return;
     }
     const struct dirent *entry;
@@ -285,7 +291,8 @@ void Reveal(const char *const path)
     if (IS_TRANSPASSING ? stat(path, &metadata) : lstat(path, &metadata))
     {
         PrintComposedError("the path \"", path,
-                           "\" does not point to anything.");
+                           "\" does not point to anything.",
+                           "Did you not mispelled it?");
         return;
     }
     switch (DATA_TYPE)
@@ -318,7 +325,7 @@ void Reveal(const char *const path)
             CASE_FUNCTION(S_IFDIR, RevealDirectory(path))
         default:
             PrintComposedError("can not reveal the contents of \"", path,
-                               "\" type.");
+                               "\" type.", NULL);
         }
     }
 }
