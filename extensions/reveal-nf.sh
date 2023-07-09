@@ -133,7 +133,7 @@ function reveal-nf {
       continue
     fi
     output+="${path_}:\n"
-    for entry in $(reveal --transpass "${path_}" | sort); do
+    for entry in $(reveal --transpass "${path_}" | sort -f); do
       typeset name="${entry##*/}"
       output+="  "
       if [[ -d "${entry}" ]]; then

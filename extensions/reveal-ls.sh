@@ -16,7 +16,7 @@ function reveal-ls {
       continue
     fi
     output+="${path_}:\n"
-    for entry in $(reveal --transpass "${path_}" | sort); do
+    for entry in $(reveal --transpass "${path_}" | sort -f); do
       typeset base_name="${entry##*/}"
       output+="  "
       [[ "${base_name}" =~ " " ]] &&

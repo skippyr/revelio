@@ -16,7 +16,7 @@ function reveal-tree {
   function tree-view {
     typeset path_="$1"
     typeset depth="$2"
-    for entry in $(reveal --transpass "${path_}" | sort); do
+    for entry in $(reveal --transpass "${path_}" | sort -f); do
       [[ ${depth} -gt 0 ]] &&
         printf "│  %.0s" {1..${depth}}
       printf "├──"
