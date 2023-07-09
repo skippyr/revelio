@@ -10,7 +10,7 @@
 
 #define PROGRAM_NAME "reveal"
 #define PROGRAM_LICENSE "Copyright (c) 2023, Sherman Rofeman. MIT license."
-#define PROGRAM_VERSION "v5.2.0"
+#define PROGRAM_VERSION "v5.2.1"
 
 #define GIGA 1e9
 #define MEGA 1e6
@@ -77,6 +77,10 @@ void PrintHelp()
     puts("METADATA FLAGS");
     puts("These flags show metadata about the program.");
     puts("");
+    puts("Once used, they will stop the execution of the program after do "
+         "certain");
+    puts("action.");
+    puts("");
     puts("  --help     prints these help instructions.");
     puts("  --version  prints its version.");
     puts("  --license  prints its license.");
@@ -84,6 +88,14 @@ void PrintHelp()
     puts("DATA TYPE FLAGS");
     puts("These flags change what data type the program will reveal from the "
          "entries.");
+    puts("");
+    puts("Once used, they will affect all the arguments until reach the use of "
+         "other");
+    puts("flag of this type.");
+    puts("");
+    puts("If none of this flag is used, the one marked as default is "
+         "considered in");
+    puts("use.");
     puts("");
     puts("  --contents (default)  prints its contents.");
     puts("  --type                prints its type.");
@@ -119,6 +131,14 @@ void PrintHelp()
     puts("");
     puts("TRANSPASSING FLAGS");
     puts("These flags changes the way symlinks are handled.");
+    puts("");
+    puts("Once used, they will affect all the arguments until reach the use of "
+         "other");
+    puts("flag of this type.");
+    puts("");
+    puts("If none of this flag is used, the one marked as default is "
+         "considered in");
+    puts("use.");
     puts("");
     puts("  --untranspass (default)  does not resolve symlinks.");
     puts("  --transpass              resolves all levels of symlinks.");
