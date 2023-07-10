@@ -123,7 +123,7 @@ void RevealHumanSize(struct stat *metadata)
 
 void RevealUser(struct stat *metadata, char *path)
 {
-    const struct passwd *const owner = getpwuid(metadata->st_uid);
+    struct passwd *owner = getpwuid(metadata->st_uid);
     if (owner)
         puts(owner->pw_name);
     else
@@ -132,7 +132,7 @@ void RevealUser(struct stat *metadata, char *path)
 
 void RevealGroup(struct stat *metadata, char *path)
 {
-    const struct group *const group = getgrgid(metadata->st_gid);
+    struct group *group = getgrgid(metadata->st_gid);
     if (group)
         puts(group->gr_name);
     else
@@ -156,7 +156,8 @@ void RevealHumanPermissions(struct stat *metadata)
 void RevealDate(time_t *date)
 {
     char buffer[29];
-    if (!strftime(buffer, sizeof(buffer), "%a %b %d %T %Z %Y", localtime(date)))
+    if (!strftime(buffer, sizeof(buffer), "%a %b %d %T %Z %Y",
+        localtime(date)))
     {
         PrintSplittedError("", "", "overflowed buffer to store date.");
         return;
@@ -166,7 +167,7 @@ void RevealDate(time_t *date)
 
 void RevealFile(char *path)
 {
-    FILE *const file = fopen(path, "r");
+    FILE *file = fopen(path, "r");
     if (!file)
     {
         PrintSplittedError("could not open file \"", path, "\". Do you have "
@@ -188,14 +189,14 @@ void RevealDirectory(char *path)
                            "\".");
         return;
     }
-    DIR *const directory = opendir(path);
+    DIR *directory = opendir(path);
     if (!directory)
     {
         PrintSplittedError("could not open directory \"", path, "\". Do you "
                            "have enough permissions?");
         return;
     }
-    const struct dirent *entry;
+    struct dirent *entry;
     while ((entry = readdir(directory)))
     {
         if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
@@ -209,7 +210,8 @@ void RevealDirectory(char *path)
 void Reveal(char *path)
 {
     struct stat metadata;
-    if (globalOptions & isTranspassingBit ? stat(path, &metadata) : lstat(path, &metadata))
+    if (globalOptions & isTranspassingBit ? stat(path, &metadata) :
+        lstat(path, &metadata))
     {
         PrintSplittedError("the path \"", path, "\" does not points to "
                            "anything. Did you not mispelled it?");
