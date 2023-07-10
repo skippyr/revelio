@@ -6,11 +6,17 @@
 #define programName "reveal"
 #define programLicense "Copyright (c) 2023, Sherman Rofeman. MIT license."
 #define programVersion "v5.2.2"
-#define ParseMetadataFlag(flag, function)\
-    if (!strcmp("--" flag, arguments[i]))\
-    {\
-        function;\
-        exit(0);\
+#define ParseMetadataFlag(flag, function)                                      \
+    if (!strcmp("--" flag, arguments[i]))                                      \
+    {                                                                          \
+        function;                                                              \
+        exit(0);                                                               \
+    }
+#define ParseDataTypeFlag(flag, dataType)                                      \
+    if (!strcmp("--" flag, arguments[i]))                                      \
+    {                                                                          \
+        globalOptions = dataType | globalOptions & (1 << 6 | 1 << 7);          \
+        continue;                                                              \
     }
 
 uint8_t globalOptions = 0;
@@ -64,4 +70,31 @@ int main(int quantityOfArguments, char **arguments)
         ParseMetadataFlag("version", puts(programVersion))
         ParseMetadataFlag("help", PrintHelp())
     }
+    for (int i = 0; i < quantityOfArguments; i++)
+    {
+        ParseDataTypeFlag("contents", 0)
+        ParseDataTypeFlag("type", 1)
+        ParseDataTypeFlag("size", 2)
+        ParseDataTypeFlag("human-size", 3)
+        ParseDataTypeFlag("blocks", 4)
+        ParseDataTypeFlag("hard-links", 5)
+        ParseDataTypeFlag("user", 6)
+        ParseDataTypeFlag("user-id", 7)
+        ParseDataTypeFlag("group", 8)
+        ParseDataTypeFlag("group-id", 9)
+        ParseDataTypeFlag("mode", 10)
+        ParseDataTypeFlag("permissions", 11)
+        ParseDataTypeFlag("human-permissions", 12)
+        ParseDataTypeFlag("inode", 13)
+        ParseDataTypeFlag("modified-date", 14)
+        ParseDataTypeFlag("changed-date", 15)
+        ParseDataTypeFlag("accessed-date", 16)
+        if (!strcmp("--transpass", arguments[i]))
+            globalOptions |= 1 << 6;
+        else if (!strcmp("--untrapass", arguments[i]))
+            globalOptions |= 1 << 7;
+        else
+            Reveal(arguments[i]);
+    }
+    return !!(globalOptions & 1 << 7);
 }
