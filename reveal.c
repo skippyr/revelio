@@ -82,8 +82,8 @@
         printf("%.1f%s\n", size, unit);                                        \
         return;                                                                \
     }
-#define ParsePermission(permission, character)                                 \
-    putchar(metadata->st_mode & permission ? character : lackCharacter);
+#define ParsePermission(permission, character) putchar(metadata->st_mode &     \
+                        permission ? character : lackCharacter);
 #define PrintUnsignedValue(value) printf("%u\n", value);
 #define PrintLongValue(value) printf("%ld\n", value);
 #define PrintUnsignedLongValue(value) printf("%lu\n", value);
@@ -279,7 +279,7 @@ int main(int quantityOfArguments, char **arguments)
         ParseDataTypeFlag("accessed-date", 16)
         if (!strcmp("--transpass", arguments[i]))
             globalOptions |= isTranspassingBit;
-        else if (!strcmp("--untrapass", arguments[i]))
+        else if (!strcmp("--untranspass", arguments[i]))
             globalOptions &= ~isTranspassingBit;
         else
             Reveal(arguments[i]);
