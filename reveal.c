@@ -1,9 +1,12 @@
 #include <dirent.h>
+#include <grp.h>
+#include <pwd.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <time.h>
 
 #define programName "reveal"
 #define programLicense "Copyright (c) 2023, Sherman Rofeman. MIT license."
@@ -17,8 +20,8 @@
                     "\nDATA TYPE FLAGS\nThese flags change what data type the "\
                     "program will reveal from the entries.\n\n  --contents "   \
                     "(default)  prints its contents.\n  --type                "\
-                    "prints its type: block, character, directory, fifo,\n"    \
-                    "                        symlink, regular or unknown.\n  " \
+                    "prints its type: Block, Character, Directory, Fifo,\n"    \
+                    "                        Symlink, Regular or Unknown.\n  " \
                     "--size                prints its size in bytes.\n  "      \
                     "--human-size          prints its size using a formidable "\
                     "unit.\n  --blocks              prints the quantity of "   \
@@ -48,6 +51,10 @@
                     "\n\nEXIT CODES\nIt will throw exit code 1 in the end of " \
                     "its execution if an error happens.\n\nISSUES\nReport "    \
                     "issues found in this program at:\n" programIssuesPage "."
+#define readCharacter 'r'
+#define writeCharacter 'w'
+#define executeCharacter 'x'
+#define lackCharacter '-'
 #define ParseMetadataFlag(flag, function)                                      \
     if (!strcmp("--" flag, arguments[i]))                                      \
     {                                                                          \
@@ -65,6 +72,18 @@
         function;                                                              \
         break;
 #define ParsePutsCase(value, text) ParseFunctionCase(value, puts(text))
+#define ParseSize(multiplier, unit)                                            \
+    size = metadata->st_size / multiplier;                                     \
+    if ((int) size)                                                            \
+    {                                                                          \
+        printf("%.1f%s\n", size, unit);                                        \
+        return;                                                                \
+    }
+#define ParsePermission(permission, character)                                 \
+    putchar(metadata->st_mode & permission ? character : lackCharacter);
+#define PrintUnsignedValue(value) printf("%u\n", value);
+#define PrintLongValue(value) printf("%ld\n", value);
+#define PrintUnsignedLongValue(value) printf("%lu\n", value);
 
 uint8_t globalOptions = 0;
 
@@ -88,6 +107,58 @@ void RevealType(struct stat *metadata)
     default:
         puts("Unknown");
     }
+}
+
+void RevealHumanSize(struct stat *metadata)
+{
+    float size;
+    ParseSize(1e9, "GB");
+    ParseSize(1e6, "MB");
+    ParseSize(1e3, "KB");
+    printf("%ldB\n", metadata->st_size);
+}
+
+void RevealUser(struct stat *metadata, char *path)
+{
+    const struct passwd *const owner = getpwuid(metadata->st_uid);
+    if (owner)
+        puts(owner->pw_name);
+    else
+        PrintSplittedError("could not get user that owns \"", path, "\".");
+}
+
+void RevealGroup(struct stat *metadata, char *path)
+{
+    const struct group *const group = getgrgid(metadata->st_gid);
+    if (group)
+        puts(group->gr_name);
+    else
+        PrintSplittedError("could not get group that owns \"", path, "\".");
+}
+
+void RevealHumanPermissions(struct stat *metadata)
+{
+    ParsePermission(S_IRUSR, readCharacter)
+    ParsePermission(S_IWUSR, writeCharacter)
+    ParsePermission(S_IXUSR, executeCharacter)
+    ParsePermission(S_IRGRP, readCharacter)
+    ParsePermission(S_IWGRP, writeCharacter)
+    ParsePermission(S_IXGRP, executeCharacter)
+    ParsePermission(S_IROTH, readCharacter)
+    ParsePermission(S_IWOTH, writeCharacter)
+    ParsePermission(S_IXOTH, executeCharacter)
+    putchar('\n');
+}
+
+void RevealDate(time_t *date)
+{
+    char buffer[29];
+    if (!strftime(buffer, sizeof(buffer), "%a %b %d %T %Z %Y", localtime(date)))
+    {
+        PrintSplittedError("", "", "overflowed buffer to store date.");
+        return;
+    }
+    puts(buffer);
 }
 
 void RevealFile(char *path)
@@ -144,6 +215,24 @@ void Reveal(char *path)
     switch (globalOptions & ~(1 << 6 | 1 << 7))
     {
     ParseFunctionCase(1, RevealType(&metadata))
+    ParseFunctionCase(2, PrintLongValue(metadata.st_size))
+    ParseFunctionCase(3, RevealHumanSize(&metadata))
+    ParseFunctionCase(4, PrintLongValue(metadata.st_blocks))
+    ParseFunctionCase(5, PrintUnsignedLongValue(metadata.st_nlink))
+    ParseFunctionCase(6, RevealUser(&metadata, path))
+    ParseFunctionCase(7, PrintUnsignedValue(metadata.st_uid))
+    ParseFunctionCase(8, RevealGroup(&metadata, path))
+    ParseFunctionCase(9, PrintUnsignedValue(metadata.st_gid))
+    ParseFunctionCase(10, PrintUnsignedValue(metadata.st_mode))
+    ParseFunctionCase(11, printf("0%o\n", metadata.st_mode &
+                                 (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP |
+                                  S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH |
+                                  S_IXOTH)))
+    ParseFunctionCase(12, RevealHumanPermissions(&metadata))
+    ParseFunctionCase(13, PrintUnsignedLongValue(metadata.st_ino))
+    ParseFunctionCase(14, RevealDate(&metadata.st_mtime))
+    ParseFunctionCase(15, RevealDate(&metadata.st_ctime))
+    ParseFunctionCase(16, RevealDate(&metadata.st_atime))
     default:
         switch (metadata.st_mode & S_IFMT)
         {
