@@ -49,8 +49,9 @@
                     "--untranspass (default)  does not resolve symlinks.\n  "  \
                     "--transpass              resolves all levels of symlinks."\
                     "\n\nEXIT CODES\nIt will throw exit code 1 in the end of " \
-                    "its execution if an error happens.\n\nISSUES\nReport "    \
-                    "issues found in this program at:\n" programIssuesPage "."
+                    "its execution if an error happens.\n\nISSUES AND "        \
+                    "SUGGESTIONS\nReport issues and suggestions at:\n"         \
+                    programIssuesPage "."
 #define isTranspassingBit (1 << 6)
 #define exitCodeBit (1 << 7)
 #define nonDataTypeBits (isTranspassingBit | exitCodeBit)
