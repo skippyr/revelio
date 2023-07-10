@@ -51,6 +51,9 @@
                     "\n\nEXIT CODES\nIt will throw exit code 1 in the end of " \
                     "its execution if an error happens.\n\nISSUES\nReport "    \
                     "issues found in this program at:\n" programIssuesPage "."
+#define isTranspassingBit (1 << 6)
+#define exitCodeBit (1 << 7)
+#define nonDataTypeBits (isTranspassingBit | exitCodeBit)
 #define readCharacter 'r'
 #define writeCharacter 'w'
 #define executeCharacter 'x'
@@ -64,7 +67,7 @@
 #define ParseDataTypeFlag(flag, dataType)                                      \
     if (!strcmp("--" flag, arguments[i]))                                      \
     {                                                                          \
-        globalOptions = dataType | globalOptions & (1 << 6 | 1 << 7);          \
+        globalOptions = dataType | globalOptions & nonDataTypeBits;            \
         continue;                                                              \
     }
 #define ParseFunctionCase(value, function)                                     \
@@ -90,7 +93,7 @@ uint8_t globalOptions = 0;
 void PrintSplittedError(char *start, char *middle, char *end)
 {
     fprintf(stderr, "%s: %s%s%s\n", programName, start, middle, end);
-    globalOptions |= 1 << 7;
+    globalOptions |= exitCodeBit;
 }
 
 void RevealType(struct stat *metadata)
@@ -206,13 +209,13 @@ void RevealDirectory(char *path)
 void Reveal(char *path)
 {
     struct stat metadata;
-    if (globalOptions & 1 << 6 ? stat(path, &metadata) : lstat(path, &metadata))
+    if (globalOptions & isTranspassingBit ? stat(path, &metadata) : lstat(path, &metadata))
     {
         PrintSplittedError("the path \"", path, "\" does not points to "
                            "anything. Did you not mispelled it?");
         return;
     }
-    switch (globalOptions & ~(1 << 6 | 1 << 7))
+    switch (globalOptions & ~nonDataTypeBits)
     {
     ParseFunctionCase(1, RevealType(&metadata))
     ParseFunctionCase(2, PrintLongValue(metadata.st_size))
@@ -273,11 +276,11 @@ int main(int quantityOfArguments, char **arguments)
         ParseDataTypeFlag("changed-date", 15)
         ParseDataTypeFlag("accessed-date", 16)
         if (!strcmp("--transpass", arguments[i]))
-            globalOptions |= 1 << 6;
+            globalOptions |= isTranspassingBit;
         else if (!strcmp("--untrapass", arguments[i]))
-            globalOptions &= ~(1 << 6);
+            globalOptions &= ~isTranspassingBit;
         else
             Reveal(arguments[i]);
     }
-    return !!(globalOptions & 1 << 7);
+    return !!(globalOptions & exitCodeBit);
 }
