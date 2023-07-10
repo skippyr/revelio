@@ -363,7 +363,6 @@ int main(int quantityOfArguments, const char **arguments)
             UNSET_IS_TRANSPASSING
         else
             Reveal(arguments[i]);
-    end:;
     }
     return PARSED_EXIT_CODE;
 }
