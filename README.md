@@ -1,10 +1,10 @@
 # Reveal
 
 Reveal is a terminal utility that can reveal information about entries of
-Unix-like operating system's file systems. It can be considered as a more
-portable version of other similar commands, such as: `ls`, `find`, `cat` and
-`stat`. Its simple outputs also allows you to extend it to your liking and needs
-using scripting languages.
+Unix-like file systems. Its simple outputs also allows you to extend it to
+your liking and needs using scripting languages.
+
+![](images/preview.gif)
 
 ## Installation
 
