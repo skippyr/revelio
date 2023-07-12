@@ -11,8 +11,49 @@
 #define programName "reveal"
 #define programVersion "v7.0.0"
 #define programLicense "Copyright (c) 2023, Sherman Rofeman. MIT license."
-#define programHelp\
-    "Usage: " programName " [FLAGS, PATHS...]"
+#define programHelp                                                            \
+    "Usage: " programName " [FLAGS, ENTRIES...]\n"                             \
+    "Reveals information about entries in the file system.\n\n"                \
+    "METADATA FLAGS\n"                                                         \
+    "These flags can be used to retrieve metadata about the program.\n\n"      \
+    "  --help     prints these help instructions.\n"                           \
+    "  --version  prints its version.\n"                                       \
+    "  --license  prints its license notice.\n\n"                              \
+    "If one of these flags is used, the program will stop its execution right "\
+    "after\nperform its respective action.\n\n"                                \
+    "DATA TYPE FLAGS\n"                                                        \
+    "These flags can be used to retrieve different data types from the entries"\
+    " given\nas arguments.\n\n"                                                \
+    "  --contents (default)  prints its contents.\n"                           \
+    "  --type                prints its type: block, character, directory, "   \
+    "fifo,\n                        symlink, regular or unknown.\n"            \
+    "  --size                prints its size in bytes.\n"                      \
+    "  --human-size          prints its size using a human readable unit: GB, "\
+    "KB, MB\n                        or B.\n"                                  \
+    "  --blocks              prints the quantity of blocks it occupies.\n"     \
+    "  --hard-links          prints the quantity of hard links it has.\n"      \
+    "  --user                prints the user that owns it.\n"                  \
+    "  --user-id             prints the ID of the user that owns it.\n"        \
+    "  --group               prints the group that owns it.\n"                 \
+    "  --group-id            prints the ID of the group that owns it.\n"       \
+    "  --mode                prints a number that contains bits representing " \
+    "its\n                        attributes.\n"                               \
+    "  --permissions         prints its permissions in octal base.\n"          \
+    "  --human-permissions   prints its permissions for user, group and "      \
+    "others,\n                        respectively, using three set of "       \
+    "characters each. Each \n                        character can mean a "    \
+    "permission set: read (r),\n                        write (w) and execute "\
+    "(x), or its lack (-).\n"                                                  \
+    "  --inode               prints its serial number.\n"                      \
+    "  --modified-date       prints the date where its contents were last "    \
+    "modified.\n"                                                              \
+    "  --changed-date        prints the date where its metadata were last "    \
+    "changed.\n"                                                               \
+    "  --accessed-date       prints the date where its contents were last "    \
+    "accessed.\n\n"                                                            \
+    "If one of these flags is used, all the entries following it will be "     \
+    "affected\nuntil it reaches another flag of this type. Else, the one "     \
+    "marked as default will\nbe considered."
 #define readCharacter 'r'
 #define writeCharacter 'w'
 #define executeCharacter 'x'
