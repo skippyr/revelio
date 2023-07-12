@@ -47,8 +47,8 @@
 #define ParsePermission(permission, character)                                 \
     putchar(metadata->st_mode & (permission) ? character : lackCharacter);
 #define PrintPermissions(mode)                                                 \
-    printf("0%o\n", (mode) & S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | \
-           S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH);
+    printf("0%o\n", (mode) & (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP |\
+           S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH));
 #define PrintUnsignedValue(value) printf("%u\n", value);
 #define PrintLongValue(value) printf("%ld\n", value);
 #define PrintUnsignedLongValue(value) printf("%lu\n", value);
@@ -71,7 +71,7 @@ static void PrintSplittedError(const char *const descriptionStart,
 static uint8_t globalOptions = 0;
 
 int
-main(int argumentsCount, const char **arguments)
+main(const int argumentsCount, const char **arguments)
 {
     for (int i = 1; i < argumentsCount; i++)
     {
@@ -105,7 +105,7 @@ main(int argumentsCount, const char **arguments)
         else
             Reveal(arguments[i]);
     }
-    return !!(globalOptions & exitCodeBit);
+    return (!!(globalOptions & exitCodeBit));
 }
 
 static void
