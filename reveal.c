@@ -84,17 +84,20 @@
         puts(text);                                                            \
         return (0);                                                            \
     }
-#define ParseDataTypeFlag(flag, dataType)                                      \
+#define ParseFlag(flag, action)                                                \
     if (!strcmp("--" flag, arguments[i]))                                      \
     {                                                                          \
-        if (globalOptions & isExpectingEntryBit)                               \
-            Reveal(entry);                                                     \
-        globalOptions = dataType | (globalOptions & nonDataTypeBits) |         \
-                        isExpectingEntryBit;                                   \
+        action;                                                                \
         if (i == quantityOfArguments - 1)                                      \
             Reveal(entry);                                                     \
         continue;                                                              \
     }
+#define ParseDataTypeFlag(flag, dataType) ParseFlag(flag,                      \
+    if (globalOptions & isExpectingEntryBit)                                   \
+        Reveal(entry);                                                         \
+    globalOptions = dataType | (globalOptions & nonDataTypeBits) |             \
+                    isExpectingEntryBit                                        \
+)
 #define ParseFunctionCase(value, function)                                     \
     case value:                                                                \
         function;                                                              \
@@ -169,19 +172,9 @@ main(const int quantityOfArguments, const char **arguments)
         ParseDataTypeFlag("modified-date", 14)
         ParseDataTypeFlag("changed-date", 15)
         ParseDataTypeFlag("accessed-date", 16)
-        if (!strcmp("--transpass", arguments[i]))
-        {
-            globalOptions |= isTranspassingBit;
-            if (i == quantityOfArguments - 1)
-                Reveal(entry);
-        }
-        else if (!strcmp("--untranspass", arguments[i]))
-        {
-            globalOptions &= ~isTranspassingBit;
-            if (i == quantityOfArguments - 1)
-                Reveal(entry);
-        }
-        else if (strlen(arguments[i]) > 2 && arguments[i][0] == '-' &&
+        ParseFlag("transpass", globalOptions |= isTranspassingBit)
+        ParseFlag("untranspass", globalOptions &= ~isTranspassingBit)
+        if (strlen(arguments[i]) > 2 && arguments[i][0] == '-' &&
                  arguments[i][1] == '-')
             PrintSplittedError("the flag \"", arguments[i], "\" is "
                                "unrecognized.\n        Did you mean the entry "
