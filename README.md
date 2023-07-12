@@ -50,7 +50,7 @@ As a first example, what about revealing your current directory:
 reveal
 ```
 
-And,  a file:
+And, a file:
 
 ```bash
 reveal LICENSE
@@ -74,8 +74,8 @@ reveal --human-permissions ~
 
 You can also stack multiple data type flags for multiple entries, allowing you
 to retrive multiple data at once. For example, you can make it reveal the size
-your current directory, the human permissions of the directories `/` and `~`,
-and the mode of the directory `~`:
+in bytes of your current directory, the human permissions of the directories
+`/` and `~`, and the mode of the directory `~`:
 
 ```bash
 reveal --size --human-permissions / ~ --mode
