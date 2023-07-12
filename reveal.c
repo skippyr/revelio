@@ -58,9 +58,10 @@
 #define writeCharacter 'w'
 #define executeCharacter 'x'
 #define lackCharacter '-'
+#define isExpectingEntryBit (1 << 5)
 #define isTranspassingBit (1 << 6)
 #define exitCodeBit (1 << 7)
-#define nonDataTypeBits (isTranspassingBit | exitCodeBit)
+#define nonDataTypeBits (isTranspassingBit | exitCodeBit | isExpectingEntryBit)
 #define ParseMetadataFlag(flag, text)                                          \
     if (!strcmp("--" flag, arguments[i]))                                      \
     {                                                                          \
@@ -70,7 +71,12 @@
 #define ParseDataTypeFlag(flag, dataType)                                      \
     if (!strcmp("--" flag, arguments[i]))                                      \
     {                                                                          \
-        globalOptions = dataType | (globalOptions & nonDataTypeBits);          \
+        if (globalOptions & isExpectingEntryBit)                                  \
+            Reveal(entry);                                                     \
+        globalOptions = dataType | (globalOptions & nonDataTypeBits) |         \
+                        isExpectingEntryBit;                                      \
+        if (i == quantityOfArguments - 1)                                      \
+            Reveal(entry);                                                     \
         continue;                                                              \
     }
 #define ParseFunctionCase(value, function)                                     \
@@ -116,6 +122,12 @@ static uint8_t globalOptions = 0;
 int
 main(const int quantityOfArguments, const char **arguments)
 {
+    if (quantityOfArguments == 1)
+    {
+        Reveal(".");
+        return (0);
+    }
+    const char *entry = ".";
     for (int i = 1; i < quantityOfArguments; i++)
     {
         ParseMetadataFlag("version", programVersion)
@@ -148,10 +160,14 @@ main(const int quantityOfArguments, const char **arguments)
         else if (strlen(arguments[i]) > 2 && arguments[i][0] == '-' &&
                  arguments[i][1] == '-')
             PrintSplittedError("the flag \"", arguments[i], "\" is "
-                               "unrecognized.\n    Did you mean the entry "
+                               "unrecognized.\n        Did you mean the entry "
                                "\"./", arguments[i], "\"?");
         else
-            Reveal(arguments[i]);
+        {
+            globalOptions &= ~isExpectingEntryBit;
+            entry = arguments[i];
+            Reveal(entry);
+        }
     }
     return (!!(globalOptions & exitCodeBit));
 }
