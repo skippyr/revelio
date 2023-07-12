@@ -196,7 +196,8 @@ Reveal(const char *const path)
         lstat(path, &metadata))
     {
         PrintSplittedError("the entry \"", path, "\" does not points to "
-                           "anything.\n        Did you not mispelled it?", "", "");
+                           "anything.\n        Did you not misspelled it?", "",
+                           "");
         return;
     }
     switch (globalOptions & ~nonDataTypeBits)
