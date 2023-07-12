@@ -9,7 +9,7 @@
 #include <time.h>
 
 #define programName "reveal"
-#define programVersion "v7.0.0"
+#define programVersion "v7.0.1"
 #define programLicense "Copyright (c) 2023, Sherman Rofeman. MIT license."
 #define programUpstream "https://github.com/skippyr/" programName
 #define programHelp                                                            \
@@ -175,7 +175,7 @@ main(const int quantityOfArguments, const char **arguments)
         ParseFlag("transpass", globalOptions |= isTranspassingBit)
         ParseFlag("untranspass", globalOptions &= ~isTranspassingBit)
         if (strlen(arguments[i]) > 2 && arguments[i][0] == '-' &&
-                 arguments[i][1] == '-')
+            arguments[i][1] == '-')
             PrintSplittedError("the flag \"", arguments[i], "\" is "
                                "unrecognized.\n        Did you mean the entry "
                                "\"./", arguments[i], "\"?");
