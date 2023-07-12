@@ -40,53 +40,73 @@ make
 
 ### First Use
 
-Reveal expects a list of entries of the file system. By default, it will
-reveal their contents. For example: you can make it reveal the entries in
-your current directory.
+Reveal expects a list of entries of the file system as arguments. By default,
+it will reveal their contents. If you do not give an entry, it will consider
+the last one given, else, the current directory.
+
+As a first example, what about revealing your current directory:
 
 ```bash
-reveal .
+reveal
+```
+
+And,  a file:
+
+```bash
+reveal LICENSE
 ```
 
 ### Data Type Flags
 
-You can change the data type you want to retrieve by using a data type flag.
-For example: you can make it reveal the size in bytes of an entry using `--size`.
+You can change the data type you want to retrieve by using a data type flag
+before the entries you want to affect. For example, you can make it reveal the
+size in bytes of your current directory using `--size`:
 
 ```bash
-reveal --size .
+reveal --size
 ```
 
-These data type flags will affect the output of any argument that follows them.
-Like this, you can retrieve different data types from different entries at once.
+Or the human permissions of your home directory:
 
 ```bash
-reveal -size . --human-permissions . /
+reveal --human-permissions ~
+```
+
+You can also stack multiple data type flags for multiple entries, allowing you
+to retrive multiple data at once. For example, you can make it reveal the size
+your current directory, the human permissions of the directories `/` and `~`,
+and the mode of the directory `~`:
+
+```bash
+reveal --size --human-permissions / ~ --mode
 ```
 
 ### Transpassing Flags
 
 By default, Reveal does not resolve symlinks. If you want to change this
-behavior, use the `--transpass` flag.
+behavior, use the `--transpass` flag before the entries you want to affect.
+You can also counter this flag using the `--untranspass` flag. This allow you
+to create interesting combos if you combine those with the data type flags.
+
+For example: you can make it reveal the contents of what the symlink directory
+`/snap` resolves to and also get the quantity of blocks the symlink itself
+occupies.
 
 ```bash
-reveal --transpass /snap
+reveal --transpass /snap --untranspass --blocks
 ```
-
-Similarly to the data type flags, this flag will also affect any argument that
-follows it.
 
 ### Help
 
-You can get a list of available flags by reading its help page.
+For more details about the program and its features, visit its help page:
 
 ```bash
 reveal --help
 ```
 
-## Issues And Suggestions
+## Issues, Questions And Suggestions
 
-Report issues and suggestion in the [issues tab](https://github.com/skippyr/reveal/issues).
+Report issues, questions and suggestions in the [issues tab](https://github.com/skippyr/reveal/issues).
 
 ## License
 

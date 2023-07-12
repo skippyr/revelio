@@ -67,8 +67,8 @@
     "EXIT CODES\n"                                                             \
     "It will throw exit code 1 in the end of its execution if an error "       \
     "happens.\n\n"                                                             \
-    "ISSUES AND SUGGESTIONS\n"                                                 \
-    "Report issues and suggestions at:\n"                                      \
+    "ISSUES, QUESTIONS AND SUGGESTIONS\n"                                      \
+    "Report issues, questions and suggestions at:\n"                           \
     programUpstream "/issues."
 #define readCharacter 'r'
 #define writeCharacter 'w'
