@@ -11,6 +11,7 @@
 #define programName "reveal"
 #define programVersion "v7.0.0"
 #define programLicense "Copyright (c) 2023, Sherman Rofeman. MIT license."
+#define programUpstream "https://github.com/skippyr/" programName
 #define programHelp                                                            \
     "Usage: " programName " [FLAGS, ENTRIES...]\n"                             \
     "Reveals information about entries in the file system.\n\n"                \
@@ -53,7 +54,22 @@
     "accessed.\n\n"                                                            \
     "If one of these flags is used, all the entries following it will be "     \
     "affected\nuntil it reaches another flag of this type. Else, the one "     \
-    "marked as default will\nbe considered in use."
+    "marked as default will\nbe considered in use.\n\n"                        \
+    "If you do not use an entry following them, they will consider the last "  \
+    "entry\ngiven, else, the current directory.\n\n"                           \
+    "TRANSPASSING FLAGS\n"                                                     \
+    "These flags change the way information of symlinks will be handled.\n\n"  \
+    "  --untranspass (default)  consider the symlinks themself.\n"             \
+    "  --transpass              consider what the symlinks resolves to.\n\n"   \
+    "If one of these flags is used, all the entries following it will be "     \
+    "affected\nuntil it reaches another flag of this type. Else, the one "     \
+    "marked as default will\nbe considered in use.\n\n"                        \
+    "EXIT CODES\n"                                                             \
+    "It will throw exit code 1 in the end of its execution if an error "       \
+    "happens.\n\n"                                                             \
+    "ISSUES AND SUGGESTIONS\n"                                                 \
+    "Report issues and suggestions at:\n"                                      \
+    programUpstream "/issues."
 #define readCharacter 'r'
 #define writeCharacter 'w'
 #define executeCharacter 'x'
