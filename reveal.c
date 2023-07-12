@@ -170,9 +170,17 @@ main(const int quantityOfArguments, const char **arguments)
         ParseDataTypeFlag("changed-date", 15)
         ParseDataTypeFlag("accessed-date", 16)
         if (!strcmp("--transpass", arguments[i]))
+        {
             globalOptions |= isTranspassingBit;
+            if (i == quantityOfArguments - 1)
+                Reveal(entry);
+        }
         else if (!strcmp("--untranspass", arguments[i]))
+        {
             globalOptions &= ~isTranspassingBit;
+            if (i == quantityOfArguments - 1)
+                Reveal(entry);
+        }
         else if (strlen(arguments[i]) > 2 && arguments[i][0] == '-' &&
                  arguments[i][1] == '-')
             PrintSplittedError("the flag \"", arguments[i], "\" is "
