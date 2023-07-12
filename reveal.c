@@ -60,7 +60,7 @@
     "TRANSPASSING FLAGS\n"                                                     \
     "These flags change the way information of symlinks will be handled.\n\n"  \
     "  --untranspass (default)  consider the symlinks themself.\n"             \
-    "  --transpass              consider what the symlinks resolves to.\n\n"   \
+    "  --transpass              consider what the symlinks resolve to.\n\n"    \
     "If one of these flags is used, all the entries following it will be "     \
     "affected\nuntil it reaches another flag of this type. Else, the one "     \
     "marked as default will\nbe considered in use.\n\n"                        \
@@ -87,10 +87,10 @@
 #define ParseDataTypeFlag(flag, dataType)                                      \
     if (!strcmp("--" flag, arguments[i]))                                      \
     {                                                                          \
-        if (globalOptions & isExpectingEntryBit)                                  \
+        if (globalOptions & isExpectingEntryBit)                               \
             Reveal(entry);                                                     \
         globalOptions = dataType | (globalOptions & nonDataTypeBits) |         \
-                        isExpectingEntryBit;                                      \
+                        isExpectingEntryBit;                                   \
         if (i == quantityOfArguments - 1)                                      \
             Reveal(entry);                                                     \
         continue;                                                              \
