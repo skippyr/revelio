@@ -53,7 +53,7 @@
     "accessed.\n\n"                                                            \
     "If one of these flags is used, all the entries following it will be "     \
     "affected\nuntil it reaches another flag of this type. Else, the one "     \
-    "marked as default will\nbe considered."
+    "marked as default will\nbe considered in use."
 #define readCharacter 'r'
 #define writeCharacter 'w'
 #define executeCharacter 'x'
@@ -105,22 +105,24 @@ static void RevealGroup(const struct stat *const metadata,
 static void RevealDate(const time_t *const date);
 static void RevealHumanSize(const struct stat *const metadata);
 static void RevealHumanPermissions(const struct stat *const metadata);
-static void PrintSplittedError(const char *const descriptionStart,
-                               const char *const descriptionMiddle,
-                               const char *const descriptionEnd);
+static void PrintSplittedError(const char *const descriptionSplit0,
+                               const char *const descriptionSplit1,
+                               const char *const descriptionSplit2,
+                               const char *const descriptionSplit3,
+                               const char *const descriptionSplit4);
 
 static uint8_t globalOptions = 0;
 
 int
-main(const int argumentsCount, const char **arguments)
+main(const int quantityOfArguments, const char **arguments)
 {
-    for (int i = 1; i < argumentsCount; i++)
+    for (int i = 1; i < quantityOfArguments; i++)
     {
         ParseMetadataFlag("version", programVersion)
         ParseMetadataFlag("license", programLicense)
         ParseMetadataFlag("help", programHelp)
     }
-    for (int i = 1; i < argumentsCount; i++)
+    for (int i = 1; i < quantityOfArguments; i++)
     {
         ParseDataTypeFlag("contents", 0)
         ParseDataTypeFlag("type", 1)
@@ -143,6 +145,11 @@ main(const int argumentsCount, const char **arguments)
             globalOptions |= isTranspassingBit;
         else if (!strcmp("--untranspass", arguments[i]))
             globalOptions &= ~isTranspassingBit;
+        else if (strlen(arguments[i]) > 2 && arguments[i][0] == '-' &&
+                 arguments[i][1] == '-')
+            PrintSplittedError("the flag \"", arguments[i], "\" is not valid. "
+                               "Did you mean the entry \"./", arguments[i],
+                               "\"?");
         else
             Reveal(arguments[i]);
     }
@@ -156,8 +163,8 @@ Reveal(const char *const path)
     if (globalOptions & isTranspassingBit ? stat(path, &metadata) :
         lstat(path, &metadata))
     {
-        PrintSplittedError("the path \"", path, "\" does not points to "
-                           "anything. Did you not mispelled it?");
+        PrintSplittedError("the entry \"", path, "\" does not points to "
+                           "anything. Did you not mispelled it?", "", "");
         return;
     }
     switch (globalOptions & ~nonDataTypeBits)
@@ -183,9 +190,12 @@ Reveal(const char *const path)
         {
             ParseFunctionCase(S_IFREG, RevealFile(path))
             ParseFunctionCase(S_IFDIR, RevealDirectory(path))
+            ParseFunctionCase(S_IFLNK, PrintSplittedError("revealing symlink "
+                              "\"", path ,"\" requires the use of \"--transpass"
+                              "\" flag.", "", ""))
         default:
-            PrintSplittedError("can not reveal the contents of \"", path,
-                               "\" type.");
+            PrintSplittedError("the entry \"", path, "\" contains a type that "
+                               "can not be read.", "", "");
         }
     }
     return;
@@ -198,7 +208,7 @@ RevealFile(const char *const path)
     if (!file)
     {
         PrintSplittedError("could not open file \"", path, "\". Do you have "
-                           "enough permissions?");
+                           "enough permissions?", "", "");
         return;
     }
     char character;
@@ -215,14 +225,14 @@ RevealDirectory(const char *const path)
     if (!realpath(path, absolutePath))
     {
         PrintSplittedError("could not resolve absolute path of \"", path,
-                           "\".");
+                           "\".", "", "");
         return;
     }
     DIR *const directory = opendir(path);
     if (!directory)
     {
         PrintSplittedError("could not open directory \"", path, "\". Do you "
-                           "have enough permissions?");
+                           "have enough permissions?", "", "");
         return;
     }
     const struct dirent *entry;
@@ -273,7 +283,7 @@ RevealUser(const struct stat *const metadata, const char *const path)
     if (user)
         puts(user->pw_name);
     else
-        PrintSplittedError("could not get user that owns \"", path, "\".");
+        PrintSplittedError("could not get user that owns \"", path, "\".", "", "");
     return;
 }
 
@@ -284,7 +294,7 @@ RevealGroup(const struct stat *const metadata, const char *const path)
     if (group)
         puts(group->gr_name);
     else
-        PrintSplittedError("could not get group that owns \"", path, "\".");
+        PrintSplittedError("could not get group that owns \"", path, "\".", "", "");
     return;
 }
 
@@ -296,7 +306,7 @@ RevealDate(const time_t *const date)
         localtime(date)))
         puts(formattedDate);
     else
-        PrintSplittedError("overflowed buffer to store date.", "", "");
+        PrintSplittedError("overflowed buffer to store date.", "", "", "", "");
     return;
 }
 
@@ -317,12 +327,15 @@ RevealHumanPermissions(const struct stat *const metadata)
 }
 
 static void
-PrintSplittedError(const char *const descriptionStart,
-                   const char *const descriptionMiddle,
-                   const char *const descriptionEnd)
+PrintSplittedError(const char *const descriptionSplit0,
+                   const char *const descriptionSplit1,
+                   const char *const descriptionSplit2,
+                   const char *const descriptionSplit3,
+                   const char *const descriptionSplit4)
 {
-    fprintf(stderr, "%s: %s%s%s\n", programName, descriptionStart,
-            descriptionMiddle, descriptionEnd);
+    fprintf(stderr, "%s: %s%s%s%s%s\n", programName, descriptionSplit0,
+            descriptionSplit1, descriptionSplit2, descriptionSplit3,
+            descriptionSplit4);
     globalOptions |= exitCodeBit;
     return;
 }
