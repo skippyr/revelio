@@ -60,6 +60,7 @@ static void RevealGroup(const struct stat *const metadata,
                         const char *const path);
 static void RevealDate(const time_t *const date);
 static void RevealHumanSize(const struct stat *const metadata);
+static void RevealPermissions(const struct stat *const metadata);
 static void RevealHumanPermissions(const struct stat *const metadata);
 static void PrintSplittedError(const char *const descriptionStart,
                                const char *const descriptionMiddle,
@@ -128,9 +129,7 @@ Reveal(const char *const path)
     ParseFunctionCase(8, RevealGroup(&metadata, path))
     ParseFunctionCase(9, PrintUnsignedValue(metadata.st_gid))
     ParseFunctionCase(10, PrintUnsignedValue(metadata.st_mode))
-    ParseFunctionCase(11, printf("0%o\n", metadata.st_mode & S_IRUSR | S_IWUSR |
-                                 S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP |
-                                 S_IROTH | S_IWOTH | S_IXOTH))
+    ParseFunctionCase(11, RevealPermissions(&metadata));
     ParseFunctionCase(12, RevealHumanPermissions(&metadata))
     ParseFunctionCase(13, PrintUnsignedLongValue(metadata.st_ino))
     ParseFunctionCase(14, RevealDate(&metadata.st_mtime))
@@ -255,6 +254,15 @@ RevealDate(const time_t *const date)
         puts(formattedDate);
     else
         PrintSplittedError("overflowed buffer to store date.", "", "");
+    return;
+}
+
+static void
+RevealPermissions(const struct stat *const metadata)
+{
+
+    printf("0%o\n", metadata->st_mode & S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP |
+           S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH);
     return;
 }
 
