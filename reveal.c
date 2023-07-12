@@ -147,9 +147,9 @@ main(const int quantityOfArguments, const char **arguments)
             globalOptions &= ~isTranspassingBit;
         else if (strlen(arguments[i]) > 2 && arguments[i][0] == '-' &&
                  arguments[i][1] == '-')
-            PrintSplittedError("the flag \"", arguments[i], "\" is not valid. "
-                               "Did you mean the entry \"./", arguments[i],
-                               "\"?");
+            PrintSplittedError("the flag \"", arguments[i], "\" is "
+                               "unrecognized.\n    Did you mean the entry "
+                               "\"./", arguments[i], "\"?");
         else
             Reveal(arguments[i]);
     }
@@ -164,7 +164,7 @@ Reveal(const char *const path)
         lstat(path, &metadata))
     {
         PrintSplittedError("the entry \"", path, "\" does not points to "
-                           "anything. Did you not mispelled it?", "", "");
+                           "anything.\n        Did you not mispelled it?", "", "");
         return;
     }
     switch (globalOptions & ~nonDataTypeBits)
@@ -190,9 +190,10 @@ Reveal(const char *const path)
         {
             ParseFunctionCase(S_IFREG, RevealFile(path))
             ParseFunctionCase(S_IFDIR, RevealDirectory(path))
-            ParseFunctionCase(S_IFLNK, PrintSplittedError("revealing symlink "
-                              "\"", path ,"\" requires the use of \"--transpass"
-                              "\" flag.", "", ""))
+            ParseFunctionCase(S_IFLNK, PrintSplittedError(
+                "can not reveal the contents of symlink \"", path, "\".\n      "
+                "  Did you mean to use the \"--transpass\" flag before it?", "",
+                ""))
         default:
             PrintSplittedError("the entry \"", path, "\" contains a type that "
                                "can not be read.", "", "");
@@ -207,8 +208,8 @@ RevealFile(const char *const path)
     FILE *const file = fopen(path, "r");
     if (!file)
     {
-        PrintSplittedError("could not open file \"", path, "\". Do you have "
-                           "enough permissions?", "", "");
+        PrintSplittedError("can not open file \"", path, "\".\n        Do you "
+                           "have enough permissions?", "", "");
         return;
     }
     char character;
@@ -224,15 +225,15 @@ RevealDirectory(const char *const path)
     char absolutePath[PATH_MAX];
     if (!realpath(path, absolutePath))
     {
-        PrintSplittedError("could not resolve absolute path of \"", path,
+        PrintSplittedError("could not resolve absolute path of entry\"", path,
                            "\".", "", "");
         return;
     }
     DIR *const directory = opendir(path);
     if (!directory)
     {
-        PrintSplittedError("could not open directory \"", path, "\". Do you "
-                           "have enough permissions?", "", "");
+        PrintSplittedError("can not open directory \"", path, "\".\n        Do "
+                           "you have enough permissions?", "", "");
         return;
     }
     const struct dirent *entry;
@@ -283,7 +284,8 @@ RevealUser(const struct stat *const metadata, const char *const path)
     if (user)
         puts(user->pw_name);
     else
-        PrintSplittedError("could not get user that owns \"", path, "\".", "", "");
+        PrintSplittedError("could not get user that owns the entry \"", path,
+                           "\".", "", "");
     return;
 }
 
@@ -294,7 +296,8 @@ RevealGroup(const struct stat *const metadata, const char *const path)
     if (group)
         puts(group->gr_name);
     else
-        PrintSplittedError("could not get group that owns \"", path, "\".", "", "");
+        PrintSplittedError("could not get group that owns the entry \"", path,
+                           "\".", "", "");
     return;
 }
 
