@@ -175,9 +175,9 @@ main(const int quantityOfArguments, const char **arguments)
     ParseFlag("untranspass", globalOptions &= ~isTranspassingBit)
     if (strlen(arguments[i]) > 2 && arguments[i][0] == '-' &&
         arguments[i][1] == '-')
-      PrintSplittedError("the flag \"", arguments[i], "\" is "
-                         "unrecognized.\n        Did you mean the entry "
-                         "\"./", arguments[i], "\"?");
+      PrintSplittedError("the flag \"", arguments[i], "\" is unrecognized.\n   "
+                         "     Did you mean the entry \"./", arguments[i],
+                         "\"?");
     else
     {
       globalOptions &= ~isExpectingEntryBit;
@@ -192,12 +192,11 @@ static void
 Reveal(const char *const path)
 {
   struct stat metadata;
-  if (globalOptions & isTranspassingBit ? stat(path, &metadata) :
-      lstat(path, &metadata))
+  if (globalOptions & isTranspassingBit ? stat(path, &metadata) : lstat(path,
+      &metadata))
   {
-    PrintSplittedError("the entry \"", path, "\" does not points to "
-                       "anything.\n        Did you not misspelled it?", "",
-                       "");
+    PrintSplittedError("the entry \"", path, "\" does not points to anything.\n"
+                       "        Did you not misspelled it?", "", "");
     return;
   }
   switch (globalOptions & ~nonDataTypeBits)
@@ -212,7 +211,7 @@ Reveal(const char *const path)
   ParseFunctionCase(8, RevealGroup(&metadata, path))
   ParseFunctionCase(9, PrintUnsignedValue(metadata.st_gid))
   ParseFunctionCase(10, PrintUnsignedValue(metadata.st_mode))
-  ParseFunctionCase(11, PrintPermissions(metadata.st_mode));
+  ParseFunctionCase(11, PrintPermissions(metadata.st_mode))
   ParseFunctionCase(12, RevealHumanPermissions(&metadata))
   ParseFunctionCase(13, PrintUnsignedLongValue(metadata.st_ino))
   ParseFunctionCase(14, RevealDate(&metadata.st_mtime))
@@ -224,12 +223,11 @@ Reveal(const char *const path)
       ParseFunctionCase(S_IFREG, RevealFile(path))
       ParseFunctionCase(S_IFDIR, RevealDirectory(path))
       ParseFunctionCase(S_IFLNK, PrintSplittedError(
-        "can not reveal the contents of symlink \"", path, "\".\n      "
-        "  Did you mean to use the \"--transpass\" flag before it?", "",
-        ""))
+        "can not reveal the contents of symlink \"", path, "\".\n        Did "
+        "you mean to use the \"--transpass\" flag before it?", "", ""))
       default:
-        PrintSplittedError("the entry \"", path, "\" contains a type that "
-                           "can not be read.", "", "");
+        PrintSplittedError("the entry \"", path, "\" contains a type that can "
+                           "not be read.", "", "");
     }
   }
   return;
@@ -241,8 +239,8 @@ RevealFile(const char *const path)
   FILE *const file = fopen(path, "r");
   if (!file)
   {
-    PrintSplittedError("can not open file \"", path, "\".\n        Do you "
-                       "have enough permissions?", "", "");
+    PrintSplittedError("can not open file \"", path, "\".\n        Do you have "
+                       "enough permissions?", "", "");
     return;
   }
   char character;
@@ -265,15 +263,15 @@ RevealDirectory(const char *const path)
   DIR *const directory = opendir(path);
   if (!directory)
   {
-    PrintSplittedError("can not open directory \"", path, "\".\n        Do "
-                       "you have enough permissions?", "", "");
+    PrintSplittedError("can not open directory \"", path, "\".\n        Do you "
+                       "have enough permissions?", "", "");
     return;
   }
   const struct dirent *entry;
   while ((entry = readdir(directory)))
   {
     if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
-        continue;
+      continue;
     printf("%s%s%s\n", absolutePath, !strcmp(absolutePath, "/") ? "" : "/",
            entry->d_name);
   }
@@ -292,7 +290,7 @@ RevealType(const struct stat *const metadata)
   ParsePutsCase(S_IFIFO, "fifo")
   ParsePutsCase(S_IFLNK, "symlink")
   ParsePutsCase(S_IFREG, "regular")
-  ParsePutsCase(S_IFSOCK, "socket");
+  ParsePutsCase(S_IFSOCK, "socket")
   default:
     puts("unknown");
   }
@@ -303,9 +301,9 @@ static void
 RevealHumanSize(const struct stat *const metadata)
 {
   float size;
-  ParseSize(1e9, "GB");
-  ParseSize(1e6, "MB");
-  ParseSize(1e3, "KB");
+  ParseSize(1e9, "GB")
+  ParseSize(1e6, "MB")
+  ParseSize(1e3, "KB")
   printf("%ldB\n", metadata->st_size);
   return;
 }
