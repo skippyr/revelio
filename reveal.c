@@ -69,4 +69,52 @@
   "ISSUES, QUESTIONS AND SUGGESTIONS\n"                                        \
   "Report issues, questions and suggestions at:\n"                             \
   programUpstream "/issues."
+#define readCharacter 'r'
+#define writeCharacter 'w'
+#define executeCharacter 'x'
+#define lackCharacter '-'
+#define isExpectingEntryBit (1 << 5)
+#define isTranspassingBit (1 << 6)
+#define exitCodeBit (1 << 7)
+#define nonDataTypeBits (isTranspassingBit | exitCodeBit | isExpectingEntryBit)
+#define ParseMetadataFlag(flag, text)                                          \
+  if (!strcmp("--" flag, arguments[i]))                                        \
+  {                                                                            \
+    puts(text);                                                                \
+    return (0);                                                                \
+  }
+#define ParseFlag(flag, action)                                                \
+  if (!strcmp("--" flag, arguments[i]))                                        \
+  {                                                                            \
+    action;                                                                    \
+    if (i == quantityOfArguments - 1)                                          \
+      Reveal(entry);                                                           \
+    continue;                                                                  \
+  }
+#define ParseDataTypeFlag(flag, dataType) ParseFlag(flag,                      \
+  if (globalOptions & isExpectingEntryBit)                                     \
+    Reveal(entry);                                                             \
+  globalOptions = dataType | (globalOptions & nonDataTypeBits) |               \
+                  isExpectingEntryBit                                          \
+)
+#define ParseFunctionCase(value, function)                                     \
+  case value:                                                                  \
+    function;                                                                  \
+    break;
+#define ParsePutsCase(value, text) ParseFunctionCase(value, puts(text))
+#define ParseSize(multiplier, unit)                                            \
+  size = metadata->st_size / (multiplier);                                     \
+  if ((int) size)                                                              \
+  {                                                                            \
+    printf("%.1f%s\n", size, unit);                                            \
+    return;                                                                    \
+  }
+#define ParsePermission(permission, character)                                 \
+    putchar(metadata->st_mode & (permission) ? character : lackCharacter);
+#define PrintPermissions(mode)                                                 \
+  printf("0%o\n", (mode) & (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP |  \
+         S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH));
+#define PrintUnsignedValue(value) printf("%u\n", value);
+#define PrintLongValue(value) printf("%ld\n", value);
+#define PrintUnsignedLongValue(value) printf("%lu\n", value);
 
