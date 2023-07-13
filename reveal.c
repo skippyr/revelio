@@ -311,24 +311,24 @@ RevealHumanSize(const struct stat *const metadata)
 static void
 RevealUser(const struct stat *const metadata, const char *const path)
 {
-    const struct passwd *const user = getpwuid(metadata->st_uid);
-    if (user)
-      puts(user->pw_name);
-    else
-      PrintSplittedError("could not get user that owns the entry \"", path,
-                         "\".", "", "");
+  const struct passwd *const user = getpwuid(metadata->st_uid);
+  if (user)
+    puts(user->pw_name);
+  else
+    PrintSplittedError("could not get user that owns the entry \"", path,
+                       "\".", "", "");
   return;
 }
 
 static void
 RevealGroup(const struct stat *const metadata, const char *const path)
 {
-    const struct group *const group = getgrgid(metadata->st_gid);
-    if (group)
-      puts(group->gr_name);
-    else
-      PrintSplittedError("could not get group that owns the entry \"", path,
-                         "\".", "", "");
+  const struct group *const group = getgrgid(metadata->st_gid);
+  if (group)
+    puts(group->gr_name);
+  else
+    PrintSplittedError("could not get group that owns the entry \"", path,
+                       "\".", "", "");
   return;
 }
 
