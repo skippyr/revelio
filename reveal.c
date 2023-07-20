@@ -1,8 +1,10 @@
-#include <stdio.h>
+#include <dirent.h>
+#include <grp.h>
+#include <pwd.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <dirent.h>
 
 #define programname__ "reveal"
 #define programversion__ "v8.0.0"
@@ -20,6 +22,9 @@
 	Parse_Opt_Flag__(f, opts = t | opts & nontypebits__;)
 
 #define Parse_Fct_Case__(v, f) case v: f; break;
+#define Parse_Puts_Case__(v, t) Parse_Fct_Case__(v, puts(t))
+#define Parse_Size__(m, u)\
+	h = s->st_size / (m); if ((int) h) {printf("%.1f%cB\n", h, u); return;}
 
 #define Puts_Long__(v) printf("%ld\n", v);
 #define Puts_Unsigned__(v) printf("%u\n", v);
@@ -32,6 +37,65 @@ Print_Error(char *e0, char *e1, char *e2)
 {
 	fprintf(stderr, "%s: %s%s%s\n", programname__, e0, e1, e2);
 	opts |= haderrorbit__;
+	return;
+}
+
+void
+Reveal_Type(struct stat *s)
+{
+	switch (s->st_mode & S_IFMT)
+	{
+	Parse_Puts_Case__(S_IFBLK, "block")
+	Parse_Puts_Case__(S_IFCHR, "character")
+	Parse_Puts_Case__(S_IFIFO, "fifo")
+	Parse_Puts_Case__(S_IFLNK, "symlink")
+	Parse_Puts_Case__(S_IFSOCK, "socket")
+	Parse_Puts_Case__(S_IFREG, "regular")
+	Parse_Puts_Case__(S_IFDIR, "directory")
+	default:
+		puts("unknown");
+	}
+	return;
+}
+
+void
+Reveal_Human_Size(struct stat *s)
+{
+	float h;
+	Parse_Size__(1e9, 'G')
+	Parse_Size__(1e6, 'M')
+	Parse_Size__(1e3, 'K')
+	printf("%ldB\n", s->st_size);
+	return;
+}
+
+void
+Reveal_User(struct stat *s, char *p)
+{
+	struct passwd *u = getpwuid(s->st_uid);
+	if (u)
+	{
+		puts(u->pw_name);
+	}
+	else
+	{
+		Print_Error("can not get user that owns \"", p, "\".");
+	}
+	return;
+}
+
+void
+Reveal_Group(struct stat *s, char *p)
+{
+	struct group *g = getgrgid(s->st_gid);
+	if (g)
+	{
+		puts(g->gr_name);
+	}
+	else
+	{
+		Print_Error("can not get group that owns \"", p, "\".");
+	}
 	return;
 }
 
@@ -86,6 +150,16 @@ Reveal(char *p)
 	}
 	switch (opts & ~nontypebits__)
 	{
+	Parse_Fct_Case__(1, Reveal_Type(&s))
+	Parse_Fct_Case__(2, Puts_Long__(s.st_size))
+	Parse_Fct_Case__(3, Reveal_Human_Size(&s))
+	Parse_Fct_Case__(4, Puts_Long__(s.st_blocks))
+	Parse_Fct_Case__(5, Puts_Unsigned_Long__(s.st_nlink))
+	Parse_Fct_Case__(6, Reveal_User(&s, p))
+	Parse_Fct_Case__(7, Puts_Unsigned__(s.st_uid))
+	Parse_Fct_Case__(8, Reveal_Group(&s, p))
+	Parse_Fct_Case__(9, Puts_Unsigned__(s.st_gid))
+	Parse_Fct_Case__(10, Puts_Unsigned__(s.st_mode))
 	default:
 		switch (s.st_mode & S_IFMT)
 		{
