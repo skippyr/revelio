@@ -11,7 +11,45 @@
 #define programname__ "reveal"
 #define programversion__ "v8.0.0"
 #define programcopyright__ "Copyright (c) 2023, Sherman Rofeman. MIT license."
-#define programhelp__ "help"
+#define programhelp__\
+	"Usage: " programname__ " [FLAGS, PATHS...]\n"\
+	"Reveals information about entries in the file system.\n\n"\
+	"META FLAGS\n"\
+	"Terminates its execution and shows information about the program itself.\n"\
+	"   --help        prints these help instructions.\n"\
+	"   --version     prints its version.\n"\
+	"   --copyright   prints its copyright notice.\n\n"\
+	"TYPE FLAGS\n"\
+	"Changes what type of data to retrive from the entries following them.\n"\
+	"   --contents (default)   prints its contents.\n"\
+	"   --type                 prints its type.\n"\
+	"   --size                 prints its size in bytes.\n"\
+	"   --human-size           prints its size using a human readable unit.\n"\
+	"   --blocks               prints how many blocks it occupies.\n"\
+	"   --hard-links           prints how many hard links it has.\n"\
+	"   --user                 prints the user that owns it.\n"\
+	"   --user-id              prints the ID of the user that owns it.\n"\
+	"   --group                prints the group that owns it.\n"\
+	"   --group-id             prints the ID of the group that owns it.\n"\
+	"   --mode                 prints its mode.\n"\
+	"   --permissions          prints its permissions in octal base.\n"\
+	"   --human-permissions    prints its permissions using characters.\n"\
+	"   --inode                prints its inode ID.\n"\
+	"   --modified-date        prints the date when its contents were last\n   "\
+	"                       modified.\n"\
+	"   --changed-date         prints the date when its metadata were last\n   "\
+	"                       changed.\n"\
+	"   --accessed-date        prints the date when its contents were last\n   "\
+	"                       read.\n\n"\
+	"TRANSPASSING FLAGS\n"\
+	"Change the way symlinks following them are handled.\n"\
+	"   --untranspass (default)   does not resolve symlinks.\n"\
+	"   --transpass               resolves symlinks.\n\n"\
+	"EXIT CODE\n"\
+	"It will throw exit code 1 if an error happens.\n\n"\
+	"SUPPORT\n"\
+	"Report issues, questions and suggestions at:\n"\
+	"https://github.com/skippyr/" programname__ "/issues."
 
 #define istranspassingbit__ (1 << 6)
 #define haderrorbit__ (1 << 7)
