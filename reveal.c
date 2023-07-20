@@ -16,6 +16,11 @@
 #define haderrorbit__ (1 << 7)
 #define nontypebits__ (istranspassingbit__ | haderrorbit__)
 
+#define readchar__ 'r'
+#define writechar__ 'w'
+#define executechar__ 'x'
+#define lackchar__ '-'
+
 #define Parse_Flag__(f, a) if (!strcmp("--" f, args[i])) {a}
 #define Parse_Meta_Flag__(f, t) Parse_Flag__(f, puts(t); return (0);)
 #define Parse_Opt_Flag__(f, a) Parse_Flag__(f, a continue;)
@@ -26,10 +31,14 @@
 #define Parse_Puts_Case__(v, t) Parse_Fct_Case__(v, puts(t))
 #define Parse_Size__(m, u)\
 	h = s->st_size / (m); if ((int) h) {printf("%.1f%cB\n", h, u); return;}
+#define Parse_Permission__(p, c) putchar(s->st_mode & p ? c : lackchar__);
 
 #define Puts_Long__(v) printf("%ld\n", v);
 #define Puts_Unsigned__(v) printf("%u\n", v);
 #define Puts_Unsigned_Long__(v) printf("%lu\n", v);
+#define Puts_Permissions__(m)\
+	printf("0%o\n", (m) & (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP |\
+	       S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH));
 
 uint8_t opts = 0;
 
@@ -101,6 +110,22 @@ Reveal_Group(struct stat *s, char *p)
 }
 
 void
+Reveal_Human_Permissions(struct stat *s)
+{
+	Parse_Permission__(S_IRUSR, readchar__)
+	Parse_Permission__(S_IWUSR, writechar__)
+	Parse_Permission__(S_IXUSR, executechar__)
+	Parse_Permission__(S_IRGRP, readchar__)
+	Parse_Permission__(S_IWGRP, writechar__)
+	Parse_Permission__(S_IXGRP, executechar__)
+	Parse_Permission__(S_IROTH, readchar__)
+	Parse_Permission__(S_IWOTH, writechar__)
+	Parse_Permission__(S_IXOTH, executechar__)
+	putchar('\n');
+	return;
+}
+
+void
 Reveal_File(char *p)
 {
 	FILE *f = fopen(p, "r");
@@ -167,6 +192,8 @@ Reveal(char *p)
 		Parse_Fct_Case__(8, Reveal_Group(&s, p))
 		Parse_Fct_Case__(9, Puts_Unsigned__(s.st_gid))
 		Parse_Fct_Case__(10, Puts_Unsigned__(s.st_mode))
+		Parse_Fct_Case__(11, Puts_Permissions__(s.st_mode))
+		Parse_Fct_Case__(12, Reveal_Human_Permissions(&s))
 		default:
 			switch (s.st_mode & S_IFMT)
 			{
