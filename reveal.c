@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <time.h>
 
 #define programname__ "reveal"
 #define programversion__ "v8.0.0"
@@ -126,6 +127,21 @@ Reveal_Human_Permissions(struct stat *s)
 }
 
 void
+Reveal_Date(time_t *d)
+{
+	char b[29];
+	if (strftime(b, sizeof(b), "%a %b %d %T %Z %Y", localtime(d)))
+	{
+		puts(b);
+	}
+	else
+	{
+		Print_Error("overflowed buffer to store date.", "", "");
+	}
+	return;
+}
+
+void
 Reveal_File(char *p)
 {
 	FILE *f = fopen(p, "r");
@@ -194,6 +210,10 @@ Reveal(char *p)
 		Parse_Fct_Case__(10, Puts_Unsigned__(s.st_mode))
 		Parse_Fct_Case__(11, Puts_Permissions__(s.st_mode))
 		Parse_Fct_Case__(12, Reveal_Human_Permissions(&s))
+		Parse_Fct_Case__(13, Puts_Unsigned_Long__(s.st_ino))
+		Parse_Fct_Case__(14, Reveal_Date(&s.st_mtime))
+		Parse_Fct_Case__(15, Reveal_Date(&s.st_ctime))
+		Parse_Fct_Case__(16, Reveal_Date(&s.st_atime))
 		default:
 			switch (s.st_mode & S_IFMT)
 			{
