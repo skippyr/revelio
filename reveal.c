@@ -3,6 +3,7 @@
 #include <pwd.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 
@@ -45,15 +46,15 @@ Reveal_Type(struct stat *s)
 {
 	switch (s->st_mode & S_IFMT)
 	{
-	Parse_Puts_Case__(S_IFBLK, "block")
-	Parse_Puts_Case__(S_IFCHR, "character")
-	Parse_Puts_Case__(S_IFIFO, "fifo")
-	Parse_Puts_Case__(S_IFLNK, "symlink")
-	Parse_Puts_Case__(S_IFSOCK, "socket")
-	Parse_Puts_Case__(S_IFREG, "regular")
-	Parse_Puts_Case__(S_IFDIR, "directory")
-	default:
-		puts("unknown");
+		Parse_Puts_Case__(S_IFBLK, "block")
+		Parse_Puts_Case__(S_IFCHR, "character")
+		Parse_Puts_Case__(S_IFIFO, "fifo")
+		Parse_Puts_Case__(S_IFLNK, "symlink")
+		Parse_Puts_Case__(S_IFSOCK, "socket")
+		Parse_Puts_Case__(S_IFREG, "regular")
+		Parse_Puts_Case__(S_IFDIR, "directory")
+		default:
+			puts("unknown");
 	}
 	return;
 }
@@ -120,6 +121,12 @@ Reveal_File(char *p)
 void
 Reveal_Directory(char *p)
 {
+	char a[PATH_MAX];
+	if (!realpath(p, a))
+	{
+		Print_Error("can not resolve absolute path of \"", p, "\".");
+		return;
+	}
 	DIR *d = opendir(p);
 	if (!d)
 	{
@@ -133,7 +140,7 @@ Reveal_Directory(char *p)
 		{
 			continue;
 		}
-		puts(e->d_name);
+		printf("%s%s%s\n", a, strcmp(a, "/") ? "/" : "", e->d_name);
 	}
 	closedir(d);
 	return;
@@ -150,24 +157,25 @@ Reveal(char *p)
 	}
 	switch (opts & ~nontypebits__)
 	{
-	Parse_Fct_Case__(1, Reveal_Type(&s))
-	Parse_Fct_Case__(2, Puts_Long__(s.st_size))
-	Parse_Fct_Case__(3, Reveal_Human_Size(&s))
-	Parse_Fct_Case__(4, Puts_Long__(s.st_blocks))
-	Parse_Fct_Case__(5, Puts_Unsigned_Long__(s.st_nlink))
-	Parse_Fct_Case__(6, Reveal_User(&s, p))
-	Parse_Fct_Case__(7, Puts_Unsigned__(s.st_uid))
-	Parse_Fct_Case__(8, Reveal_Group(&s, p))
-	Parse_Fct_Case__(9, Puts_Unsigned__(s.st_gid))
-	Parse_Fct_Case__(10, Puts_Unsigned__(s.st_mode))
-	default:
-		switch (s.st_mode & S_IFMT)
-		{
-		Parse_Fct_Case__(S_IFREG, Reveal_File(p))
-		Parse_Fct_Case__(S_IFDIR, Reveal_Directory(p))
+		Parse_Fct_Case__(1, Reveal_Type(&s))
+		Parse_Fct_Case__(2, Puts_Long__(s.st_size))
+		Parse_Fct_Case__(3, Reveal_Human_Size(&s))
+		Parse_Fct_Case__(4, Puts_Long__(s.st_blocks))
+		Parse_Fct_Case__(5, Puts_Unsigned_Long__(s.st_nlink))
+		Parse_Fct_Case__(6, Reveal_User(&s, p))
+		Parse_Fct_Case__(7, Puts_Unsigned__(s.st_uid))
+		Parse_Fct_Case__(8, Reveal_Group(&s, p))
+		Parse_Fct_Case__(9, Puts_Unsigned__(s.st_gid))
+		Parse_Fct_Case__(10, Puts_Unsigned__(s.st_mode))
 		default:
-			Print_Error("can not reveal contents of the type \"", p, "\" is.");
-		}
+			switch (s.st_mode & S_IFMT)
+			{
+				Parse_Fct_Case__(S_IFREG, Reveal_File(p))
+				Parse_Fct_Case__(S_IFDIR, Reveal_Directory(p))
+				default:
+					Print_Error("can not reveal contents of the type \"", p,
+					            "\" is.");
+			}
 	}
 	return;
 }
