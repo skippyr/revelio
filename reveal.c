@@ -17,35 +17,33 @@
    "METADATA FLAGS\n"                                                          \
    "The following flags allow you to get information about the program "       \
    "itself.\n\n"                                                               \
-   "    --copyright    prints its copyright notice.\n"                         \
-   "    --version      prints its version.\n"                                  \
-   "    --help         prints these help instructions.\n\n"                    \
+   "   --copyright   prints its copyright notice.\n"                           \
+   "   --version     prints its version.\n"                                    \
+   "   --help        prints these help instructions.\n\n"                      \
    "DATA TYPE FLAGS\n"                                                         \
    "The following flags allow you to change what type of data to get from "    \
    "the\nentries following them.\n\n"                                          \
    "If none is used, the one marked as default will be considered in "         \
    "use.\n\n"                                                                  \
-   "    --contents (default)    prints its contents.\n"                        \
-   "    --type                  prints its type: regular, directory, "         \
-   "symlink,\n                            socket, fifo, block, character or "  \
+   "   --contents (default)   prints its contents.\n"                          \
+   "   --type                 prints its type: regular, directory, "           \
+   "symlink,\n                          socket, fifo, block, character or "    \
    "unknown.\n"                                                                \
-   "    --size                  prints its size using the most formidable "    \
-   "unit:\n                            gigabyte (GB), megabyte (MB), "         \
-   "kilobyte (KB) "                                                            \
-   "or\n                            byte (B).\n"                               \
-   "    --byte-size             prints its size in bytes.\n"                   \
-   "    --permissions           prints its read (r), write (w) and execute "   \
-   "(x)\n                            permissions for user, group and "         \
-   "others. If a\n                            permission is not set "          \
-   "the lack (-) character\n                            will be used.\n"       \
-   "    --octal-permissions     prints its permissions in octal base.\n"       \
-   "    --user                  prints the user that owns it.\n"               \
-   "    --user-uid              prints the UID of the user that owns it.\n"    \
-   "    --group                 prints the group that owns it.\n"              \
-   "    --group-gid             prints the GID of the group that owns it.\n"   \
-   "    --modified-date         prints the date when its contents where "      \
-   "last\n                            "                                        \
-   "modified.\n\n"                                                             \
+   "   --size                 prints its size using the most formidable "      \
+   "unit:\n                          gigabyte (GB), megabyte (MB), "           \
+   "kilobyte (KB) or\n                          byte (B).\n"                   \
+   "   --byte-size            prints its size in bytes.\n"                     \
+   "   --permissions          prints its read (r), write (w) and execute "     \
+   "(x)\n                          permissions for user, group and "           \
+   "others. If a\n                          permission is not set "            \
+   "the lack (-) character\n                          will be used.\n"         \
+   "   --octal-permissions    prints its permissions in octal base.\n"         \
+   "   --user                 prints the user that owns it.\n"                 \
+   "   --user-uid             prints the UID of the user that owns it.\n"      \
+   "   --group                prints the group that owns it.\n"                \
+   "   --group-gid            prints the GID of the group that owns it.\n"     \
+   "   --modified-date        prints the date when its contents where "        \
+   "last\n                          modified.\n\n"                             \
    "These flags expects, at least, one path following them. If none is "       \
    "provided,\nthey will consider the last one given or else, the current "    \
    "directory.\n\n"                                                            \
@@ -54,8 +52,8 @@
    "handled, affecting the origin of the data you reveal.\n\n"                 \
    "If none is used, the one marked as default will be considered in "         \
    "use.\n\n"                                                                  \
-   "    --follow-symlinks  (default)    symlinks will be followed.\n"          \
-   "    --unfollow-symlinks             symlinks will not be followed\n\n"     \
+   "   --follow-symlinks  (default)   symlinks will be followed.\n"            \
+   "   --unfollow-symlinks            symlinks will not be followed\n\n"       \
    "EXIT CODES\n"                                                              \
    "The exit code 1 will be throw if an error happens during its "             \
    "execution.\n\n"                                                            \
