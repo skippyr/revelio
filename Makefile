@@ -1,7 +1,7 @@
-f=reveal
-o=z
+file=reveal
+optimization_level=z
 
-${f}:
-	clang ${f}.c -o ${f} -O${o}
+${file}:
+	clang ${file}.c -o ${file} -O${optimization_level}
 
-.PHONY: ${f}
+.PHONY: ${file}
