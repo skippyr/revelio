@@ -1,3 +1,3 @@
-BasedOnStyle: microsoft
+IndentWidth: 3
 AlwaysBreakAfterDefinitionReturnType: true
-ColumnLimit: 80
+BreakBeforeBraces: Stroustrup
