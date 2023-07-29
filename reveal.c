@@ -1,7 +1,10 @@
+#include <dirent.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
 
+#define program_name__ "reveal"
 #define program_version__ "v9.0.0"
 #define program_copyright__ "Copyright (c) Sherman Rofeman. MIT license."
 #define program_support__ "https://github.com/skippyr/reveal/issues"
@@ -53,7 +56,7 @@
    "EXIT CODES\n"                                                              \
    "The exit code 1 will be throw if an error happens during its "             \
    "execution.\n\n"                                                            \
-   "Errors will be reported through standard error stream.\n\n"                \
+   "Errors will be reported through the standard error stream.\n\n"            \
    "SUPPORT\n"                                                                 \
    "Report issues, questions or suggestion at:\n" program_support__ "."
 #define is_expecting_path_bit__ (1 << 5)
@@ -81,6 +84,11 @@
 #define Parse_Non_Data_Type_Flag__(flag, action)                               \
    Parse_Flag__(                                                               \
        flag, if (Is_Last_Argument__) { Reveal_Last_Path__; } action continue;)
+#define Parse_Function_Case__(value, action)                                   \
+   case (value):                                                               \
+      action;                                                                  \
+      break;
+#define Parse_Null_String__(text) (text ? text : "")
 
 typedef enum {
    Data_Type_Contents,
@@ -99,11 +107,81 @@ typedef enum {
 uint8_t global_options = is_following_symlinks_bit__;
 
 void
+Print_Error(const char *const description_split_0,
+            const char *const description_split_1,
+            const char *const description_split_2, const char *const suggestion)
+{
+   fprintf(stderr, "%s: %s%s%s\n%s%s%s", program_name__,
+           Parse_Null_String__(description_split_0),
+           Parse_Null_String__(description_split_1),
+           Parse_Null_String__(description_split_2),
+           suggestion ? "        " : "", Parse_Null_String__(suggestion),
+           suggestion ? "\n" : "");
+   return;
+}
+
+void
+Reveal_File(const char *const path)
+{
+   FILE *const file = fopen(path, "r");
+   if (!file) {
+      Print_Error("can not open file \"", path, "\".",
+                  "Ensure that you have enough permissions.");
+      return;
+   }
+   char character;
+   while ((character = fgetc(file)) != EOF) {
+      putchar(character);
+   }
+   fclose(file);
+   return;
+}
+
+void
+Reveal_Directory(const char *const path)
+{
+   DIR *const directory = opendir(path);
+   if (!directory) {
+      Print_Error("can not open directory \"", path, "\".",
+                  "Ensure that you have enough permissions.");
+      return;
+   }
+   const struct dirent *entry;
+   while ((entry = readdir(directory))) {
+      if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")) {
+         continue;
+      }
+      printf("%s\n", entry->d_name);
+   }
+   closedir(directory);
+   return;
+}
+
+void
 Reveal(const char *const path)
 {
-   printf("%s (mode: %i) (is following symlinks: %i)\n", path,
-          global_options & ~non_data_type_bits__,
-          global_options & is_following_symlinks_bit__);
+   struct stat metadata;
+   if (global_options & is_following_symlinks_bit__ ? stat(path, &metadata)
+                                                    : lstat(path, &metadata)) {
+      Print_Error("the path \"", path, "\" does not exists.",
+                  "Ensure that you did not misspelled it.");
+      return;
+   }
+   switch (global_options & ~non_data_type_bits__) {
+   default:
+      switch (metadata.st_mode & S_IFMT) {
+         Parse_Function_Case__(S_IFREG, Reveal_File(path));
+         Parse_Function_Case__(S_IFDIR, Reveal_Directory(path));
+         Parse_Function_Case__(
+             S_IFLNK,
+             Print_Error(
+                 "can not reveal contents of symlink \"", path, "\".",
+                 "Did you mean to use \"--follow-symlinks\" before it?"));
+      default:
+         Print_Error("can not reveal the contents of \"", path,
+                     "\" due to its type.", NULL);
+      }
+   }
    return;
 }
 
