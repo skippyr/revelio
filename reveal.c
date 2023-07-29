@@ -61,6 +61,7 @@
 #define had_error_bit__ (1 << 7)
 #define non_data_type_bits__                                                   \
    (is_expecting_path_bit__ | is_following_symlinks_bit__ | had_error_bit__)
+#define Is_Last_Argument__ (arguments_index == total_of_arguments - 1)
 #define Reveal_Last_Path__                                                     \
    Reveal(last_path_index == -1 ? "." : arguments[last_path_index])
 #define Parse_Flag__(flag, action)                                             \
@@ -72,20 +73,14 @@
 #define Parse_Data_Type_Flag__(flag, data_type)                                \
    Parse_Flag__(                                                               \
        flag,                                                                   \
-       if (global_options & is_expecting_path_bit__ && arguments_index != 1) { \
+       if (global_options & is_expecting_path_bit__) {                         \
           Reveal_Last_Path__;                                                  \
        } global_options = (data_type | is_expecting_path_bit__ |               \
                            (global_options & non_data_type_bits__));           \
-       if (arguments_index == total_of_arguments - 1) {                        \
-          Reveal_Last_Path__;                                                  \
-       } continue;)
+       if (Is_Last_Argument__) { Reveal_Last_Path__; } continue;)
 #define Parse_Non_Data_Type_Flag__(flag, action)                               \
    Parse_Flag__(                                                               \
-       flag,                                                                   \
-       if (global_options & is_expecting_path_bit__) {                         \
-          Reveal_Last_Path__;                                                  \
-       } global_options &= ~is_expecting_path_bit__;                           \
-       action continue;)
+       flag, if (Is_Last_Argument__) { Reveal_Last_Path__; } action continue;)
 
 typedef enum {
    Data_Type_Contents,
@@ -101,7 +96,7 @@ typedef enum {
    Data_Type_Modified_Date
 } Data_Type;
 
-uint8_t global_options = is_following_symlinks_bit__ | is_expecting_path_bit__;
+uint8_t global_options = is_following_symlinks_bit__;
 
 void
 Reveal(const char *const path)
