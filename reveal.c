@@ -69,10 +69,10 @@
    Reveal(last_path_index == -1 ? "." : arguments[last_path_index])
 #define Parse_Flag__(flag, action)                                             \
    if (!strcmp("--" flag, arguments[arguments_index])) {                       \
-      action                                                                   \
+      action;                                                                  \
    }
 #define Parse_Metadata_Flag__(flag, text)                                      \
-   Parse_Flag__(flag, puts(text); return (0);)
+   Parse_Flag__(flag, puts(text); return (0))
 #define Parse_Data_Type_Flag__(flag, data_type)                                \
    Parse_Flag__(                                                               \
        flag,                                                                   \
@@ -80,10 +80,10 @@
           Reveal_Last_Path__;                                                  \
        } global_options = (data_type | is_expecting_path_bit__ |               \
                            (global_options & non_data_type_bits__));           \
-       if (Is_Last_Argument__) { Reveal_Last_Path__; } continue;)
+       if (Is_Last_Argument__) { Reveal_Last_Path__; } continue)
 #define Parse_Non_Data_Type_Flag__(flag, action)                               \
    Parse_Flag__(                                                               \
-       flag, if (Is_Last_Argument__) { Reveal_Last_Path__; } action continue;)
+       flag, if (Is_Last_Argument__) { Reveal_Last_Path__; } action; continue)
 #define Parse_Function_Case__(value, action)                                   \
    case (value):                                                               \
       action;                                                                  \
@@ -230,10 +230,10 @@ main(const int total_of_arguments, const char **arguments)
       Parse_Data_Type_Flag__("group", Data_Type_Group);
       Parse_Data_Type_Flag__("group-gid", Data_Type_Group_Gid);
       Parse_Data_Type_Flag__("modified-date", Data_Type_Modified_Date);
+      Parse_Non_Data_Type_Flag__("follow-symlinks",
+                                 global_options |= is_following_symlinks_bit__);
       Parse_Non_Data_Type_Flag__(
-          "follow-symlinks", global_options |= is_following_symlinks_bit__;);
-      Parse_Non_Data_Type_Flag__(
-          "unfollow-symlinks", global_options &= ~is_following_symlinks_bit__;);
+          "unfollow-symlinks", global_options &= ~is_following_symlinks_bit__);
       global_options &= ~is_expecting_path_bit__;
       last_path_index = arguments_index;
       Reveal_Last_Path__;
