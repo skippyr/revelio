@@ -291,9 +291,9 @@ Reveal(const char *const path)
       Parse_Function_Case__(Data_Type_Group_Gid,
                             Print_Unsigned__(metadata.st_gid));
       Parse_Function_Case__(Data_Type_Modified_Date,
-                            Reveal_Modified_Date(&metadata)) default
-          : switch (metadata.st_mode & S_IFMT)
-      {
+                            Reveal_Modified_Date(&metadata));
+   default:
+      switch (metadata.st_mode & S_IFMT) {
          Parse_Function_Case__(S_IFREG, Reveal_File(path));
          Parse_Function_Case__(S_IFDIR, Reveal_Directory(path));
          Parse_Function_Case__(
