@@ -8,7 +8,7 @@
 #include <time.h>
 
 #define program_name__ "reveal"
-#define program_version__ "v9.0.1"
+#define program_version__ "v9.0.2"
 #define program_copyright__ "Copyright (c) Sherman Rofeman. MIT license."
 #define program_support__ "https://github.com/skippyr/reveal/issues"
 #define program_help__                                                         \
@@ -138,6 +138,7 @@ Print_Error(const char *const description_split_0,
            Parse_Null_String__(description_split_2),
            suggestion ? "        " : "", Parse_Null_String__(suggestion),
            suggestion ? "\n" : "");
+   global_options |= had_error_bit__;
    return;
 }
 
