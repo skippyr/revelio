@@ -31,7 +31,7 @@
    "unknown.\n"                                                                \
    "   --size                 prints its size using the most formidable "      \
    "unit:\n                          gigabyte (GB), megabyte (MB), "           \
-   "kilobyte (KB) or\n                          byte (B).\n"                   \
+   "kilobyte (kB) or\n                          byte (B).\n"                   \
    "   --byte-size            prints its size in bytes.\n"                     \
    "   --permissions          prints its read (r), write (w) and execute "     \
    "(x)\n                          permissions for user, group and "           \
