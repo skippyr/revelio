@@ -88,6 +88,7 @@
    case (value):                                                               \
       action;                                                                  \
       break;
+#define Parse_Puts_Case__(value, text) Parse_Function_Case__(value, puts(text))
 #define Parse_Null_String__(text) (text ? text : "")
 
 typedef enum {
@@ -117,6 +118,23 @@ Print_Error(const char *const description_split_0,
            Parse_Null_String__(description_split_2),
            suggestion ? "        " : "", Parse_Null_String__(suggestion),
            suggestion ? "\n" : "");
+   return;
+}
+
+void
+Reveal_Type(const struct stat *const metadata)
+{
+   switch (metadata->st_mode & S_IFMT) {
+      Parse_Puts_Case__(S_IFREG, "regular");
+      Parse_Puts_Case__(S_IFDIR, "directory");
+      Parse_Puts_Case__(S_IFLNK, "symlink");
+      Parse_Puts_Case__(S_IFSOCK, "socket");
+      Parse_Puts_Case__(S_IFIFO, "fifo");
+      Parse_Puts_Case__(S_IFBLK, "block");
+      Parse_Puts_Case__(S_IFCHR, "character");
+   default:
+      puts("unknown");
+   }
    return;
 }
 
@@ -168,6 +186,7 @@ Reveal(const char *const path)
       return;
    }
    switch (global_options & ~non_data_type_bits__) {
+      Parse_Function_Case__(Data_Type_Type, Reveal_Type(&metadata));
    default:
       switch (metadata.st_mode & S_IFMT) {
          Parse_Function_Case__(S_IFREG, Reveal_File(path));
