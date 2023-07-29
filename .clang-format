@@ -1,2 +1,3 @@
 BasedOnStyle: microsoft
+AlwaysBreakAfterDefinitionReturnType: true
 ColumnLimit: 80
