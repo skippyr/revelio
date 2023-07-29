@@ -90,6 +90,13 @@
       break;
 #define Parse_Puts_Case__(value, text) Parse_Function_Case__(value, puts(text))
 #define Parse_Null_String__(text) (text ? text : "")
+#define Parse_Size__(multiplier, multiplierCharacter)                          \
+   size = metadata->st_size / (multiplier);                                    \
+   if ((int)size) {                                                            \
+      printf("%.1f%c\n", size, multiplierCharacter);                           \
+      return;                                                                  \
+   }
+#define Print_Long__(value) printf("%ld\n", value);
 
 typedef enum {
    Data_Type_Contents,
@@ -135,6 +142,17 @@ Reveal_Type(const struct stat *const metadata)
    default:
       puts("unknown");
    }
+   return;
+}
+
+void
+Reveal_Size(const struct stat *const metadata)
+{
+   float size;
+   Parse_Size__(1e9, 'G');
+   Parse_Size__(1e6, 'M');
+   Parse_Size__(1e3, 'K');
+   printf("%ldB\n", metadata->st_size);
    return;
 }
 
@@ -187,6 +205,9 @@ Reveal(const char *const path)
    }
    switch (global_options & ~non_data_type_bits__) {
       Parse_Function_Case__(Data_Type_Type, Reveal_Type(&metadata));
+      Parse_Function_Case__(Data_Type_Size, Reveal_Size(&metadata));
+      Parse_Function_Case__(Data_Type_Byte_Size,
+                            Print_Long__(metadata.st_size));
    default:
       switch (metadata.st_mode & S_IFMT) {
          Parse_Function_Case__(S_IFREG, Reveal_File(path));
