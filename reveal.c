@@ -59,6 +59,10 @@
    "Errors will be reported through the standard error stream.\n\n"            \
    "SUPPORT\n"                                                                 \
    "Report issues, questions or suggestion at:\n" program_support__ "."
+#define read_character__ 'r'
+#define write_character__ 'w'
+#define execute_character__ 'x'
+#define lack_character__ '-'
 #define is_expecting_path_bit__ (1 << 5)
 #define is_following_symlinks_bit__ (1 << 6)
 #define had_error_bit__ (1 << 7)
@@ -90,12 +94,15 @@
       break;
 #define Parse_Puts_Case__(value, text) Parse_Function_Case__(value, puts(text))
 #define Parse_Null_String__(text) (text ? text : "")
-#define Parse_Size__(multiplier, multiplierCharacter)                          \
+#define Parse_Size__(multiplier, multiplier_character)                         \
    size = metadata->st_size / (multiplier);                                    \
    if ((int)size) {                                                            \
-      printf("%.1f%c\n", size, multiplierCharacter);                           \
+      printf("%.1f%c\n", size, multiplier_character);                          \
       return;                                                                  \
    }
+#define Parse_Permission__(permission, permissions_character)                  \
+   putchar(metadata->st_mode &permission ? permissions_character               \
+                                         : lack_character__);
 #define Print_Long__(value) printf("%ld\n", value);
 
 typedef enum {
@@ -104,7 +111,7 @@ typedef enum {
    Data_Type_Size,
    Data_Type_Byte_Size,
    Data_Type_Permissions,
-   Data_Type_Octal_Permission,
+   Data_Type_Octal_Permissions,
    Data_Type_User,
    Data_Type_User_Uid,
    Data_Type_Group,
@@ -153,6 +160,31 @@ Reveal_Size(const struct stat *const metadata)
    Parse_Size__(1e6, 'M');
    Parse_Size__(1e3, 'K');
    printf("%ldB\n", metadata->st_size);
+   return;
+}
+
+void
+Reveal_Permissions(const struct stat *const metadata)
+{
+   Parse_Permission__(S_IRUSR, read_character__);
+   Parse_Permission__(S_IWUSR, write_character__);
+   Parse_Permission__(S_IXUSR, execute_character__);
+   Parse_Permission__(S_IRGRP, read_character__);
+   Parse_Permission__(S_IWGRP, write_character__);
+   Parse_Permission__(S_IXGRP, execute_character__);
+   Parse_Permission__(S_IROTH, read_character__);
+   Parse_Permission__(S_IWOTH, write_character__);
+   Parse_Permission__(S_IXOTH, execute_character__);
+   putchar('\n');
+   return;
+}
+
+void
+Reveal_Octal_Permissions(const struct stat *const metadata)
+{
+   printf("0%o\n",
+          metadata->st_mode & (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP |
+                               S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH));
    return;
 }
 
@@ -208,6 +240,10 @@ Reveal(const char *const path)
       Parse_Function_Case__(Data_Type_Size, Reveal_Size(&metadata));
       Parse_Function_Case__(Data_Type_Byte_Size,
                             Print_Long__(metadata.st_size));
+      Parse_Function_Case__(Data_Type_Permissions,
+                            Reveal_Permissions(&metadata));
+      Parse_Function_Case__(Data_Type_Octal_Permissions,
+                            Reveal_Octal_Permissions(&metadata));
    default:
       switch (metadata.st_mode & S_IFMT) {
          Parse_Function_Case__(S_IFREG, Reveal_File(path));
@@ -245,7 +281,7 @@ main(const int total_of_arguments, const char **arguments)
       Parse_Data_Type_Flag__("size", Data_Type_Size);
       Parse_Data_Type_Flag__("byte-size", Data_Type_Byte_Size);
       Parse_Data_Type_Flag__("permissions", Data_Type_Permissions);
-      Parse_Data_Type_Flag__("octal-permissions", Data_Type_Octal_Permission);
+      Parse_Data_Type_Flag__("octal-permissions", Data_Type_Octal_Permissions);
       Parse_Data_Type_Flag__("user", Data_Type_User);
       Parse_Data_Type_Flag__("user-uid", Data_Type_User_Uid);
       Parse_Data_Type_Flag__("group", Data_Type_Group);
