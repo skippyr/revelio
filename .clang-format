@@ -1,3 +1,5 @@
+BasedOnStyle: llvm
 IndentWidth: 3
-AlwaysBreakAfterDefinitionReturnType: true
+AlwaysBreakAfterReturnType: AllDefinitions
+AllowShortFunctionsOnASingleLine: None
 BreakBeforeBraces: Stroustrup
