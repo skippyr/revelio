@@ -52,7 +52,7 @@
    "handled, affecting the origin of the data you reveal.\n\n"                 \
    "If none is used, the one marked as default will be considered in "         \
    "use.\n\n"                                                                  \
-   "   --follow-symlinks  (default)   symlinks will be followed.\n"            \
+   "   --follow-symlinks (default)   symlinks will be followed.\n"             \
    "   --unfollow-symlinks            symlinks will not be followed\n\n"       \
    "EXIT CODES\n"                                                              \
    "The exit code 1 will be throw if an error happens during its "             \
