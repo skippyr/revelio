@@ -8,7 +8,7 @@
 #include <time.h>
 
 #define program_name__ "reveal"
-#define program_version__ "v9.0.0"
+#define program_version__ "v9.0.1"
 #define program_copyright__ "Copyright (c) Sherman Rofeman. MIT license."
 #define program_support__ "https://github.com/skippyr/reveal/issues"
 #define program_help__                                                         \
@@ -98,7 +98,7 @@
 #define Parse_Size__(multiplier, multiplier_character)                         \
    size = metadata->st_size / (multiplier);                                    \
    if ((int)size) {                                                            \
-      printf("%.1f%c\n", size, multiplier_character);                          \
+      printf("%.1f%cB\n", size, multiplier_character);                         \
       return;                                                                  \
    }
 #define Parse_Permission__(permission, permissions_character)                  \
@@ -164,7 +164,7 @@ Reveal_Size(const struct stat *const metadata)
    float size;
    Parse_Size__(1e9, 'G');
    Parse_Size__(1e6, 'M');
-   Parse_Size__(1e3, 'K');
+   Parse_Size__(1e3, 'k');
    printf("%ldB\n", metadata->st_size);
    return;
 }
