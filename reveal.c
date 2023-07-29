@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <time.h>
 
 #define program_name__ "reveal"
 #define program_version__ "v9.0.0"
@@ -213,6 +214,21 @@ Reveal_Group(const struct stat *const metadata, const char *const path)
 }
 
 void
+Reveal_Modified_Date(const struct stat *const metadata)
+{
+   char modified_date[29];
+   if (strftime(modified_date, sizeof(modified_date), "%a %b %d %T %Z %Y",
+                localtime(&metadata->st_mtime))) {
+      puts(modified_date);
+   }
+   else {
+      Print_Error("overflowed buffer that stores modified date.", NULL, NULL,
+                  NULL);
+   }
+   return;
+}
+
+void
 Reveal_File(const char *const path)
 {
    FILE *const file = fopen(path, "r");
@@ -274,8 +290,10 @@ Reveal(const char *const path)
       Parse_Function_Case__(Data_Type_Group, Reveal_Group(&metadata, path));
       Parse_Function_Case__(Data_Type_Group_Gid,
                             Print_Unsigned__(metadata.st_gid));
-   default:
-      switch (metadata.st_mode & S_IFMT) {
+      Parse_Function_Case__(Data_Type_Modified_Date,
+                            Reveal_Modified_Date(&metadata)) default
+          : switch (metadata.st_mode & S_IFMT)
+      {
          Parse_Function_Case__(S_IFREG, Reveal_File(path));
          Parse_Function_Case__(S_IFDIR, Reveal_Directory(path));
          Parse_Function_Case__(
