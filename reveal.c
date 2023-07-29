@@ -40,6 +40,9 @@
    "    --modified-date         prints the date when its contents where "      \
    "last\n                            "                                        \
    "modified.\n\n"                                                             \
+   "These flags expects, at least, one path following them. If none is "       \
+   "provided,\nthey will consider the last one given or else, the current "    \
+   "directory.\n\n"                                                            \
    "SYMLINKS FLAGS\n"                                                          \
    "These flags allow you to change how symlinks following them will be\n"     \
    "handled, affecting the origin of the data you reveal.\n\n"                 \
