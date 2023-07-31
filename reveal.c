@@ -159,7 +159,7 @@ uint8_t Reveal_User(const char* const path, const struct stat* const metadata)
 {
 	const struct passwd* const user = getpwuid(metadata->st_uid);
 	if (!user) {
-		return (Write_Error("can not find user that owns \"", path, "\".", NULL));
+		return (Write_Error("Can not find user that owns \"", path, "\".", NULL));
 	}
 	puts(user->pw_name);
 	return (0);
@@ -169,7 +169,7 @@ uint8_t Reveal_Group(const char* const path, const struct stat* const metadata)
 {
 	const struct group* const group = getgrgid(metadata->st_gid);
 	if (!group) {
-		return (Write_Error("can not find user that owns \"", path, "\".", NULL));
+		return (Write_Error("Can not find user that owns \"", path, "\".", NULL));
 	}
 	puts(group->gr_name);
 	return (0);
@@ -183,7 +183,7 @@ uint8_t Reveal_Modified_Date(const struct stat* const metadata)
 		localtime(&metadata->st_mtime)
 	)) {
 		return (Write_Error(
-			"overflowed buffer to store modified date.", NULL, NULL, NULL
+			"Overflowed buffer meant to store modified date.", NULL, NULL, NULL
 		));
 	}
 	puts(modified_date);
@@ -195,7 +195,7 @@ uint8_t Reveal_File(const char* const path)
 	FILE* const file = fopen(path, "r");
 	if (!file) {
 		return (Write_Error(
-			"can not open file \"", path, "\".",
+			"Can not open file \"", path, "\".",
 			"Ensure that you have enough permissions to read it."
 		));
 	}
@@ -212,7 +212,7 @@ uint8_t Reveal_Directory(const char* const path)
 	DIR* const directory = opendir(path);
 	if (!directory) {
 		return (Write_Error(
-			"can not open directory \"", path, "\".",
+			"Can not open directory \"", path, "\".",
 			"Ensure that you have enough permissions to read it."
 		));
 	}
@@ -235,7 +235,7 @@ uint8_t Reveal(const char* const path)
 		lstat(path, &metadata)
 	) {
 		return (Write_Error(
-			"The path \"", path, "\" does not exists.",
+			"\"", path, "\" does not exists.",
 			"Ensure that you did not misspelled it."
 		));
 	}
@@ -265,12 +265,12 @@ uint8_t Reveal(const char* const path)
 			Parse_Return_Case__(S_IFREG, Reveal_File(path));
 			Parse_Return_Case__(S_IFDIR, Reveal_Directory(path));
 			Parse_Return_Case__(S_IFLNK, Write_Error(
-				"can not reveal contents of symlink \"", path, "\".",
+				"Can not reveal contents of symlink \"", path, "\".",
 				"Did you mean to use the \"--follow-symlinks\" flag before it?"
 			));
 		default:
 			return (Write_Error(
-				"can not reveal \"", path, "\" due to its type.", NULL
+				"Can not reveal \"", path, "\" due to its type.", NULL
 			));
 		}
 	}
