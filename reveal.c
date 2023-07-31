@@ -174,7 +174,6 @@ void Reveal_Type(const struct stat* const metadata)
 	default:
 		puts("unknown");
 	}
-	return;
 }
 
 void Reveal_Size(const struct stat* const metadata)
@@ -184,7 +183,6 @@ void Reveal_Size(const struct stat* const metadata)
 	Parse_Size__(1e6, 'M');
 	Parse_Size__(1e3, 'k');
 	printf("%ldB\n", metadata->st_size);
-	return;
 }
 
 void Reveal_Permissions(const struct stat* const metadata)
@@ -202,7 +200,6 @@ void Reveal_Permissions(const struct stat* const metadata)
 	Parse_Permission__(S_IWOTH, write_character);
 	Parse_Permission__(S_IXOTH, execute_character);
 	putchar('\n');
-	return;
 }
 
 uint8_t Reveal_User(const char* const path, const struct stat* const metadata)
