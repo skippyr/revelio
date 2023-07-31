@@ -19,6 +19,11 @@
 #define is_last_argument__ (argument_index == total_of_arguments - 1)
 
 #define Print_Long__(value) printf("%ld\n", value);
+#define Print_Octal_Permissions__\
+	printf("0%o\n", metadata.st_mode & (\
+		S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH |\
+		S_IWOTH | S_IXOTH\
+	));
 
 #define Parse_Null_String__(text) (text ? text : "")
 
@@ -37,6 +42,11 @@
 		printf("%.1f%cB\n", size, multiplier_character);\
 		return;\
 	}
+
+#define Parse_Permission__(permission, permission_character)\
+	putchar(\
+		metadata->st_mode & permission ? permission_character : lack_character\
+	);
 
 #define Parse_Flag__(flag, action)\
 	if (!strcmp("--" flag, arguments[argument_index])) {\
@@ -121,6 +131,24 @@ void Reveal_Size(const struct stat* const metadata)
 	return;
 }
 
+void Reveal_Permissions(const struct stat* const metadata)
+{
+	char
+		read_character = 'r', write_character = 'w', execute_character = 'x',
+		lack_character = '-';
+	Parse_Permission__(S_IRUSR, read_character);
+	Parse_Permission__(S_IWUSR, write_character);
+	Parse_Permission__(S_IXUSR, execute_character);
+	Parse_Permission__(S_IRGRP, read_character);
+	Parse_Permission__(S_IWGRP, write_character);
+	Parse_Permission__(S_IXGRP, execute_character);
+	Parse_Permission__(S_IROTH, read_character);
+	Parse_Permission__(S_IWOTH, write_character);
+	Parse_Permission__(S_IXOTH, execute_character);
+	putchar('\n');
+	return;
+}
+
 uint8_t Reveal_File(const char* const path)
 {
 	FILE* const file = fopen(path, "r");
@@ -174,6 +202,12 @@ uint8_t Reveal(const char* const path)
 		Parse_Function_Case__(Data_Type_Type, Reveal_Type(&metadata));
 		Parse_Function_Case__(Data_Type_Size, Reveal_Size(&metadata));
 		Parse_Function_Case__(Data_Type_Byte_Size, Print_Long__(metadata.st_size));
+		Parse_Function_Case__(
+			Data_Type_Permissions, Reveal_Permissions(&metadata)
+		);
+		Parse_Function_Case__(
+			Data_Type_Octal_Permissions, Print_Octal_Permissions__
+		);
 	default:
 		switch (metadata.st_mode & S_IFMT) {
 			Parse_Return_Case__(S_IFREG, Reveal_File(path));
