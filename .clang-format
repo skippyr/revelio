@@ -1,5 +1,0 @@
-BasedOnStyle: llvm
-IndentWidth: 3
-AlwaysBreakAfterReturnType: AllDefinitions
-AllowShortFunctionsOnASingleLine: None
-BreakBeforeBraces: Stroustrup
