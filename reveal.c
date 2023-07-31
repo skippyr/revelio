@@ -24,6 +24,7 @@
 	case value:\
 		action;\
 		break;
+#define Parse_Puts_Case__(value, text) Parse_Function_Case__(value, puts(text))
 #define Parse_Return_Case__(value, action)\
 	case value:\
 		return (action);\
@@ -85,6 +86,22 @@ uint8_t Write_Error(
 	return (1);
 }
 
+void Reveal_Type(const struct stat* const metadata)
+{
+	switch (metadata->st_mode & S_IFMT) {
+		Parse_Puts_Case__(S_IFREG, "regular");
+		Parse_Puts_Case__(S_IFDIR, "directory");
+		Parse_Puts_Case__(S_IFLNK, "symlink");
+		Parse_Puts_Case__(S_IFSOCK, "socket");
+		Parse_Puts_Case__(S_IFIFO, "fifo");
+		Parse_Puts_Case__(S_IFCHR, "character");
+		Parse_Puts_Case__(S_IFBLK, "block");
+	default:
+		puts("unknown");
+	}
+	return;
+}
+
 uint8_t Reveal_File(const char* const path)
 {
 	FILE* const file = fopen(path, "r");
@@ -135,6 +152,7 @@ uint8_t Reveal(const char* const path)
 		));
 	}
 	switch (OPTIONS & ~non_data_type_bits__) {
+		Parse_Function_Case__(Data_Type_Type, Reveal_Type(&metadata));
 	default:
 		switch (metadata.st_mode & S_IFMT) {
 			Parse_Return_Case__(S_IFREG, Reveal_File(path));
