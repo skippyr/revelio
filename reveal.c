@@ -35,6 +35,13 @@
 		Reveal(last_path);\
 	}\
 )
+#define Parse_Non_Data_Type_Flag__(flag, action) Parse_Flag__(flag,\
+	if (is_last_argument__) {\
+		Reveal(last_path);\
+	}\
+	action;\
+	continue;\
+)
 
 typedef enum {
 	Data_Type_Contents,
@@ -52,9 +59,9 @@ typedef enum {
 
 uint8_t OPTIONS = is_following_symlinks_bit__;
 
-void Reveal(const char* const path)
+uint8_t Reveal(const char* const path)
 {
-	return;
+	return (0);
 }
 
 int main(const int total_of_arguments, const char** arguments)
@@ -62,7 +69,7 @@ int main(const int total_of_arguments, const char** arguments)
 	if (total_of_arguments == 1) {
 		Reveal(".");
 	}
-	const char* last_path = "";
+	const char* last_path = ".";
 	for (
 		int argument_index = 1; argument_index < total_of_arguments;
 		argument_index++
@@ -86,6 +93,17 @@ int main(const int total_of_arguments, const char** arguments)
 		Parse_Data_Type_Flag__("group", Data_Type_Group);
 		Parse_Data_Type_Flag__("group-gid", Data_Type_Group_Gid);
 		Parse_Data_Type_Flag__("modified-date", Data_Type_Modified_Date);
+		Parse_Non_Data_Type_Flag__(
+			"follow-symlinks", OPTIONS |= is_following_symlinks_bit__
+		);
+		Parse_Non_Data_Type_Flag__(
+			"unfollow-symlinks", OPTIONS &= ~is_following_symlinks_bit__
+		);
+		if (Reveal(arguments[argument_index])) {
+			continue;
+		}
+		OPTIONS &= ~is_expecting_path_bit__;
+		last_path = arguments[argument_index];
 	}
 	return !!(OPTIONS & had_error_bit__);
 }
