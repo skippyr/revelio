@@ -100,9 +100,11 @@ uint8_t Write_Error(
 	const char* const description_split_2, const char* const suggestion
 ) {
 	fprintf(
-		stderr, "%s:\n   %s%s%s\n%s%s%s", program_name__, description_split_0,
-		description_split_1, description_split_2, suggestion ? "   " : "",
-		suggestion, suggestion ? "\n" : ""
+		stderr, "%s:\n   %s%s%s\n%s%s%s", program_name__,
+		Parse_Null_String__(description_split_0),
+		Parse_Null_String__(description_split_1),
+		Parse_Null_String__(description_split_2), suggestion ? "   " : "",
+		Parse_Null_String__(suggestion), suggestion ? "\n" : ""
 	);
 	OPTIONS |= had_error_bit__;
 	return (1);
@@ -249,8 +251,7 @@ uint8_t Reveal(const char* const path)
 			));
 		default:
 			return (Write_Error(
-				"can not reveal \"", path, "\" due to its type.",
-				NULL
+				"can not reveal \"", path, "\" due to its type.", NULL
 			));
 		}
 	}
