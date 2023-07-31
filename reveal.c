@@ -98,7 +98,7 @@
 
 #define Parse_Permission__(permission, permission_character)\
 	putchar(\
-		metadata->st_mode & permission ? permission_character : lack_character\
+		metadata->st_mode & (permission) ? permission_character : lack_character\
 	);
 
 #define Parse_Flag__(flag, action)\
@@ -148,7 +148,8 @@ uint8_t OPTIONS = is_following_symlinks_bit__;
 uint8_t Write_Error(
 	const char* const description_split_0, const char* const description_split_1,
 	const char* const description_split_2, const char* const suggestion
-) {
+)
+{
 	fprintf(
 		stderr, "%s:\n   %s%s%s\n%s%s%s", program_name__,
 		Parse_Null_String__(description_split_0),
