@@ -1,4 +1,6 @@
 #include <dirent.h>
+#include <grp.h>
+#include <pwd.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -19,6 +21,7 @@
 #define is_last_argument__ (argument_index == total_of_arguments - 1)
 
 #define Print_Long__(value) printf("%ld\n", value);
+#define Print_Unsigned__(value) printf("%u\n", value);
 #define Print_Octal_Permissions__\
 	printf("0%o\n", metadata.st_mode & (\
 		S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH |\
@@ -149,6 +152,26 @@ void Reveal_Permissions(const struct stat* const metadata)
 	return;
 }
 
+uint8_t Reveal_User(const char* const path, const struct stat* const metadata)
+{
+	const struct passwd* const user = getpwuid(metadata->st_uid);
+	if (!user) {
+		return (Write_Error("can not find user that owns \"", path, "\".", NULL));
+	}
+	puts(user->pw_name);
+	return (0);
+}
+
+uint8_t Reveal_Group(const char* const path, const struct stat* const metadata)
+{
+	const struct group* const group = getgrgid(metadata->st_gid);
+	if (!group) {
+		return (Write_Error("can not find user that owns \"", path, "\".", NULL));
+	}
+	puts(group->gr_name);
+	return (0);
+}
+
 uint8_t Reveal_File(const char* const path)
 {
 	FILE* const file = fopen(path, "r");
@@ -207,6 +230,14 @@ uint8_t Reveal(const char* const path)
 		);
 		Parse_Function_Case__(
 			Data_Type_Octal_Permissions, Print_Octal_Permissions__
+		);
+		Parse_Function_Case__(Data_Type_User, Reveal_User(path, &metadata));
+		Parse_Function_Case__(
+			Data_Type_User_Uid, Print_Unsigned__(metadata.st_uid)
+		);
+		Parse_Function_Case__(Data_Type_Group, Reveal_Group(path, &metadata));
+		Parse_Function_Case__(
+			Data_Type_Group_Gid, Print_Unsigned__(metadata.st_gid)
 		);
 	default:
 		switch (metadata.st_mode & S_IFMT) {
