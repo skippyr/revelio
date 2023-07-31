@@ -52,17 +52,17 @@ typedef enum {
 
 uint8_t OPTIONS = is_following_symlinks_bit__;
 
-void Reveal(const char *const path)
+void Reveal(const char* const path)
 {
 	return;
 }
 
-int main(const int total_of_arguments, const char **arguments)
+int main(const int total_of_arguments, const char** arguments)
 {
 	if (total_of_arguments == 1) {
 		Reveal(".");
 	}
-	const char *last_path = "";
+	const char* last_path = "";
 	for (
 		int argument_index = 1; argument_index < total_of_arguments;
 		argument_index++
