@@ -187,7 +187,7 @@ void Reveal_Size(const struct stat* const metadata)
 
 void Reveal_Permissions(const struct stat* const metadata)
 {
-	char
+	const char
 		read_character = 'r', write_character = 'w', execute_character = 'x',
 		lack_character = '-';
 	Parse_Permission__(S_IRUSR, read_character);
