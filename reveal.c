@@ -90,15 +90,15 @@
 		return (action);
 
 #define Parse_Size__(multiplier, multiplier_character)\
-	s = metadata->st_size / (multiplier);\
-	if ((int) s) {\
-		printf("%.1f%cB\n", s, multiplier_character);\
+	size = metadata->st_size / (multiplier);\
+	if ((int) size) {\
+		printf("%.1f%cB\n", size, multiplier_character);\
 		return;\
 	}
 
 #define Parse_Permission__(permission, permission_character)\
 	putchar(\
-		metadata->st_mode & (permission) ? permission_character : l\
+		metadata->st_mode & (permission) ? permission_character : lack_character\
 	);
 
 #define Parse_Flag__(flag, action)\
@@ -179,7 +179,7 @@ void Reveal_Type(const struct stat* const metadata)
 
 void Reveal_Size(const struct stat* const metadata)
 {
-	float s;
+	float size;
 	Parse_Size__(1e9, 'G');
 	Parse_Size__(1e6, 'M');
 	Parse_Size__(1e3, 'k');
@@ -188,16 +188,18 @@ void Reveal_Size(const struct stat* const metadata)
 
 void Reveal_Permissions(const struct stat* const metadata)
 {
-	const char r = 'r', w = 'w', x = 'x', l = '-';
-	Parse_Permission__(S_IRUSR, r);
-	Parse_Permission__(S_IWUSR, w);
-	Parse_Permission__(S_IXUSR, x);
-	Parse_Permission__(S_IRGRP, r);
-	Parse_Permission__(S_IWGRP, w);
-	Parse_Permission__(S_IXGRP, x);
-	Parse_Permission__(S_IROTH, r);
-	Parse_Permission__(S_IWOTH, w);
-	Parse_Permission__(S_IXOTH, x);
+	const char
+		read_character = 'r', write_character = 'w', execute_character = 'x',
+		lack_character = '-';
+	Parse_Permission__(S_IRUSR, read_character);
+	Parse_Permission__(S_IWUSR, write_character);
+	Parse_Permission__(S_IXUSR, execute_character);
+	Parse_Permission__(S_IRGRP, read_character);
+	Parse_Permission__(S_IWGRP, write_character);
+	Parse_Permission__(S_IXGRP, execute_character);
+	Parse_Permission__(S_IROTH, read_character);
+	Parse_Permission__(S_IWOTH, write_character);
+	Parse_Permission__(S_IXOTH, execute_character);
 	putchar('\n');
 }
 
