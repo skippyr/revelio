@@ -8,7 +8,7 @@
 #include <time.h>
 
 #define program_name__ "reveal"
-#define program_version__ "v9.0.3"
+#define program_version__ "v9.0.4"
 #define program_copyright__ "Copyright (c) Sherman Rofeman. MIT license."
 #define program_support_url__ "https://github.com/skippyr/reveal/issues"
 #define program_help__\
@@ -152,11 +152,12 @@ Write_Error(
 )
 {
 	fprintf(
-		stderr, "%s:\n   %s%s%s\n%s%s%s", program_name__,
-		Parse_Null_String__(description_split_0),
+		stderr, "Error Report - %s (1):\n   Description:\n      %s%s%s\n%s%s%s",
+		program_name__, Parse_Null_String__(description_split_0),
 		Parse_Null_String__(description_split_1),
-		Parse_Null_String__(description_split_2), suggestion ? "   " : "",
-		Parse_Null_String__(suggestion), suggestion ? "\n" : ""
+		Parse_Null_String__(description_split_2), suggestion ? "\n   "
+		"Suggestion:\n      " : "", Parse_Null_String__(suggestion), suggestion ?
+		"\n" : ""
 	);
 	OPTIONS |= had_error_bit__;
 	return (1);
