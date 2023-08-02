@@ -68,12 +68,12 @@
 	is_expecting_path_bit__ | is_following_symlinks_bit__ | had_error_bit__\
 )
 
-#define is_last_argument__ (i == total_of_arguments - 1)
+#define is_last_argument__ (argument_index == total_of_arguments - 1)
 
 #define Print_Long__(value) printf("%ld\n", value);
 #define Print_Unsigned__(value) printf("%u\n", value);
 #define Print_Octal_Permissions__\
-	printf("0%o\n", m.st_mode & (\
+	printf("0%o\n", metadata.st_mode & (\
 		S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH |\
 		S_IWOTH | S_IXOTH\
 	));
@@ -102,7 +102,7 @@
 	);
 
 #define Parse_Flag__(flag, action)\
-	if (!strcmp("--" flag, arguments[i])) {\
+	if (!strcmp("--" flag, arguments[argument_index])) {\
 		action;\
 	}
 #define Parse_Metadata_Flag__(flag, text) Parse_Flag__(flag,\
@@ -111,19 +111,19 @@
 )
 #define Parse_Data_Type_Flag__(flag, data_type) Parse_Flag__(flag,\
 	if (OPTIONS & is_expecting_path_bit__) {\
-		Reveal(p);\
+		Reveal(last_path);\
 	}\
 	OPTIONS = (\
 		data_type | is_expecting_path_bit__ | (OPTIONS & non_data_type_bits__)\
 	);\
 	if (is_last_argument__) {\
-		Reveal(p);\
+		Reveal(last_path);\
 	}\
 	continue;\
 )
 #define Parse_Non_Data_Type_Flag__(flag, action) Parse_Flag__(flag,\
 	if (is_last_argument__) {\
-		Reveal(p);\
+		Reveal(last_path);\
 	}\
 	action;\
 	continue;\
@@ -145,8 +145,7 @@ typedef enum {
 
 uint8_t OPTIONS = is_following_symlinks_bit__;
 
-uint8_t
-Write_Error(
+uint8_t Write_Error(
 	const char* const description_split_0, const char* const description_split_1,
 	const char* const description_split_2, const char* const suggestion
 )
@@ -163,8 +162,7 @@ Write_Error(
 	return (1);
 }
 
-void
-Reveal_Type(const struct stat* const metadata)
+void Reveal_Type(const struct stat* const metadata)
 {
 	switch (metadata->st_mode & S_IFMT) {
 		Parse_Puts_Case__(S_IFREG, "regular");
@@ -179,8 +177,7 @@ Reveal_Type(const struct stat* const metadata)
 	}
 }
 
-void
-Reveal_Size(const struct stat* const metadata)
+void Reveal_Size(const struct stat* const metadata)
 {
 	float s;
 	Parse_Size__(1e9, 'G');
@@ -189,8 +186,7 @@ Reveal_Size(const struct stat* const metadata)
 	printf("%ldB\n", metadata->st_size);
 }
 
-void
-Reveal_Permissions(const struct stat* const metadata)
+void Reveal_Permissions(const struct stat* const metadata)
 {
 	const char r = 'r', w = 'w', x = 'x', l = '-';
 	Parse_Permission__(S_IRUSR, r);
@@ -205,89 +201,84 @@ Reveal_Permissions(const struct stat* const metadata)
 	putchar('\n');
 }
 
-uint8_t
-Reveal_User(const char* const path, const struct stat* const metadata)
+uint8_t Reveal_User(const char* const path, const struct stat* const metadata)
 {
-	const struct passwd* const u = getpwuid(metadata->st_uid);
-	if (!u) {
+	const struct passwd* const user = getpwuid(metadata->st_uid);
+	if (!user) {
 		return (Write_Error("Can not find user that owns \"", path, "\".", NULL));
 	}
-	puts(u->pw_name);
+	puts(user->pw_name);
 	return (0);
 }
 
-uint8_t
-Reveal_Group(const char* const path, const struct stat* const metadata)
+uint8_t Reveal_Group(const char* const path, const struct stat* const metadata)
 {
-	const struct group* const g = getgrgid(metadata->st_gid);
-	if (!g) {
+	const struct group* const group = getgrgid(metadata->st_gid);
+	if (!group) {
 		return (Write_Error("Can not find user that owns \"", path, "\".", NULL));
 	}
-	puts(g->gr_name);
+	puts(group->gr_name);
 	return (0);
 }
 
-uint8_t
-Reveal_Modified_Date(const struct stat* const metadata)
+uint8_t Reveal_Modified_Date(const struct stat* const metadata)
 {
-	char m[29];
+	char modified_date[29];
 	if (!strftime(
-		m, sizeof(m), "%a %b %d %T %Z %Y",localtime(&metadata->st_mtime)
+		modified_date, sizeof(modified_date), "%a %b %d %T %Z %Y",
+		localtime(&metadata->st_mtime)
 	)) {
 		return (Write_Error(
 			"Overflowed buffer meant to store modified date.", NULL, NULL, NULL
 		));
 	}
-	puts(m);
+	puts(modified_date);
 	return (0);
 }
 
-uint8_t
-Reveal_File(const char* const path)
+uint8_t Reveal_File(const char* const path)
 {
-	FILE* const f = fopen(path, "r");
-	if (!f) {
+	FILE* const file = fopen(path, "r");
+	if (!file) {
 		return (Write_Error(
 			"Can not open file \"", path, "\".",
 			"Ensure that you have enough permissions to read it."
 		));
 	}
-	char c;
-	while ((c = fgetc(f)) != EOF) {
-		putchar(c);
+	char character;
+	while ((character = fgetc(file)) != EOF) {
+		putchar(character);
 	}
-	fclose(f);
+	fclose(file);
 	return (0);
 }
 
-uint8_t
-Reveal_Directory(const char* const path)
+uint8_t Reveal_Directory(const char* const path)
 {
-	DIR* const d = opendir(path);
-	if (!d) {
+	DIR* const directory = opendir(path);
+	if (!directory) {
 		return (Write_Error(
 			"Can not open directory \"", path, "\".",
 			"Ensure that you have enough permissions to read it."
 		));
 	}
-	const struct dirent* e;
-	while ((e = readdir(d))) {
-		if (!strcmp(e->d_name, ".") || !strcmp(e->d_name, "..")) {
+	const struct dirent* entry;
+	while ((entry = readdir(directory))) {
+		if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")) {
 			continue;
 		}
-		puts(e->d_name);
+		puts(entry->d_name);
 	}
-	closedir(d);
+	closedir(directory);
 	return (0);
 }
 
-uint8_t
-Reveal(const char* const path)
+uint8_t Reveal(const char* const path)
 {
-	struct stat m;
+	struct stat metadata;
 	if (
-		OPTIONS & is_following_symlinks_bit__ ? stat(path, &m) :
-		lstat(path, &m)
+		OPTIONS & is_following_symlinks_bit__ ? stat(path, &metadata) :
+		lstat(path, &metadata)
 	) {
 		return (Write_Error(
 			"\"", path, "\" does not exists.",
@@ -295,28 +286,30 @@ Reveal(const char* const path)
 		));
 	}
 	switch (OPTIONS & ~non_data_type_bits__) {
-		Parse_Function_Case__(Data_Type_Type, Reveal_Type(&m));
-		Parse_Function_Case__(Data_Type_Size, Reveal_Size(&m));
-		Parse_Function_Case__(Data_Type_Byte_Size, Print_Long__(m.st_size));
+		Parse_Function_Case__(Data_Type_Type, Reveal_Type(&metadata));
+		Parse_Function_Case__(Data_Type_Size, Reveal_Size(&metadata));
 		Parse_Function_Case__(
-			Data_Type_Permissions, Reveal_Permissions(&m)
+			Data_Type_Byte_Size, Print_Long__(metadata.st_size)
+		);
+		Parse_Function_Case__(
+			Data_Type_Permissions, Reveal_Permissions(&metadata)
 		);
 		Parse_Function_Case__(
 			Data_Type_Octal_Permissions, Print_Octal_Permissions__
 		);
-		Parse_Return_Case__(Data_Type_User, Reveal_User(path, &m));
+		Parse_Return_Case__(Data_Type_User, Reveal_User(path, &metadata));
 		Parse_Function_Case__(
-			Data_Type_User_Uid, Print_Unsigned__(m.st_uid)
+			Data_Type_User_Uid, Print_Unsigned__(metadata.st_uid)
 		);
-		Parse_Return_Case__(Data_Type_Group, Reveal_Group(path, &m));
+		Parse_Return_Case__(Data_Type_Group, Reveal_Group(path, &metadata));
 		Parse_Function_Case__(
-			Data_Type_Group_Gid, Print_Unsigned__(m.st_gid)
+			Data_Type_Group_Gid, Print_Unsigned__(metadata.st_gid)
 		);
 		Parse_Return_Case__(
-			Data_Type_Modified_Date, Reveal_Modified_Date(&m)
+			Data_Type_Modified_Date, Reveal_Modified_Date(&metadata)
 		);
 	default:
-		switch (m.st_mode & S_IFMT) {
+		switch (metadata.st_mode & S_IFMT) {
 			Parse_Return_Case__(S_IFREG, Reveal_File(path));
 			Parse_Return_Case__(S_IFDIR, Reveal_Directory(path));
 			Parse_Return_Case__(S_IFLNK, Write_Error(
@@ -332,19 +325,24 @@ Reveal(const char* const path)
 	return (0);
 }
 
-int
-main(const int total_of_arguments, const char** arguments)
+int main(const int total_of_arguments, const char** arguments)
 {
 	if (total_of_arguments == 1) {
 		Reveal(".");
 	}
-	const char* p = ".";
-	for (int i = 1; i < total_of_arguments; i++) {
+	const char* last_path = ".";
+	for (
+		int argument_index = 1; argument_index < total_of_arguments;
+		argument_index++
+	) {
 		Parse_Metadata_Flag__("version", program_version__);
 		Parse_Metadata_Flag__("copyright", program_copyright__);
 		Parse_Metadata_Flag__("help", program_help__);
 	}
-	for (int i = 1; i < total_of_arguments; i++) {
+	for (
+		int argument_index = 1; argument_index < total_of_arguments;
+		argument_index++
+	) {
 		Parse_Data_Type_Flag__("contents", Data_Type_Contents);
 		Parse_Data_Type_Flag__("type", Data_Type_Type);
 		Parse_Data_Type_Flag__("size", Data_Type_Size);
@@ -362,11 +360,11 @@ main(const int total_of_arguments, const char** arguments)
 		Parse_Non_Data_Type_Flag__(
 			"unfollow-symlinks", OPTIONS &= ~is_following_symlinks_bit__
 		);
-		if (Reveal(arguments[i])) {
+		if (Reveal(arguments[argument_index])) {
 			continue;
 		}
 		OPTIONS &= ~is_expecting_path_bit__;
-		p = arguments[i];
+		last_path = arguments[argument_index];
 	}
 	return !!(OPTIONS & had_error_bit__);
 }
