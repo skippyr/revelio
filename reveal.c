@@ -129,7 +129,8 @@
 	continue;\
 )
 
-typedef enum {
+typedef enum
+{
 	Data_Type_Contents,
 	Data_Type_Type,
 	Data_Type_Size,
