@@ -9,42 +9,42 @@
 
 #define program_name__ "reveal"
 #define program_version__ "v9.0.5"
-#define program_help__\
-    "Usage: reveal [FLAGS | PATHS]\n"\
-    "Reveals information about entries in the file system.\n\n"\
-    "METADATA FLAGS\n"\
+#define program_help__                                                         \
+    "Usage: reveal [FLAGS | PATHS]\n"                                          \
+    "Reveals information about entries in the file system.\n\n"                \
+    "METADATA FLAGS\n"                                                         \
     "The following flags can be used to get information about the program.\n\n"\
-    "    --version    print its version.\n"\
-    "    --help       print these help instructions.\n\n"\
-    "DATA TYPE FLAGS\n"\
-    "These flags can be used to change what type of data to get from the "\
-    "entries\nfollowing them.\n\n"\
-    "If none is used, the one marked as default will be considered.\n\n"\
-    "    --contents (default)    print its contents.\n"\
+    "    --version    print its version.\n"                                    \
+    "    --help       print these help instructions.\n\n"                      \
+    "DATA TYPE FLAGS\n"                                                        \
+    "These flags can be used to change what type of data to get from the "     \
+    "entries\nfollowing them.\n\n"                                             \
+    "If none is used, the one marked as default will be considered.\n\n"       \
+    "    --contents (default)    print its contents.\n"                        \
     "    --type                  print its type: regular, directory, symlink, "\
     "fifo,\n                            socket, character, block or unknown.\n"\
-    "    --size                  print its size using a readable unit: "\
+    "    --size                  print its size using a readable unit: "       \
     "gigabyte (GB),\n                            megabyte (MB), kilobyte (kB) "\
-    "or byte (B).\n"\
-    "    --byte-size             print its size in bytes.\n"\
+    "or byte (B).\n"                                                           \
+    "    --byte-size             print its size in bytes.\n"                   \
     "    --permissions           print its read (r), write (w) and execute (x)"\
-    "\n                            permissions for user, group and others.\n"\
-    "    --octal-permissions     print its permissions in octal base.\n"\
-    "    --user                  print the user that owns its.\n"\
-    "    --user-uid              print the UID of the user that owns its.\n"\
-    "    --group                 print the group that owns its.\n"\
-    "    --group-gid             print the GID of the group that owns its.\n"\
-    "    --modified-date         print the date when its contents were last "\
-    "modified.\n\n"\
-    "These flags expects a path following them, if none is used, they will "\
-    "consider\nthe last valid one given or, else, the current directory.\n\n"\
-    "SYMLINK FLAGS\n"\
-    "These flags change how symlinks will be treated, changing the origin of "\
-    "what\nwill be revealed.\n\n"\
-    "If none is used, the one marked as default will be considered.\n\n"\
-    "    --follow-symlinks (default)    follow symlinks.\n"\
-    "    --unfollow-symlinks            unfollow symlinks.\n\n"\
-    "EXIT CODES\n"\
+    "\n                            permissions for user, group and others.\n"  \
+    "    --octal-permissions     print its permissions in octal base.\n"       \
+    "    --user                  print the user that owns its.\n"              \
+    "    --user-uid              print the UID of the user that owns its.\n"   \
+    "    --group                 print the group that owns its.\n"             \
+    "    --group-gid             print the GID of the group that owns its.\n"  \
+    "    --modified-date         print the date when its contents were last "  \
+    "modified.\n\n"                                                            \
+    "These flags expects a path following them. If none is used, they will "   \
+    "consider\nthe last valid one given or, else, the current directory.\n\n"  \
+    "SYMLINK FLAGS\n"                                                          \
+    "These flags change how symlinks will be treated, changing the origin of " \
+    "what\nwill be revealed.\n\n"                                              \
+    "If none is used, the one marked as default will be considered.\n\n"       \
+    "    --follow-symlinks (default)    follow symlinks.\n"                    \
+    "    --unfollow-symlinks            unfollow symlinks.\n\n"                \
+    "EXIT CODES\n"                                                             \
     "The exit code 1 will be throw if an error happens."
 #define is_expecting_path_bit__ (1 << 5)
 #define is_following_symlinks_bit__ (1 << 6)
