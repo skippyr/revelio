@@ -1,4 +1,6 @@
 #include <dirent.h>
+#include <grp.h>
+#include <pwd.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -10,11 +12,12 @@
 #define is_expecting_path_bit__ (1 << 5)
 #define is_following_symlinks_bit__ (1 << 6)
 #define had_error_bit__ (1 << 7)
-#define non_data_type_bits__ (is_expecting_path_bit__ |                        \
-                              is_following_symlinks_bit__ | had_error_bit__)
+#define non_data_type_bits__                                                   \
+    (is_expecting_path_bit__ | is_following_symlinks_bit__ | had_error_bit__)
 #define is_last_argument__ (argument_index == total_of_arguments - 1)
 #define Use_String_On_Suggestion__(text) (suggestion ? text : "")
 #define Print_Long__(value) printf("%ld\n", value);
+#define Print_Unsigned__(value) printf("%u\n", value);
 #define Print_Octal_Permissions__                                              \
     printf("0%o\n", metadata.st_mode & (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP |\
                                         S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH |\
@@ -133,6 +136,26 @@ void Reveal_Permissions(const struct stat* const metadata)
     putchar('\n');
 }
 
+uint8_t Reveal_User(const struct stat* const metadata, const char* const path)
+{
+    const struct passwd* const user = getpwuid(metadata->st_uid);
+    if (!user) {
+        return Throw_Error("can not get user that owns \"", path, "\".", NULL);
+    }
+    puts(user->pw_name);
+    return 0;
+}
+
+uint8_t Reveal_Group(const struct stat* const metadata, const char* const path)
+{
+    const struct group* const group = getgrgid(metadata->st_gid);
+    if (!group) {
+        return Throw_Error("can not get group that owns \"", path, "\".", NULL);
+    }
+    puts(group->gr_name);
+    return 0;
+}
+
 uint8_t Reveal_File(const char* const path)
 {
     FILE* const file = fopen(path, "r");
@@ -180,6 +203,10 @@ uint8_t Reveal(const char* const path)
         Parse_Case__(Data_Type_Byte_Size, Print_Long__(metadata.st_size));
         Parse_Case__(Data_Type_Permissions, Reveal_Permissions(&metadata));
         Parse_Case__(Data_Type_Octal_Permissions, Print_Octal_Permissions__);
+        Parse_Return_Case__(Data_Type_User, Reveal_User(&metadata, path));
+        Parse_Case__(Data_Type_User_Uid, Print_Unsigned__(metadata.st_uid));
+        Parse_Return_Case__(Data_Type_Group, Reveal_Group(&metadata, path));
+        Parse_Case__(Data_Type_Group_Gid, Print_Unsigned__(metadata.st_gid));
     default:
         switch (metadata.st_mode & S_IFMT) {
             Parse_Return_Case__(S_IFREG, Reveal_File(path));
