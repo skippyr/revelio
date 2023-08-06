@@ -39,8 +39,8 @@
     "These flags expects a path following them. If none is used, they will "   \
     "consider\nthe last valid one given or, else, the current directory.\n\n"  \
     "SYMLINK FLAGS\n"                                                          \
-    "These flags change how symlinks will be treated, changing the origin of " \
-    "what\nwill be revealed.\n\n"                                              \
+    "These flags change how symlinks following them will be treated, "         \
+    "changing the\norigin of what is revealed.\n\n"                            \
     "If none is used, the one marked as default will be considered.\n\n"       \
     "    --follow-symlinks (default)    follow symlinks.\n"                    \
     "    --unfollow-symlinks            unfollow symlinks.\n\n"                \
