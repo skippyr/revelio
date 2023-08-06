@@ -118,10 +118,10 @@ typedef enum
 
 uint8_t OPTIONS = is_following_symlinks_bit__;
 
-uint8_t Throw_Error(const char* const description_split_0,
-                    const char* const description_split_1,
-                    const char* const description_split_2,
-                    const char* const suggestion)
+uint8_t
+Throw_Error(const char* const description_split_0,
+            const char* const description_split_1,
+            const char* const description_split_2, const char* const suggestion)
 {
     fprintf(stderr, "%s: %s%s%s\n%s%s%s", program_name__,
             Parse_Null_String__(description_split_0),
@@ -133,7 +133,8 @@ uint8_t Throw_Error(const char* const description_split_0,
     return 1;
 }
 
-void Reveal_Type(const struct stat* const metadata)
+void
+Reveal_Type(const struct stat* const metadata)
 {
     switch (metadata->st_mode & S_IFMT) {
         Parse_Puts_Case__(S_IFREG, "regular");
@@ -148,7 +149,8 @@ void Reveal_Type(const struct stat* const metadata)
     }
 }
 
-void Reveal_Size(const struct stat* const metadata)
+void
+Reveal_Size(const struct stat* const metadata)
 {
     float size;
     Parse_Size__(1e9, 'G');
@@ -157,7 +159,8 @@ void Reveal_Size(const struct stat* const metadata)
     printf("%ldB\n", metadata->st_size);
 }
 
-void Reveal_Permissions(const struct stat* const metadata)
+void
+Reveal_Permissions(const struct stat* const metadata)
 {
     const char read_character = 'r', write_character = 'w',
                execute_character = 'x', lack_character = '-';
@@ -173,7 +176,8 @@ void Reveal_Permissions(const struct stat* const metadata)
     putchar('\n');
 }
 
-uint8_t Reveal_User(const struct stat* const metadata, const char* const path)
+uint8_t
+Reveal_User(const struct stat* const metadata, const char* const path)
 {
     const struct passwd* const user = getpwuid(metadata->st_uid);
     if (!user) {
@@ -183,7 +187,8 @@ uint8_t Reveal_User(const struct stat* const metadata, const char* const path)
     return 0;
 }
 
-uint8_t Reveal_Group(const struct stat* const metadata, const char* const path)
+uint8_t
+Reveal_Group(const struct stat* const metadata, const char* const path)
 {
     const struct group* const group = getgrgid(metadata->st_gid);
     if (!group) {
@@ -193,7 +198,8 @@ uint8_t Reveal_Group(const struct stat* const metadata, const char* const path)
     return 0;
 }
 
-uint8_t Reveal_Modified_Date(const struct stat* const metadata)
+uint8_t
+Reveal_Modified_Date(const struct stat* const metadata)
 {
     char modified_date[29];
     if (!strftime(modified_date, sizeof(modified_date), "%a %b %d %T %Z %Y",
@@ -205,7 +211,8 @@ uint8_t Reveal_Modified_Date(const struct stat* const metadata)
     return 0;
 }
 
-uint8_t Reveal_File(const char* const path)
+uint8_t
+Reveal_File(const char* const path)
 {
     FILE* const file = fopen(path, "r");
     if (!file) {
@@ -220,7 +227,8 @@ uint8_t Reveal_File(const char* const path)
     return 0;
 }
 
-uint8_t Reveal_Directory(const char* const path)
+uint8_t
+Reveal_Directory(const char* const path)
 {
     DIR* const directory = opendir(path);
     if (!directory) {
@@ -238,7 +246,8 @@ uint8_t Reveal_Directory(const char* const path)
     return 0;
 }
 
-uint8_t Reveal(const char* const path)
+uint8_t
+Reveal(const char* const path)
 {
     struct stat metadata;
     if (OPTIONS & is_following_symlinks_bit__ ? stat(path, &metadata) :
@@ -273,7 +282,8 @@ uint8_t Reveal(const char* const path)
     return 0;
 }
 
-int main(const int total_of_arguments, const char** arguments)
+int
+main(const int total_of_arguments, const char** arguments)
 {
     if (total_of_arguments == 1) {
         Reveal(".");
