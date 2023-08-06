@@ -1,6 +1,8 @@
-#include <stdio.h>
+#include <dirent.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #define program_name__ "reveal"
 #define program_version__ "version"
@@ -11,6 +13,11 @@
 #define non_data_type_bits__ (is_expecting_path_bit__ |                        \
                               is_following_symlinks_bit__ | had_error_bit__)
 #define is_last_argument__ (argument_index == total_of_arguments - 1)
+#define Use_String_On_Suggestion__(text) (suggestion ? text : "")
+#define Parse_Null_String__(text) (text ? text : "")
+#define Parse_Return_Case__(value, action)                                     \
+    case value:                                                                \
+        return action;
 #define Parse_Flag(flag, action)\
     if (!strcmp("--" flag, arguments[argument_index])) {                       \
         action;                                                                \
@@ -52,10 +59,72 @@ typedef enum
 
 uint8_t OPTIONS = is_following_symlinks_bit__;
 
+uint8_t Throw_Error(const char* const description_split_0,
+                    const char* const description_split_1,
+                    const char* const description_split_2,
+                    const char* const suggestion)
+{
+    fprintf(stderr, "%s: %s%s%s\n%s%s%s", program_name__,
+            Parse_Null_String__(description_split_0),
+            Parse_Null_String__(description_split_1),
+            Parse_Null_String__(description_split_2),
+            Use_String_On_Suggestion__("        "),
+            Parse_Null_String__(suggestion), Use_String_On_Suggestion__("\n"));
+    OPTIONS |= had_error_bit__;
+    return 1;
+}
+
+uint8_t Reveal_File(const char* const path)
+{
+    FILE* const file = fopen(path, "r");
+    if (!file) {
+        return Throw_Error("can not open file \"", path, "\".", "Ensure that "
+                           "you have permissions to read it.");
+    }
+    char character;
+    while ((character = fgetc(file)) != EOF) {
+        putchar(character);
+    }
+    fclose(file);
+    return 0;
+}
+
+uint8_t Reveal_Directory(const char* const path)
+{
+    DIR* const directory = opendir(path);
+    if (!directory) {
+        return Throw_Error("can not open directory \"", path, "\".", "Ensure "
+                           "that you have permissions to read it.");
+    }
+    const struct dirent* entry;
+    while ((entry = readdir(directory))) {
+        if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")) {
+            continue;
+        }
+        puts(entry->d_name);
+    }
+    closedir(directory);
+    return 0;
+}
+
 uint8_t Reveal(const char* const path)
 {
-    printf("%s (mode: %i) (sym: %i)\n", path, OPTIONS & ~non_data_type_bits__,
-           OPTIONS & is_following_symlinks_bit__);
+    struct stat metadata;
+    if (OPTIONS & is_following_symlinks_bit__ ? stat(path, &metadata) :
+                                                lstat(path, &metadata)) {
+        return Throw_Error("\"", path, "\" does not exists.", "Ensure that you "
+                           "did not misspelled it.");
+    }
+    switch (OPTIONS & ~non_data_type_bits__) {
+    default:
+        switch (metadata.st_mode & S_IFMT) {
+            Parse_Return_Case__(S_IFREG, Reveal_File(path));
+            Parse_Return_Case__(S_IFDIR, Reveal_Directory(path));
+        default:
+            return Throw_Error("can not reveal \"", path, "\" due to its type.",
+                               NULL);
+        }
+    }
     return 0;
 }
 
