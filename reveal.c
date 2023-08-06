@@ -10,7 +10,7 @@
 #define program_name__ "reveal"
 #define program_version__ "v9.0.5"
 #define program_help__                                                         \
-    "Usage: reveal [FLAGS | PATHS]\n"                                          \
+    "Usage: " program_name__ " [FLAGS | PATHS]\n"                              \
     "Reveals information about entries in the file system.\n\n"                \
     "METADATA FLAGS\n"                                                         \
     "The following flags can be used to get information about the program.\n\n"\
