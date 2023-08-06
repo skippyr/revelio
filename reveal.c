@@ -14,10 +14,29 @@
                               is_following_symlinks_bit__ | had_error_bit__)
 #define is_last_argument__ (argument_index == total_of_arguments - 1)
 #define Use_String_On_Suggestion__(text) (suggestion ? text : "")
+#define Print_Long__(value) printf("%ld\n", value);
+#define Print_Octal_Permissions__                                              \
+    printf("0%o\n", metadata.st_mode & (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP |\
+                                        S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH |\
+                                        S_IXOTH))
 #define Parse_Null_String__(text) (text ? text : "")
 #define Parse_Return_Case__(value, action)                                     \
     case value:                                                                \
         return action;
+#define Parse_Case__(value, action)                                            \
+    case value:                                                                \
+        action;                                                                \
+        break;
+#define Parse_Puts_Case__(value, text) Parse_Case__(value, puts(text))
+#define Parse_Size__(multiplier, multiplier_character)\
+    size = metadata->st_size / (multiplier);                                   \
+    if ((int) size) {                                                          \
+        printf("%.1f%cB\n", size, multiplier_character);                       \
+        return;                                                                \
+    }
+#define Parse_Permission__(permission, permission_character)                   \
+    putchar(metadata->st_mode & permission ? permission_character :            \
+                                             lack_character);
 #define Parse_Flag(flag, action)\
     if (!strcmp("--" flag, arguments[argument_index])) {                       \
         action;                                                                \
@@ -74,6 +93,46 @@ uint8_t Throw_Error(const char* const description_split_0,
     return 1;
 }
 
+void Reveal_Type(const struct stat* const metadata)
+{
+    switch (metadata->st_mode & S_IFMT) {
+        Parse_Puts_Case__(S_IFREG, "regular");
+        Parse_Puts_Case__(S_IFDIR, "directory");
+        Parse_Puts_Case__(S_IFLNK, "symlink");
+        Parse_Puts_Case__(S_IFSOCK, "socket");
+        Parse_Puts_Case__(S_IFIFO, "fifo");
+        Parse_Puts_Case__(S_IFCHR, "character");
+        Parse_Puts_Case__(S_IFBLK, "block");
+    default:
+        puts("unknown");
+    }
+}
+
+void Reveal_Size(const struct stat* const metadata)
+{
+    float size;
+    Parse_Size__(1e9, 'G');
+    Parse_Size__(1e6, 'M');
+    Parse_Size__(1e3, 'k');
+    printf("%ldB\n", metadata->st_size);
+}
+
+void Reveal_Permissions(const struct stat* const metadata)
+{
+    const char read_character = 'r', write_character = 'w',
+               execute_character = 'x', lack_character = '-';
+    Parse_Permission__(S_IRUSR, read_character);
+    Parse_Permission__(S_IWUSR, write_character);
+    Parse_Permission__(S_IXUSR, execute_character);
+    Parse_Permission__(S_IRGRP, read_character);
+    Parse_Permission__(S_IWGRP, write_character);
+    Parse_Permission__(S_IXGRP, execute_character);
+    Parse_Permission__(S_IROTH, read_character);
+    Parse_Permission__(S_IWOTH, write_character);
+    Parse_Permission__(S_IXOTH, execute_character);
+    putchar('\n');
+}
+
 uint8_t Reveal_File(const char* const path)
 {
     FILE* const file = fopen(path, "r");
@@ -116,13 +175,21 @@ uint8_t Reveal(const char* const path)
                            "did not misspelled it.");
     }
     switch (OPTIONS & ~non_data_type_bits__) {
+        Parse_Case__(Data_Type_Type, Reveal_Type(&metadata));
+        Parse_Case__(Data_Type_Size, Reveal_Size(&metadata));
+        Parse_Case__(Data_Type_Byte_Size, Print_Long__(metadata.st_size));
+        Parse_Case__(Data_Type_Permissions, Reveal_Permissions(&metadata));
+        Parse_Case__(Data_Type_Octal_Permissions, Print_Octal_Permissions__);
     default:
         switch (metadata.st_mode & S_IFMT) {
             Parse_Return_Case__(S_IFREG, Reveal_File(path));
             Parse_Return_Case__(S_IFDIR, Reveal_Directory(path));
+            Parse_Return_Case__(__S_IFLNK, Throw_Error(
+                "can not reveal contents of symlink \"", path, "\".", "Did you "
+                "mean to use the \"--follow-symlinks\" flag before it?"));
         default:
-            return Throw_Error("can not reveal \"", path, "\" due to its type.",
-                               NULL);
+            return Throw_Error("can not reveal \"", path, "\" due to its "
+                               "unreadable type.", NULL);
         }
     }
     return 0;
@@ -146,7 +213,8 @@ int main(const int total_of_arguments, const char** arguments)
         Parse_Data_Type_Flag__("size", Data_Type_Size);
         Parse_Data_Type_Flag__("byte-size", Data_Type_Byte_Size);
         Parse_Data_Type_Flag__("permissions", Data_Type_Permissions);
-        Parse_Data_Type_Flag__("octal-permissions", Data_Type_Permissions);
+        Parse_Data_Type_Flag__("octal-permissions",
+                               Data_Type_Octal_Permissions);
         Parse_Data_Type_Flag__("user", Data_Type_User);
         Parse_Data_Type_Flag__("user-uid", Data_Type_User_Uid);
         Parse_Data_Type_Flag__("group", Data_Type_Group);
