@@ -10,14 +10,14 @@
 #define program_name__ "reveal"
 #define program_version__ "v9.0.5"
 #define program_help__                                                         \
-    "Usage: " program_name__ " [FLAG]... [PATH]...\n"                          \
+    "Usage: " program_name__ " [OPTION]... [PATH]...\n"                        \
     "Reveals information about entries in the file system.\n\n"                \
-    "METADATA FLAGS\n"                                                         \
-    "The following flags can be used to get information about the program.\n\n"\
+    "METADATA OPTIONS\n"                                                       \
+    "These options can be used to get information about the program.\n\n"      \
     "    --version    print its version.\n"                                    \
     "    --help       print these help instructions.\n\n"                      \
-    "DATA TYPE FLAGS\n"                                                        \
-    "These flags can be used to change what type of data to get from the "     \
+    "DATA TYPE OPTIONS\n"                                                      \
+    "These options can be used to change what type of data to get from the "   \
     "entries\nfollowing them.\n\n"                                             \
     "If none is used, the one marked as default will be considered.\n\n"       \
     "    --contents (default)    print its contents.\n"                        \
@@ -36,10 +36,10 @@
     "    --group-gid             print the GID of the group that owns its.\n"  \
     "    --modified-date         print the date when its contents were last "  \
     "modified.\n\n"                                                            \
-    "These flags expects a path following them. If none is used, they will "   \
+    "These options expects a path following them. If none is used, they will " \
     "consider\nthe last valid one given or, else, the current directory.\n\n"  \
-    "SYMLINK FLAGS\n"                                                          \
-    "These flags change how symlinks following them will be treated, "         \
+    "SYMLINK OPTIONS\n"                                                        \
+    "These options change how symlinks following them will be treated, "       \
     "changing the\norigin of what is revealed.\n\n"                            \
     "If none is used, the one marked as default will be considered.\n\n"       \
     "    --follow-symlinks (default)    follow symlinks.\n"                    \
@@ -77,12 +77,13 @@
 #define Parse_Permission__(permission, permission_character)                   \
     putchar(metadata->st_mode & permission ? permission_character :            \
                                              lack_character);
-#define Parse_Flag(flag, action)\
-    if (!strcmp("--" flag, arguments[argument_index])) {                       \
+#define Parse_Option__(option, action)\
+    if (!strcmp("--" option, arguments[argument_index])) {                     \
         action;                                                                \
     }
-#define Parse_Metadata_Flag__(flag, text) Parse_Flag(flag, puts(text); return 0)
-#define Parse_Data_Type_Flag__(flag, data_type) Parse_Flag(flag,               \
+#define Parse_Metadata_Option__(option, text)                                  \
+    Parse_Option__(option, puts(text); return 0)
+#define Parse_Data_Type_Option__(option, data_type) Parse_Option__(option,     \
     if (OPTIONS & is_expecting_path_bit__) {                                   \
         Reveal(last_path);                                                     \
     }                                                                          \
@@ -93,7 +94,7 @@
     }                                                                          \
     continue;                                                                  \
 )
-#define Parse_Non_Data_Type_Flag__(flag, action) Parse_Flag(flag,              \
+#define Parse_Non_Data_Type_Option__(option, action) Parse_Option__(option,    \
     if (is_last_argument__) {                                                  \
         Reveal(last_path);                                                     \
     }                                                                          \
@@ -273,7 +274,7 @@ Reveal(const char* const path)
             Parse_Return_Case__(S_IFDIR, Reveal_Directory(path));
             Parse_Return_Case__(__S_IFLNK, Throw_Error(
                 "can not reveal contents of symlink \"", path, "\".", "Did you "
-                "mean to use the \"--follow-symlinks\" flag before it?"));
+                "mean to use the option \"--follow-symlinks\" before it?"));
         default:
             return Throw_Error("can not reveal \"", path, "\" due to its "
                                "unreadable type.", NULL);
@@ -290,28 +291,28 @@ main(const int total_of_arguments, const char** arguments)
     }
     for (int argument_index = 1; argument_index < total_of_arguments;
          argument_index++) {
-        Parse_Metadata_Flag__("version", program_version__);
-        Parse_Metadata_Flag__("help", program_help__);
+        Parse_Metadata_Option__("version", program_version__);
+        Parse_Metadata_Option__("help", program_help__);
     }
     const char* last_path = ".";
     for (int argument_index = 1; argument_index < total_of_arguments;
          argument_index++) {
-        Parse_Data_Type_Flag__("contents", Data_Type_Content);
-        Parse_Data_Type_Flag__("type", Data_Type_Type);
-        Parse_Data_Type_Flag__("size", Data_Type_Size);
-        Parse_Data_Type_Flag__("byte-size", Data_Type_Byte_Size);
-        Parse_Data_Type_Flag__("permissions", Data_Type_Permissions);
-        Parse_Data_Type_Flag__("octal-permissions",
-                               Data_Type_Octal_Permissions);
-        Parse_Data_Type_Flag__("user", Data_Type_User);
-        Parse_Data_Type_Flag__("user-uid", Data_Type_User_Uid);
-        Parse_Data_Type_Flag__("group", Data_Type_Group);
-        Parse_Data_Type_Flag__("group-gid", Data_Type_Group_Gid);
-        Parse_Data_Type_Flag__("modified-date", Data_Type_Modified_Date);
-        Parse_Non_Data_Type_Flag__("follow-symlinks",
-                                   OPTIONS |= is_following_symlinks_bit__);
-        Parse_Non_Data_Type_Flag__("unfollow-symlinks",
-                                   OPTIONS &= ~is_following_symlinks_bit__);
+        Parse_Data_Type_Option__("contents", Data_Type_Content);
+        Parse_Data_Type_Option__("type", Data_Type_Type);
+        Parse_Data_Type_Option__("size", Data_Type_Size);
+        Parse_Data_Type_Option__("byte-size", Data_Type_Byte_Size);
+        Parse_Data_Type_Option__("permissions", Data_Type_Permissions);
+        Parse_Data_Type_Option__("octal-permissions",
+                                 Data_Type_Octal_Permissions);
+        Parse_Data_Type_Option__("user", Data_Type_User);
+        Parse_Data_Type_Option__("user-uid", Data_Type_User_Uid);
+        Parse_Data_Type_Option__("group", Data_Type_Group);
+        Parse_Data_Type_Option__("group-gid", Data_Type_Group_Gid);
+        Parse_Data_Type_Option__("modified-date", Data_Type_Modified_Date);
+        Parse_Non_Data_Type_Option__("follow-symlinks",
+                                     OPTIONS |= is_following_symlinks_bit__);
+        Parse_Non_Data_Type_Option__("unfollow-symlinks",
+                                     OPTIONS &= ~is_following_symlinks_bit__);
         if (Reveal(arguments[argument_index])) {
             continue;
         }
