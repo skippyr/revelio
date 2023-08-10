@@ -62,13 +62,13 @@
 #define Parse_Null_String__(text) (text ? text : "")
 #define Parse_Return_Case__(value, action)                                     \
     case value:                                                                \
-        return action;
+        return (action);
 #define Parse_Case__(value, action)                                            \
     case value:                                                                \
         action;                                                                \
         break;
 #define Parse_Puts_Case__(value, text) Parse_Case__(value, puts(text))
-#define Parse_Size__(multiplier, multiplier_character)\
+#define Parse_Size__(multiplier, multiplier_character)                         \
     size = metadata->st_size / (multiplier);                                   \
     if ((int) size)                                                            \
     {                                                                          \
@@ -78,13 +78,13 @@
 #define Parse_Permission__(permission, permission_character)                   \
     putchar(metadata->st_mode & permission ? permission_character :            \
                                              lack_character);
-#define Parse_Option__(option, action)\
+#define Parse_Option__(option, action)                                         \
     if (!strcmp("--" option, arguments[argument_index]))                       \
     {                                                                          \
         action;                                                                \
     }
 #define Parse_Metadata_Option__(option, text)                                  \
-    Parse_Option__(option, puts(text); return 0)
+    Parse_Option__(option, puts(text); return (0))
 #define Parse_Data_Type_Option__(option, data_type) Parse_Option__(option,     \
     if (OPTIONS & is_expecting_path_bit__)                                     \
     {                                                                          \
@@ -136,7 +136,7 @@ uint8_t Throw_Error(const char* const description_split_0,
             Use_String_On_Suggestion__("        "),
             Parse_Null_String__(suggestion), Use_String_On_Suggestion__("\n"));
     OPTIONS |= had_error_bit__;
-    return 1;
+    return (1);
 }
 
 void Reveal_Type(const struct stat* const metadata)
@@ -185,10 +185,11 @@ uint8_t Reveal_User(const struct stat* const metadata, const char* const path)
     const struct passwd* const user = getpwuid(metadata->st_uid);
     if (!user)
     {
-        return Throw_Error("can not get user that owns \"", path, "\".", NULL);
+        return (Throw_Error("can not get user that owns \"", path, "\".",
+                            NULL));
     }
     puts(user->pw_name);
-    return 0;
+    return (0);
 }
 
 uint8_t Reveal_Group(const struct stat* const metadata, const char* const path)
@@ -196,10 +197,11 @@ uint8_t Reveal_Group(const struct stat* const metadata, const char* const path)
     const struct group* const group = getgrgid(metadata->st_gid);
     if (!group)
     {
-        return Throw_Error("can not get group that owns \"", path, "\".", NULL);
+        return (Throw_Error("can not get group that owns \"", path, "\".",
+                            NULL));
     }
     puts(group->gr_name);
-    return 0;
+    return (0);
 }
 
 uint8_t Reveal_Modified_Date(const struct stat* const metadata)
@@ -208,11 +210,11 @@ uint8_t Reveal_Modified_Date(const struct stat* const metadata)
     if (!strftime(modified_date, sizeof(modified_date), "%a %b %d %T %Z %Y",
         localtime(&metadata->st_mtime)))
     {
-        return Throw_Error("overflowed buffer meant to store modified date.",
-                           NULL, NULL, NULL);
+        return (Throw_Error("overflowed buffer meant to store modified date.",
+                            NULL, NULL, NULL));
     }
     puts(modified_date);
-    return 0;
+    return (0);
 }
 
 uint8_t Reveal_File(const char* const path)
@@ -220,8 +222,8 @@ uint8_t Reveal_File(const char* const path)
     FILE* const file = fopen(path, "r");
     if (!file)
     {
-        return Throw_Error("can not open file \"", path, "\".", "Ensure that "
-                           "you have permissions to read it.");
+        return (Throw_Error("can not open file \"", path, "\".", "Ensure that "
+                            "you have permissions to read it."));
     }
     char character;
     while ((character = fgetc(file)) != EOF)
@@ -229,7 +231,7 @@ uint8_t Reveal_File(const char* const path)
         putchar(character);
     }
     fclose(file);
-    return 0;
+    return (0);
 }
 
 uint8_t Reveal_Directory(const char* const path)
@@ -237,8 +239,8 @@ uint8_t Reveal_Directory(const char* const path)
     DIR* const directory = opendir(path);
     if (!directory)
     {
-        return Throw_Error("can not open directory \"", path, "\".", "Ensure "
-                           "that you have permissions to read it.");
+        return (Throw_Error("can not open directory \"", path, "\".", "Ensure "
+                            "that you have permissions to read it."));
     }
     const struct dirent* entry;
     while ((entry = readdir(directory)))
@@ -250,7 +252,7 @@ uint8_t Reveal_Directory(const char* const path)
         puts(entry->d_name);
     }
     closedir(directory);
-    return 0;
+    return (0);
 }
 
 uint8_t Reveal(const char* const path)
@@ -259,8 +261,8 @@ uint8_t Reveal(const char* const path)
     if (OPTIONS & is_following_symlinks_bit__ ? stat(path, &metadata) :
                                                 lstat(path, &metadata))
     {
-        return Throw_Error("\"", path, "\" does not exists.", "Ensure that you "
-                           "did not misspelled it.");
+        return (Throw_Error("\"", path, "\" does not exists.", "Ensure that you"
+                            " did not misspelled it."));
     }
     switch (OPTIONS & ~non_data_type_bits__)
     {
@@ -284,11 +286,11 @@ uint8_t Reveal(const char* const path)
                 "can not reveal contents of symlink \"", path, "\".", "Did you "
                 "mean to use the option \"--follow-symlinks\" before it?"));
         default:
-            return Throw_Error("can not reveal \"", path, "\" due to its "
-                               "unreadable type.", NULL);
+            return (Throw_Error("can not reveal \"", path, "\" due to its "
+                                "unreadable type.", NULL));
         }
     }
-    return 0;
+    return (0);
 }
 
 int main(const int total_of_arguments, const char** arguments)
