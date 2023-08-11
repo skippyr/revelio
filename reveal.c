@@ -109,17 +109,17 @@
 
 typedef enum
 {
-    Data_Type_Content,
-    Data_Type_Type,
-    Data_Type_Size,
-    Data_Type_Byte_Size,
-    Data_Type_Permissions,
-    Data_Type_Octal_Permissions,
-    Data_Type_User,
-    Data_Type_User_Uid,
-    Data_Type_Group,
-    Data_Type_Group_Gid,
-    Data_Type_Modified_Date
+    Data_Type__Contents,
+    Data_Type__Type,
+    Data_Type__Size,
+    Data_Type__Byte_Size,
+    Data_Type__Permissions,
+    Data_Type__Octal_Permissions,
+    Data_Type__User,
+    Data_Type__User_Uid,
+    Data_Type__Group,
+    Data_Type__Group_Gid,
+    Data_Type__Modified_Date
 } Data_Type;
 
 uint8_t OPTIONS = is_following_symlinks_bit__;
@@ -266,23 +266,23 @@ uint8_t Reveal(const char* const path)
     }
     switch (OPTIONS & ~non_data_type_bits__)
     {
-        Parse_Case__(Data_Type_Type, Reveal_Type(&metadata));
-        Parse_Case__(Data_Type_Size, Reveal_Size(&metadata));
-        Parse_Case__(Data_Type_Byte_Size, Print_Long__(metadata.st_size));
-        Parse_Case__(Data_Type_Permissions, Reveal_Permissions(&metadata));
-        Parse_Case__(Data_Type_Octal_Permissions, Print_Octal_Permissions__);
-        Parse_Return_Case__(Data_Type_User, Reveal_User(&metadata, path));
-        Parse_Case__(Data_Type_User_Uid, Print_Unsigned__(metadata.st_uid));
-        Parse_Return_Case__(Data_Type_Group, Reveal_Group(&metadata, path));
-        Parse_Case__(Data_Type_Group_Gid, Print_Unsigned__(metadata.st_gid));
-        Parse_Return_Case__(Data_Type_Modified_Date,
+        Parse_Case__(Data_Type__Type, Reveal_Type(&metadata));
+        Parse_Case__(Data_Type__Size, Reveal_Size(&metadata));
+        Parse_Case__(Data_Type__Byte_Size, Print_Long__(metadata.st_size));
+        Parse_Case__(Data_Type__Permissions, Reveal_Permissions(&metadata));
+        Parse_Case__(Data_Type__Octal_Permissions, Print_Octal_Permissions__);
+        Parse_Return_Case__(Data_Type__User, Reveal_User(&metadata, path));
+        Parse_Case__(Data_Type__User_Uid, Print_Unsigned__(metadata.st_uid));
+        Parse_Return_Case__(Data_Type__Group, Reveal_Group(&metadata, path));
+        Parse_Case__(Data_Type__Group_Gid, Print_Unsigned__(metadata.st_gid));
+        Parse_Return_Case__(Data_Type__Modified_Date,
                             Reveal_Modified_Date(&metadata));
     default:
         switch (metadata.st_mode & S_IFMT)
         {
             Parse_Return_Case__(S_IFREG, Reveal_File(path));
             Parse_Return_Case__(S_IFDIR, Reveal_Directory(path));
-            Parse_Return_Case__(__S_IFLNK, Throw_Error(
+            Parse_Return_Case__(S_IFLNK, Throw_Error(
                 "can not reveal contents of symlink \"", path, "\".", "Did you "
                 "mean to use the option \"--follow-symlinks\" before it?"));
         default:
@@ -309,18 +309,18 @@ int main(const int total_of_arguments, const char** arguments)
     for (int argument_index = 1; argument_index < total_of_arguments;
          argument_index++)
     {
-        Parse_Data_Type_Option__("contents", Data_Type_Content);
-        Parse_Data_Type_Option__("type", Data_Type_Type);
-        Parse_Data_Type_Option__("size", Data_Type_Size);
-        Parse_Data_Type_Option__("byte-size", Data_Type_Byte_Size);
-        Parse_Data_Type_Option__("permissions", Data_Type_Permissions);
+        Parse_Data_Type_Option__("contents", Data_Type__Contents);
+        Parse_Data_Type_Option__("type", Data_Type__Type);
+        Parse_Data_Type_Option__("size", Data_Type__Size);
+        Parse_Data_Type_Option__("byte-size", Data_Type__Byte_Size);
+        Parse_Data_Type_Option__("permissions", Data_Type__Permissions);
         Parse_Data_Type_Option__("octal-permissions",
-                                 Data_Type_Octal_Permissions);
-        Parse_Data_Type_Option__("user", Data_Type_User);
-        Parse_Data_Type_Option__("user-uid", Data_Type_User_Uid);
-        Parse_Data_Type_Option__("group", Data_Type_Group);
-        Parse_Data_Type_Option__("group-gid", Data_Type_Group_Gid);
-        Parse_Data_Type_Option__("modified-date", Data_Type_Modified_Date);
+                                 Data_Type__Octal_Permissions);
+        Parse_Data_Type_Option__("user", Data_Type__User);
+        Parse_Data_Type_Option__("user-uid", Data_Type__User_Uid);
+        Parse_Data_Type_Option__("group", Data_Type__Group);
+        Parse_Data_Type_Option__("group-gid", Data_Type__Group_Gid);
+        Parse_Data_Type_Option__("modified-date", Data_Type__Modified_Date);
         Parse_Non_Data_Type_Option__("follow-symlinks",
                                      OPTIONS |= is_following_symlinks_bit__);
         Parse_Non_Data_Type_Option__("unfollow-symlinks",
