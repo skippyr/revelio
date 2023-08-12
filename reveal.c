@@ -46,7 +46,10 @@
 	"    --unfollow-symlinks            symlinks will not be followed.\n\n"\
 	"If none is used, the one marked as default will be considered.\n\n"\
 	"EXIT CODES\n"\
-	"It will throw code 1 if an error happens and 0 otherwise."
+	"It will throw code 1 if an error happens and 0 otherwise.\n\n"\
+	"SUPPORT\n"\
+	"Report issues, questions and suggestions through its issues page:\n"\
+	"<https://github.com/skippyr/reveal/issues>."
 #define is_expecting_path_bit__ (1 << 5)
 #define is_following_symlinks_bit__ (1 << 6)
 #define had_error_bit__ (1 << 7)

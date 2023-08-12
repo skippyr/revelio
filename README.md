@@ -55,11 +55,15 @@ make
 
 ## Usage
 
-Access its help page by running it using the --help option. There you will find instructions on how to use it, available options and their descriptions.
+Access its help page by running it using the `--help` option. There you will find instructions on how to use it, available options and their descriptions.
 
 ```bash
 reveal --help
 ```
+
+## Support
+
+Report issues, questions and suggestions through its [issues page](https://github.com/skippyr/reveal/issues).
 
 ## Copyright
 
