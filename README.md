@@ -78,7 +78,7 @@ find instructions on how to use it, available options and their descriptions.
 reveal --help
 ```
 
-## License
+## Copyright
 
 This software is under the MIT license. A copy of the license is bundled with
 the source code.
