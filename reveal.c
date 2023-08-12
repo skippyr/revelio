@@ -131,6 +131,10 @@ typedef const struct stat* const Metadata;
 
 uint8_t OPTIONS = is_following_symlinks_bit__;
 
+void Print_Long(long value) {
+	printf("%ld\n", value);
+}
+
 void Print_Unsigned(unsigned value) {
 	printf("%u\n", value);
 }
@@ -279,6 +283,7 @@ uint8_t Reveal(String path) {
 	switch (OPTIONS & ~non_data_type_bits__) {
 		Parse_Case__(Data_Type__Type, Reveal_Type(&metadata));
 		Parse_Case__(Data_Type__Size, Reveal_Size(&metadata));
+		Parse_Case__(Data_Type__Byte_Size, Print_Long(metadata.st_size));
 		Parse_Case__(Data_Type__Permissions, Reveal_Permissions(&metadata));
 		Parse_Case__(
 			Data_Type__Octal_Permissions, Reveal_Octal_Permissions(&metadata)
