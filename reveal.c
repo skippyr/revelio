@@ -269,8 +269,8 @@ uint8_t Reveal(String path) {
 		lstat(path, &metadata)
 	) {
 		return (Throw_Error(
-			"\"", path, "\" does not exists.", "Ensure that you did not "
-			"misspelled it."
+			"the entry \"", path, "\" does not exists.", "Ensure that you did "
+			"not misspelled it."
 		));
 	}
 	switch (OPTIONS & ~non_data_type_bits__) {
