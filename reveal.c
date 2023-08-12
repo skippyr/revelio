@@ -1,7 +1,10 @@
-#include <stdio.h>
+#include <dirent.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
 
+#define program_name__ "reveal"
 #define program_version__ "v9.0.5"
 #define program_help__ "help"
 #define is_expecting_path_bit__ (1 << 5)
@@ -11,6 +14,10 @@
 	is_expecting_path_bit__ | is_following_symlinks_bit__ | had_error_bit__\
 )
 #define is_last_argument__ (argument_index == total_of_arguments - 1)
+#define Parse_Null_String__(text) (text ? text : "")
+#define Parse_Return_Case__(value, action)\
+	case value:\
+		return (action);
 #define Parse_Option__(option, action)\
 	if (!strcmp("--" option, arguments[argument_index])) {\
 		action;\
@@ -56,11 +63,86 @@ typedef enum {
 
 uint8_t OPTIONS = is_following_symlinks_bit__;
 
-uint8_t Reveal(const char* const path) {
-	printf(
-		"%s (mode: %i) (is following symlinsk: %i)\n", path,
-		OPTIONS & ~non_data_type_bits__, OPTIONS & is_following_symlinks_bit__
+uint8_t Throw_Error(
+	const char* const description_split_0,
+	const char* const description_split_1,
+	const char* const description_split_2, const char* const fix_suggestion
+) {
+	fprintf(
+		stderr, "%s: %s%s%s\n%s%s", program_name__,
+		Parse_Null_String__(description_split_0),
+		Parse_Null_String__(description_split_1),
+		Parse_Null_String__(description_split_2),
+		Parse_Null_String__(fix_suggestion), fix_suggestion ? "\n" : ""
 	);
+	OPTIONS |= had_error_bit__;
+	return (1);
+}
+
+uint8_t Reveal_File(const char* const path) {
+	FILE* const file = fopen(path, "r");
+	if (!file) {
+		return (Throw_Error(
+			"can not open file \"", path, "\".", "Ensure that you have "
+			"permissions to read it."
+		));
+	}
+	char character;
+	while ((character = fgetc(file)) != EOF) {
+		putchar(character);
+	}
+	fclose(file);
+	return (0);
+}
+
+uint8_t Reveal_Directory(const char* const path) {
+	DIR * const directory = opendir(path);
+	if (!directory) {
+		return (Throw_Error(
+			"can not open directory \"", path, "\".", "Ensure that you have "
+			"permissions to read it."
+		));
+	}
+	const struct dirent* entry;
+	while ((entry = readdir(directory))) {
+		if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")) {
+			puts(entry->d_name);
+		}
+	}
+	closedir(directory);
+	return (0);
+}
+
+uint8_t Reveal(const char* const path) {
+	struct stat metadata;
+	if (
+		OPTIONS & is_following_symlinks_bit__ ? stat(path, &metadata) :
+		lstat(path, &metadata)
+	) {
+		return (Throw_Error(
+			"\"", path, "\" does not exists.", "Ensure that you did not "
+			"misspelled it."
+		));
+	}
+	switch (OPTIONS & ~non_data_type_bits__) {
+	default:
+		switch (metadata.st_mode & S_IFMT) {
+			Parse_Return_Case__(S_IFREG, Reveal_File(path));
+			Parse_Return_Case__(S_IFDIR, Reveal_Directory(path));
+			Parse_Return_Case__(
+				S_IFLNK, Throw_Error(
+					"can not reveal the contents of symlink \"", path, "\".",
+					"Did you mean to use the \"--follow-symlinks\" option "
+					"before it?"
+				)
+			);
+		default:
+			return (Throw_Error(
+				"can not reveal contents of \"", path, "\" due to its "
+				"unreadable nature.", NULL
+			));
+		}
+	}
 	return (0);
 }
 
