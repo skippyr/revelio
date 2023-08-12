@@ -13,11 +13,34 @@
 #define non_data_type_bits__ (\
 	is_expecting_path_bit__ | is_following_symlinks_bit__ | had_error_bit__\
 )
+#define gigabyte_in_bytes__ 1e9
+#define megabyte_in_bytes__ 1e6
+#define kilobyte_in_bytes__ 1e3
+#define read_permission_character__ 'r'
+#define write_permission_character__ 'w'
+#define execute_permission_character__ 'x'
+#define lack_permission_character__ '-'
 #define is_last_argument__ (argument_index == total_of_arguments - 1)
 #define Parse_Null_String__(text) (text ? text : "")
+#define Parse_Size_Multiplier__(multiplier, multiplier_character)\
+	size = metadata->st_size / (multiplier);\
+	if ((int)size) {\
+		printf("%.1f%cB\n", size, multiplier_character);\
+		return;\
+	}
+#define Parse_Case__(value, action)\
+	case value:\
+		action;\
+		break;
 #define Parse_Return_Case__(value, action)\
 	case value:\
 		return (action);
+#define Parse_Puts_Case__(value, text) Parse_Case__(value, puts(text));
+#define Parse_Permission_Bit__(permission_bit, permission_character)\
+	putchar(\
+		metadata->st_mode & permission_bit ? permission_character :\
+		lack_permission_character__\
+	);
 #define Parse_Option__(option, action)\
 	if (!strcmp("--" option, arguments[argument_index])) {\
 		action;\
@@ -60,13 +83,14 @@ typedef enum {
 	Data_Type__Group_Gid,
 	Data_Type__Modified_Date
 } Data_Type;
+typedef const char* const String;
+typedef const struct stat* const Metadata;
 
 uint8_t OPTIONS = is_following_symlinks_bit__;
 
 uint8_t Throw_Error(
-	const char* const description_split_0,
-	const char* const description_split_1,
-	const char* const description_split_2, const char* const fix_suggestion
+	String description_split_0, String description_split_1,
+	String description_split_2, String fix_suggestion
 ) {
 	fprintf(
 		stderr, "%s: %s%s%s\n%s%s", program_name__,
@@ -79,7 +103,49 @@ uint8_t Throw_Error(
 	return (1);
 }
 
-uint8_t Reveal_File(const char* const path) {
+void Reveal_Type(Metadata metadata) {
+	switch (metadata->st_mode & S_IFMT) {
+		Parse_Puts_Case__(S_IFREG, "regular");
+		Parse_Puts_Case__(S_IFDIR, "directory");
+		Parse_Puts_Case__(S_IFLNK, "symlink");
+		Parse_Puts_Case__(S_IFSOCK, "socket");
+		Parse_Puts_Case__(S_IFIFO, "fifo");
+		Parse_Puts_Case__(S_IFCHR, "character");
+		Parse_Puts_Case__(S_IFBLK, "block");
+	default:
+		puts("unknown");
+	}
+}
+
+void Reveal_Size(Metadata metadata) {
+	float size;
+	Parse_Size_Multiplier__(gigabyte_in_bytes__, 'G');
+	Parse_Size_Multiplier__(megabyte_in_bytes__, 'M');
+	Parse_Size_Multiplier__(kilobyte_in_bytes__, 'k');
+	printf("%ldB\n", metadata->st_size);
+}
+
+void Reveal_Permissions(Metadata metadata) {
+	Parse_Permission_Bit__(S_IRUSR, read_permission_character__);
+	Parse_Permission_Bit__(S_IWUSR, write_permission_character__);
+	Parse_Permission_Bit__(S_IXUSR, execute_permission_character__);
+	Parse_Permission_Bit__(S_IRGRP, read_permission_character__);
+	Parse_Permission_Bit__(S_IWGRP, write_permission_character__);
+	Parse_Permission_Bit__(S_IXGRP, execute_permission_character__);
+	Parse_Permission_Bit__(S_IROTH, read_permission_character__);
+	Parse_Permission_Bit__(S_IWOTH, write_permission_character__);
+	Parse_Permission_Bit__(S_IXOTH, execute_permission_character__);
+	putchar('\n');
+}
+
+void Reveal_Octal_Permissions(Metadata metadata) {
+	printf("0%o\n", metadata->st_mode & (
+		S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH |
+		S_IWOTH | S_IXOTH
+	));
+}
+
+uint8_t Reveal_File(String path) {
 	FILE* const file = fopen(path, "r");
 	if (!file) {
 		return (Throw_Error(
@@ -95,7 +161,7 @@ uint8_t Reveal_File(const char* const path) {
 	return (0);
 }
 
-uint8_t Reveal_Directory(const char* const path) {
+uint8_t Reveal_Directory(String path) {
 	DIR * const directory = opendir(path);
 	if (!directory) {
 		return (Throw_Error(
@@ -113,7 +179,7 @@ uint8_t Reveal_Directory(const char* const path) {
 	return (0);
 }
 
-uint8_t Reveal(const char* const path) {
+uint8_t Reveal(String path) {
 	struct stat metadata;
 	if (
 		OPTIONS & is_following_symlinks_bit__ ? stat(path, &metadata) :
@@ -125,6 +191,12 @@ uint8_t Reveal(const char* const path) {
 		));
 	}
 	switch (OPTIONS & ~non_data_type_bits__) {
+		Parse_Case__(Data_Type__Type, Reveal_Type(&metadata));
+		Parse_Case__(Data_Type__Size, Reveal_Size(&metadata));
+		Parse_Case__(Data_Type__Permissions, Reveal_Permissions(&metadata));
+		Parse_Case__(
+			Data_Type__Octal_Permissions, Reveal_Octal_Permissions(&metadata)
+		);
 	default:
 		switch (metadata.st_mode & S_IFMT) {
 			Parse_Return_Case__(S_IFREG, Reveal_File(path));
