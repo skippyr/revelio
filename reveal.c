@@ -252,7 +252,7 @@ uint8_t Reveal_File(String path) {
 }
 
 uint8_t Reveal_Directory(String path) {
-	DIR * const directory = opendir(path);
+	DIR* const directory = opendir(path);
 	if (!directory) {
 		return (Throw_Error(
 			"can not open directory \"", path, "\".", "Ensure that you have "
