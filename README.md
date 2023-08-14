@@ -10,17 +10,17 @@ Here are some usage preview that you can check out:
 - Revealing a directory: in the preview below, `reveal` was used to reveal the
                          contents of a directory.
 
-![](assets/preview-0.png)
+![](assets/preview-0.webp)
 
 - Revealing a file: in the preview below, `reveal` was used to reveal the
                     contents of a file.
 
-![](assets/preview-1.png)
+![](assets/preview-1.webp)
 
 - Revealing file properties: in the preview below, `reveal` was used to reveal
                              the size, permissions and user of a file.
 
-![](assets/preview-2.png)
+![](assets/preview-2.webp)
 
 ## Installation
 ### Dependencies
