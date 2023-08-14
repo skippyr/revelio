@@ -1,4 +1,6 @@
 #include <dirent.h>
+#include <grp.h>
+#include <pwd.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -185,6 +187,28 @@ void Reveal_Octal_Permissions(Metadata metadata)
                                          S_IXOTH));
 }
 
+uint8_t Reveal_User(Metadata metadata, String path)
+{
+    const struct passwd* const user = getpwuid(metadata->st_uid);
+    if (!user) {
+        return (Throw_Error("can not discover user that owns \"", path, "\".",
+                            "Ensure that the entry is not broken."));
+    }
+    puts(user->pw_name);
+    return (0);
+}
+
+uint8_t Reveal_Group(Metadata metadata, String path)
+{
+    const struct group* const group = getgrgid(metadata->st_gid);
+    if (!group) {
+        return (Throw_Error("can not discover group that owns \"", path, "\".",
+                            "Ensure that the entry is not broken."));
+    }
+    puts(group->gr_name);
+    return (0);
+}
+
 uint8_t Reveal_File(String path)
 {
     FILE* const file = fopen(path, "r");
@@ -232,6 +256,10 @@ uint8_t Reveal(String path)
         Parse_Case__(Data_Type__Permissions, Reveal_Permissions(&metadata));
         Parse_Case__(Data_Type__Octal_Permissions,
                      Reveal_Octal_Permissions(&metadata));
+        Parse_Return_Case__(Data_Type__User, Reveal_User(&metadata, path));
+        Parse_Case__(Data_Type__User_Uid, Print_Unsigned(metadata.st_uid));
+        Parse_Return_Case__(Data_Type__Group, Reveal_Group(&metadata, path));
+        Parse_Case__(Data_Type__Group_Gid, Print_Unsigned(metadata.st_gid));
     default:
         switch (metadata.st_mode & S_IFMT) {
             Parse_Return_Case__(S_IFREG, Reveal_File(path));
