@@ -52,8 +52,17 @@
 #define had_error_bit__ (1 << 7)
 #define non_data_type_bits__ (is_expecting_path_bit__ |                        \
                               is_following_symlinks_bit__ | had_error_bit__)
+#define gigabyte_in_bytes__ 1e9
+#define megabyte_in_bytes__ 1e6
+#define kilobyte_in_bytes__ 1e3
 #define is_last_argument__ (argument_index == total_of_arguments - 1)
 #define Parse_Null_String__(text) (text ? text : "")
+#define Parse_Size_Multiplier__(multiplier, multiplier_character)              \
+    size = metadata->st_size / (multiplier);                                   \
+    if ((int)size) {                                                           \
+        printf("%.1f%cB\n", size, multiplier_character);                       \
+        return;                                                                \
+    }
 #define Parse_Case__(value, action)                                            \
     case value:                                                                \
         action;                                                                \
@@ -108,6 +117,11 @@ typedef const struct stat* const Metadata;
 
 uint8_t OPTIONS = is_following_symlinks_bit__;
 
+void Print_Unsigned(unsigned value)
+{
+    printf("%u\n", value);
+}
+
 uint8_t Throw_Error(String description_split_0, String description_split_1,
                     String description_split_2, String fix_suggestion)
 {
@@ -132,6 +146,15 @@ void Reveal_Type(Metadata metadata)
     default:
         puts("unknown");
     }
+}
+
+void Reveal_Size(Metadata metadata)
+{
+    float size;
+    Parse_Size_Multiplier__(gigabyte_in_bytes__, 'G');
+    Parse_Size_Multiplier__(megabyte_in_bytes__, 'M');
+    Parse_Size_Multiplier__(kilobyte_in_bytes__, 'k');
+    printf("%ldB\n", metadata->st_size);
 }
 
 uint8_t Reveal_File(String path)
@@ -176,6 +199,8 @@ uint8_t Reveal(String path)
     }
     switch (OPTIONS & ~non_data_type_bits__) {
         Parse_Case__(Data_Type__Type, Reveal_Type(&metadata));
+        Parse_Case__(Data_Type__Size, Reveal_Size(&metadata));
+        Parse_Case__(Data_Type__Byte_Size, printf("%ld\n", metadata.st_size));
     default:
         switch (metadata.st_mode & S_IFMT) {
             Parse_Return_Case__(S_IFREG, Reveal_File(path));
