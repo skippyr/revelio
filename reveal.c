@@ -108,8 +108,7 @@
     continue;                                                                  \
 )
 
-typedef enum
-{
+typedef enum {
     Data_Type__Contents,
     Data_Type__Type,
     Data_Type__Size,
@@ -127,14 +126,12 @@ typedef const struct stat* const Metadata;
 
 uint8_t OPTIONS = is_following_symlinks_bit__;
 
-void Print_Unsigned(unsigned value)
-{
+void Print_Unsigned(unsigned value) {
     printf("%u\n", value);
 }
 
 uint8_t Throw_Error(String description_split_0, String description_split_1,
-                    String description_split_2, String fix_suggestion)
-{
+                    String description_split_2, String fix_suggestion) {
     fprintf(stderr, "%s: %s%s%s\n%s%s", program_name__,
             Parse_Null_String__(description_split_0),
             Parse_Null_String__(description_split_1),
@@ -143,8 +140,7 @@ uint8_t Throw_Error(String description_split_0, String description_split_1,
     return (1);
 }
 
-void Reveal_Type(Metadata metadata)
-{
+void Reveal_Type(Metadata metadata) {
     switch (metadata->st_mode & S_IFMT) {
         Parse_Puts_Case__(S_IFREG, "regular");
         Parse_Puts_Case__(S_IFDIR, "directory");
@@ -158,8 +154,7 @@ void Reveal_Type(Metadata metadata)
     }
 }
 
-void Reveal_Size(Metadata metadata)
-{
+void Reveal_Size(Metadata metadata) {
     float size;
     Parse_Size_Multiplier__(gigabyte_in_bytes__, 'G');
     Parse_Size_Multiplier__(megabyte_in_bytes__, 'M');
@@ -167,8 +162,7 @@ void Reveal_Size(Metadata metadata)
     printf("%ldB\n", metadata->st_size);
 }
 
-void Reveal_Permissions(Metadata metadata)
-{
+void Reveal_Permissions(Metadata metadata) {
     Parse_Permission_Bit__(S_IRUSR, read_permission_character__);
     Parse_Permission_Bit__(S_IWUSR, write_permission_character__);
     Parse_Permission_Bit__(S_IXUSR, execute_permission_character__);
@@ -181,15 +175,13 @@ void Reveal_Permissions(Metadata metadata)
     putchar('\n');
 }
 
-void Reveal_Octal_Permissions(Metadata metadata)
-{
+void Reveal_Octal_Permissions(Metadata metadata) {
     printf("0%o\n", metadata->st_mode & (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP |
                                          S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH |
                                          S_IXOTH));
 }
 
-uint8_t Reveal_User(Metadata metadata, String path)
-{
+uint8_t Reveal_User(Metadata metadata, String path) {
     const struct passwd* const user = getpwuid(metadata->st_uid);
     if (!user) {
         return (Throw_Error("can not discover user that owns \"", path, "\".",
@@ -199,8 +191,7 @@ uint8_t Reveal_User(Metadata metadata, String path)
     return (0);
 }
 
-uint8_t Reveal_Group(Metadata metadata, String path)
-{
+uint8_t Reveal_Group(Metadata metadata, String path) {
     const struct group* const group = getgrgid(metadata->st_gid);
     if (!group) {
         return (Throw_Error("can not discover group that owns \"", path, "\".",
@@ -210,8 +201,7 @@ uint8_t Reveal_Group(Metadata metadata, String path)
     return (0);
 }
 
-uint8_t Reveal_Modified_Date(Metadata metadata)
-{
+uint8_t Reveal_Modified_Date(Metadata metadata) {
     char modified_date[29];
     if (!strftime(modified_date, sizeof(modified_date), "%a %b %d %T %Z %Y",
                   localtime(&metadata->st_mtime))) {
@@ -222,8 +212,7 @@ uint8_t Reveal_Modified_Date(Metadata metadata)
     return (0);
 }
 
-uint8_t Reveal_File(String path)
-{
+uint8_t Reveal_File(String path) {
     FILE* const file = fopen(path, "r");
     if (!file) {
         return (Throw_Error("can not open file \"", path, "\".", "Ensure that "
@@ -237,8 +226,7 @@ uint8_t Reveal_File(String path)
     return (0);
 }
 
-uint8_t Reveal_Directory(String path)
-{
+uint8_t Reveal_Directory(String path) {
     DIR* const directory = opendir(path);
     if (!directory) {
         return (Throw_Error("can not open directory \"", path, "\".", "Ensure "
@@ -254,8 +242,7 @@ uint8_t Reveal_Directory(String path)
     return (0);
 }
 
-uint8_t Reveal(String path)
-{
+uint8_t Reveal(String path) {
     struct stat metadata;
     if (OPTIONS & is_following_symlinks_bit__ ? stat(path, &metadata) :
                                                 lstat(path, &metadata)) {
@@ -293,8 +280,7 @@ uint8_t Reveal(String path)
     return (0);
 }
 
-int main(const int total_of_arguments, const char** arguments)
-{
+int main(const int total_of_arguments, const char** arguments) {
     if (total_of_arguments == 1) {
         return (Reveal("."));
     }
