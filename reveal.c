@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <time.h>
 
 #define program_name__ "reveal"
 #define program_version__ "v9.0.5"
@@ -209,6 +210,18 @@ uint8_t Reveal_Group(Metadata metadata, String path)
     return (0);
 }
 
+uint8_t Reveal_Modified_Date(Metadata metadata)
+{
+    char modified_date[29];
+    if (!strftime(modified_date, sizeof(modified_date), "%a %b %d %T %Z %Y",
+                  localtime(&metadata->st_mtime))) {
+        return (Throw_Error("overflowed buffer intended to store modified "
+                            "date.", NULL, NULL, NULL));
+    }
+    puts(modified_date);
+    return (0);
+}
+
 uint8_t Reveal_File(String path)
 {
     FILE* const file = fopen(path, "r");
@@ -260,6 +273,8 @@ uint8_t Reveal(String path)
         Parse_Case__(Data_Type__User_Uid, Print_Unsigned(metadata.st_uid));
         Parse_Return_Case__(Data_Type__Group, Reveal_Group(&metadata, path));
         Parse_Case__(Data_Type__Group_Gid, Print_Unsigned(metadata.st_gid));
+        Parse_Return_Case__(Data_Type__Modified_Date,
+                            Reveal_Modified_Date(&metadata));
     default:
         switch (metadata.st_mode & S_IFMT) {
             Parse_Return_Case__(S_IFREG, Reveal_File(path));
