@@ -22,9 +22,9 @@
     "    --contents (default)    print its contents.\n"                        \
     "    --type                  print its type: regular, directory, symlink, "\
     "socket,\n                            fifo, character, block or unknown.\n"\
-    "    --size                  print its size using a convenient unit: "     \
-    "gigabyte (GB),\n                            megabyte (MB), kilobyte (kB) "\
-    "or byte (B).\n"                                                           \
+    "    --size                  print its size using a convenient unit:\n    "\
+    "                        gigabyte (GB), megabyte (MB), kilobyte (kB) or\n "\
+    "                           byte (B).\n"                                   \
     "    --byte-size             print its size in bytes.\n"                   \
     "    --permissions           print its read (r), write (w) and execute (x)"\
     "\n                            permissions for user, group and others.\n"  \
@@ -37,7 +37,7 @@
     "modified.\n\n"                                                            \
     "If none is used, the one marked as default will be considered.\n\n"       \
     "Each one of them expects at least one path following it. If none is "     \
-    "given, it will\nconsider the last valid one given or, else, the current " \
+    "given, it\nwill consider the last valid one given or, else, the current " \
     "directory.\n\n"                                                           \
     "SYMLINK FLAGS\n"                                                          \
     "These options change how the symlinks following them are handled, "       \
