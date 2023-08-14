@@ -119,6 +119,21 @@ uint8_t Throw_Error(String description_split_0, String description_split_1,
     return (1);
 }
 
+void Reveal_Type(Metadata metadata)
+{
+    switch (metadata->st_mode & S_IFMT) {
+        Parse_Puts_Case__(S_IFREG, "regular");
+        Parse_Puts_Case__(S_IFDIR, "directory");
+        Parse_Puts_Case__(S_IFLNK, "symlink");
+        Parse_Puts_Case__(S_IFSOCK, "socket");
+        Parse_Puts_Case__(S_IFIFO, "fifo");
+        Parse_Puts_Case__(S_IFCHR, "character");
+        Parse_Puts_Case__(S_IFBLK, "block");
+    default:
+        puts("unknown");
+    }
+}
+
 uint8_t Reveal_File(String path)
 {
     FILE* const file = fopen(path, "r");
@@ -160,14 +175,17 @@ uint8_t Reveal(String path)
                             "Ensure that you did not misspelled it."));
     }
     switch (OPTIONS & ~non_data_type_bits__) {
+        Parse_Case__(Data_Type__Type, Reveal_Type(&metadata));
     default:
         switch (metadata.st_mode & S_IFMT) {
             Parse_Return_Case__(S_IFREG, Reveal_File(path));
             Parse_Return_Case__(S_IFDIR, Reveal_Directory(path));
             Parse_Return_Case__(S_IFLNK,
-                Throw_Error("can not reveal the contents of symlink \"", path,
-                            "\".", "Did you mean to use the "
-                            "\"--follow-symlinks\" option before it?"));
+                                Throw_Error("can not reveal the contents of "
+                                            "symlink \"", path, "\".", "Did "
+                                            "you mean to use the "
+                                            "\"--follow-symlinks\" option "
+                                            "before it?"));
         default:
             return (Throw_Error("can not reveal the contents of \"", path,
                                 "\" due to its unreadable nature.", NULL));
