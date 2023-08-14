@@ -55,6 +55,10 @@
 #define gigabyte_in_bytes__ 1e9
 #define megabyte_in_bytes__ 1e6
 #define kilobyte_in_bytes__ 1e3
+#define read_permission_character__ 'r'
+#define write_permission_character__ 'w'
+#define execute_permission_character__ 'x'
+#define lack_permission_character__ '-'
 #define is_last_argument__ (argument_index == total_of_arguments - 1)
 #define Parse_Null_String__(text) (text ? text : "")
 #define Parse_Size_Multiplier__(multiplier, multiplier_character)              \
@@ -63,6 +67,9 @@
         printf("%.1f%cB\n", size, multiplier_character);                       \
         return;                                                                \
     }
+#define Parse_Permission_Bit__(permission_bit, permission_bit_character)       \
+    putchar(metadata->st_mode & permission_bit ? permission_bit_character :    \
+                                                 lack_permission_character__);
 #define Parse_Case__(value, action)                                            \
     case value:                                                                \
         action;                                                                \
@@ -157,6 +164,27 @@ void Reveal_Size(Metadata metadata)
     printf("%ldB\n", metadata->st_size);
 }
 
+void Reveal_Permissions(Metadata metadata)
+{
+    Parse_Permission_Bit__(S_IRUSR, read_permission_character__);
+    Parse_Permission_Bit__(S_IWUSR, write_permission_character__);
+    Parse_Permission_Bit__(S_IXUSR, execute_permission_character__);
+    Parse_Permission_Bit__(S_IRGRP, read_permission_character__);
+    Parse_Permission_Bit__(S_IWGRP, write_permission_character__);
+    Parse_Permission_Bit__(S_IXGRP, execute_permission_character__);
+    Parse_Permission_Bit__(S_IROTH, read_permission_character__);
+    Parse_Permission_Bit__(S_IWOTH, write_permission_character__);
+    Parse_Permission_Bit__(S_IXOTH, execute_permission_character__);
+    putchar('\n');
+}
+
+void Reveal_Octal_Permissions(Metadata metadata)
+{
+    printf("0%o\n", metadata->st_mode & (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP |
+                                         S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH |
+                                         S_IXOTH));
+}
+
 uint8_t Reveal_File(String path)
 {
     FILE* const file = fopen(path, "r");
@@ -201,6 +229,9 @@ uint8_t Reveal(String path)
         Parse_Case__(Data_Type__Type, Reveal_Type(&metadata));
         Parse_Case__(Data_Type__Size, Reveal_Size(&metadata));
         Parse_Case__(Data_Type__Byte_Size, printf("%ld\n", metadata.st_size));
+        Parse_Case__(Data_Type__Permissions, Reveal_Permissions(&metadata));
+        Parse_Case__(Data_Type__Octal_Permissions,
+                     Reveal_Octal_Permissions(&metadata));
     default:
         switch (metadata.st_mode & S_IFMT) {
             Parse_Return_Case__(S_IFREG, Reveal_File(path));
