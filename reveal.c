@@ -7,8 +7,8 @@
 #include <sys/stat.h>
 #include <time.h>
 
-#define program_name__ "reveal"
-#define program_version__ "v9.0.6"
+#define program_name__    "reveal"
+#define program_version__ "v9.0.7"
 #define program_help__                                                         \
     "Usage: " program_name__ " [OPTION]... [PATH]...\n"                        \
     "Reveals information about entries in the file system.\n\n"                \
@@ -46,33 +46,16 @@
     "    --unfollow-symlinks            symlinks will not be followed.\n\n"    \
     "If none is used, the one marked as default will be considered.\n\n"       \
     "EXIT CODES\n"                                                             \
-    "It will throw code 1 if an error happens and 0 otherwise.\n\n"            \
+    "It will throw exit code 1 if an error happens and 0 otherwise.\n\n"       \
     "SUPPORT\n"                                                                \
     "Report issues, questions and suggestions through its issues page:\n"      \
     "<https://github.com/skippyr/reveal/issues>."
-#define is_expecting_path_bit__ (1 << 5)
-#define is_following_symlinks_bit__ (1 << 6)
-#define had_error_bit__ (1 << 7)
-#define non_data_type_bits__ (is_expecting_path_bit__ |                        \
-                              is_following_symlinks_bit__ | had_error_bit__)
-#define gigabyte_in_bytes__ 1e9
-#define megabyte_in_bytes__ 1e6
-#define kilobyte_in_bytes__ 1e3
-#define read_permission_character__ 'r'
-#define write_permission_character__ 'w'
-#define execute_permission_character__ 'x'
-#define lack_permission_character__ '-'
-#define is_last_argument__ (argument_index == total_of_arguments - 1)
-#define Parse_Null_String__(text) (text ? text : "")
-#define Parse_Size_Multiplier__(multiplier, multiplier_character)              \
-    size = metadata->st_size / (multiplier);                                   \
-    if ((int)size) {                                                           \
-        printf("%.1f%cB\n", size, multiplier_character);                       \
-        return;                                                                \
-    }
-#define Parse_Permission_Bit__(permission_bit, permission_bit_character)       \
-    putchar(metadata->st_mode & permission_bit ? permission_bit_character :    \
-                                                 lack_permission_character__);
+#define is_expecting_entry_path_bit__ (1 << 5)
+#define is_following_symlinks_bit__   (1 << 6)
+#define had_error_bit__               (1 << 7)
+#define non_data_type_bits__          (is_expecting_entry_path_bit__ |         \
+                                       is_following_symlinks_bit__   |         \
+                                       had_error_bit__)
 #define Parse_Case__(value, action)                                            \
     case value:                                                                \
         action;                                                                \
@@ -80,35 +63,59 @@
 #define Parse_Return_Case__(value, action)                                     \
     case value:                                                                \
         return (action);
-#define Parse_Puts_Case__(value, text) Parse_Case__(value, puts(text);)
+#define Parse_Puts_Case__(value, text) Parse_Case__(value, puts(text))
+#define Parse_Null_String__(text) (text ? text : "")
+#define Parse_Size_Multiplier__(multiplier, multiplier_character)              \
+    size = metadata->st_size / (multiplier);                                   \
+    if ((int)size)                                                             \
+    {                                                                          \
+        printf("%.1f%cB\n", size, multiplier_character);                       \
+        return;                                                                \
+    }
 #define Parse_Option__(option, action)                                         \
-    if (!strcmp("--" option, arguments[argument_index])) {                     \
+    if (!strcmp("--" option, arguments[argument_index]))                       \
+    {                                                                          \
         action;                                                                \
     }
 #define Parse_Metadata_Option__(option, text)                                  \
-    Parse_Option__(option, puts(text); return(0));
-#define Parse_Data_Type_Option__(option, data_type) Parse_Option__(            \
-    option,                                                                    \
-    if (OPTIONS & is_expecting_path_bit__) {                                   \
-        Reveal(last_path);                                                     \
-    }                                                                          \
-    OPTIONS = data_type | is_expecting_path_bit__ |                            \
-              (OPTIONS & non_data_type_bits__);                                \
-    if (is_last_argument__) {                                                  \
-        Reveal(last_path);                                                     \
-    }                                                                          \
-    continue;                                                                  \
-)
-#define Parse_Non_Data_Type_Option__(option, action) Parse_Option__(           \
-    option,                                                                    \
-    if (is_last_argument__) {                                                  \
-        Reveal(last_path);                                                     \
-    }                                                                          \
-    action;                                                                    \
-    continue;                                                                  \
-)
+    Parse_Option__(                                                            \
+        option,                                                                \
+        puts(text);                                                            \
+        return (0);                                                            \
+    )
+#define Parse_Data_Type_Option__(option, data_type)                            \
+    Parse_Option__(                                                            \
+        option,                                                                \
+        if (OPTIONS & is_expecting_entry_path_bit__)                           \
+        {                                                                      \
+            Reveal_Entry(last_entry_path);                                     \
+        }                                                                      \
+        OPTIONS = data_type | is_expecting_entry_path_bit__ |                  \
+                  (OPTIONS & non_data_type_bits__);                            \
+        if (is_last_argument)                                                  \
+        {                                                                      \
+            Reveal_Entry(last_entry_path);                                     \
+        }                                                                      \
+        continue;                                                              \
+    )
+#define Parse_Non_Data_Type_Option__(option, action)                           \
+    Parse_Option__(                                                            \
+        option,                                                                \
+        if (is_last_argument)                                                  \
+        {                                                                      \
+            Reveal_Entry(last_entry_path);                                     \
+        }                                                                      \
+        action;                                                                \
+        continue;                                                              \
+    )
 
-typedef enum {
+typedef enum
+{
+    Return_Status__Success,
+    Return_Status__Error
+} Return_Status;
+typedef enum
+{
     Data_Type__Contents,
     Data_Type__Type,
     Data_Type__Size,
@@ -122,176 +129,248 @@ typedef enum {
     Data_Type__Modified_Date
 } Data_Type;
 typedef const char* const String;
+typedef const char* const* const Array_Of_String;
 typedef const struct stat* const Metadata;
 
-uint8_t OPTIONS = is_following_symlinks_bit__;
+static uint8_t Throw_Error(String description_split_0,
+                           String description_split_1,
+                           String description_split_2, String fix_suggestion);
+static void Reveal_Type(Metadata metadata);
+static void Reveal_Size(Metadata metadata);
+static void Parse_Permission_Bit(Metadata metadata, uint16_t permission_bit,
+                                 const char permission_bit_character);
+static void Reveal_Permissions(Metadata metadata);
+static void Reveal_Octal_Permissions(Metadata metadata);
+static uint8_t Reveal_User(Metadata metadata, String entry_path);
+static uint8_t Reveal_Group(Metadata metadata, String entry_path);
+static uint8_t Reveal_Modified_Date(Metadata metadata);
+static uint8_t Reveal_File(String file_path);
+static uint8_t Reveal_Directory(String directory_path);
+static void Print_Unsigned(unsigned value);
+static uint8_t Reveal_Entry(String entry_path);
 
-void Print_Unsigned(unsigned value) {
-    printf("%u\n", value);
-}
+static uint8_t OPTIONS = is_following_symlinks_bit__;
 
-uint8_t Throw_Error(String description_split_0, String description_split_1,
-                    String description_split_2, String fix_suggestion) {
+static uint8_t Throw_Error(String description_split_0,
+                           String description_split_1,
+                           String description_split_2, String fix_suggestion)
+{
     fprintf(stderr, "%s: %s%s%s\n%s%s", program_name__,
             Parse_Null_String__(description_split_0),
             Parse_Null_String__(description_split_1),
             Parse_Null_String__(description_split_2),
             Parse_Null_String__(fix_suggestion), fix_suggestion ? "\n" : "");
-    return (1);
+    OPTIONS |= had_error_bit__;
+    return (Return_Status__Error);
 }
 
-void Reveal_Type(Metadata metadata) {
-    switch (metadata->st_mode & S_IFMT) {
+static void Reveal_Type(Metadata metadata)
+{
+    switch (metadata->st_mode & S_IFMT)
+    {
         Parse_Puts_Case__(S_IFREG, "regular");
         Parse_Puts_Case__(S_IFDIR, "directory");
         Parse_Puts_Case__(S_IFLNK, "symlink");
         Parse_Puts_Case__(S_IFSOCK, "socket");
-        Parse_Puts_Case__(S_IFIFO, "fifo");
-        Parse_Puts_Case__(S_IFCHR, "character");
         Parse_Puts_Case__(S_IFBLK, "block");
+        Parse_Puts_Case__(S_IFCHR, "character");
     default:
         puts("unknown");
     }
 }
 
-void Reveal_Size(Metadata metadata) {
+static void Reveal_Size(Metadata metadata)
+{
     float size;
-    Parse_Size_Multiplier__(gigabyte_in_bytes__, 'G');
-    Parse_Size_Multiplier__(megabyte_in_bytes__, 'M');
-    Parse_Size_Multiplier__(kilobyte_in_bytes__, 'k');
+    const float one_gigabyte_in_bytes = 1e9,
+                one_megabyte_in_bytes = 1e6,
+                one_kilobyte_in_bytes = 1e3;
+    Parse_Size_Multiplier__(one_gigabyte_in_bytes, 'G');
+    Parse_Size_Multiplier__(one_megabyte_in_bytes, 'M');
+    Parse_Size_Multiplier__(one_kilobyte_in_bytes, 'k');
     printf("%ldB\n", metadata->st_size);
 }
 
-void Reveal_Permissions(Metadata metadata) {
-    Parse_Permission_Bit__(S_IRUSR, read_permission_character__);
-    Parse_Permission_Bit__(S_IWUSR, write_permission_character__);
-    Parse_Permission_Bit__(S_IXUSR, execute_permission_character__);
-    Parse_Permission_Bit__(S_IRGRP, read_permission_character__);
-    Parse_Permission_Bit__(S_IWGRP, write_permission_character__);
-    Parse_Permission_Bit__(S_IXGRP, execute_permission_character__);
-    Parse_Permission_Bit__(S_IROTH, read_permission_character__);
-    Parse_Permission_Bit__(S_IWOTH, write_permission_character__);
-    Parse_Permission_Bit__(S_IXOTH, execute_permission_character__);
+static void Parse_Permission_Bit(Metadata metadata, uint16_t permission_bit,
+                                 const char permission_bit_character)
+{
+    const char lack_permission_character = '-';
+    putchar(metadata->st_mode & permission_bit ? permission_bit_character :
+                                                 lack_permission_character);
+}
+
+static void Reveal_Permissions(Metadata metadata)
+{
+    const char read_permission_character    = 'r',
+               write_permission_character   = 'w',
+               execute_permission_character = 'x';
+    Parse_Permission_Bit(metadata, S_IRUSR, read_permission_character);
+    Parse_Permission_Bit(metadata, S_IWUSR, write_permission_character);
+    Parse_Permission_Bit(metadata, S_IXUSR, execute_permission_character);
+    Parse_Permission_Bit(metadata, S_IRGRP, read_permission_character);
+    Parse_Permission_Bit(metadata, S_IWGRP, write_permission_character);
+    Parse_Permission_Bit(metadata, S_IXGRP, execute_permission_character);
+    Parse_Permission_Bit(metadata, S_IROTH, read_permission_character);
+    Parse_Permission_Bit(metadata, S_IWOTH, write_permission_character);
+    Parse_Permission_Bit(metadata, S_IXOTH, execute_permission_character);
     putchar('\n');
 }
 
-void Reveal_Octal_Permissions(Metadata metadata) {
+static void Reveal_Octal_Permissions(Metadata metadata)
+{
     printf("0%o\n", metadata->st_mode & (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP |
                                          S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH |
                                          S_IXOTH));
 }
 
-uint8_t Reveal_User(Metadata metadata, String path) {
+static uint8_t Reveal_User(Metadata metadata, String entry_path)
+{
     const struct passwd* const user = getpwuid(metadata->st_uid);
-    if (!user) {
-        return (Throw_Error("can not discover user that owns \"", path, "\".",
-                            "Ensure that the entry is not broken."));
+    if (!user)
+    {
+        return (Throw_Error("can not discover user that owns the entry \"",
+                            entry_path, "\".", "Ensure that the entry is not "
+                            "dangling."));
     }
     puts(user->pw_name);
-    return (0);
+    return (Return_Status__Success);
 }
 
-uint8_t Reveal_Group(Metadata metadata, String path) {
+static uint8_t Reveal_Group(Metadata metadata, String entry_path)
+{
     const struct group* const group = getgrgid(metadata->st_gid);
-    if (!group) {
-        return (Throw_Error("can not discover group that owns \"", path, "\".",
-                            "Ensure that the entry is not broken."));
+    if (!group)
+    {
+        return (Throw_Error("can not discover group that owns the entry \"",
+                            entry_path, "\".", "Ensure that the entry is not "
+                            "dangling."));
     }
     puts(group->gr_name);
-    return (0);
+    return (Return_Status__Success);
 }
 
-uint8_t Reveal_Modified_Date(Metadata metadata) {
+static uint8_t Reveal_Modified_Date(Metadata metadata)
+{
     char modified_date[29];
     if (!strftime(modified_date, sizeof(modified_date), "%a %b %d %T %Z %Y",
-                  localtime(&metadata->st_mtime))) {
+                  localtime(&metadata->st_mtime)))
+    {
         return (Throw_Error("overflowed buffer intended to store modified "
                             "date.", NULL, NULL, NULL));
     }
     puts(modified_date);
-    return (0);
+    return (Return_Status__Success);
 }
 
-uint8_t Reveal_File(String path) {
-    FILE* const file = fopen(path, "r");
-    if (!file) {
-        return (Throw_Error("can not open file \"", path, "\".", "Ensure that "
-                            "you have permissions to read it."));
+static uint8_t Reveal_File(String file_path)
+{
+    String read_mode = "r";
+    FILE* const file_stream = fopen(file_path, read_mode);
+    if (!file_stream)
+    {
+        return (Throw_Error("can not open the file \"", file_path, "\".",
+                            "Ensure that you have permissions to read."));
     }
     char character;
-    while ((character = fgetc(file)) != EOF) {
+    while ((character = fgetc(file_stream)) != EOF)
+    {
         putchar(character);
     }
-    fclose(file);
-    return (0);
+    fclose(file_stream);
+    return (Return_Status__Success);
 }
 
-uint8_t Reveal_Directory(String path) {
-    DIR* const directory = opendir(path);
-    if (!directory) {
-        return (Throw_Error("can not open directory \"", path, "\".", "Ensure "
-                            "that you have permissions to read it."));
+static uint8_t Reveal_Directory(String directory_path)
+{
+    DIR* const directory_stream = opendir(directory_path);
+    if (!directory_stream)
+    {
+        return (Throw_Error("can not open the directory \"", directory_path,
+                            "\".", "Ensure that you have permissions to read "
+                            "it."));
     }
-    const struct dirent* entry;
-    while ((entry = readdir(directory))) {
-        if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")) {
-            puts(entry->d_name);
+    const struct dirent* directory_entry;
+    while ((directory_entry = readdir(directory_stream)))
+    {
+        if (strcmp(directory_entry->d_name, ".") &&
+            strcmp(directory_entry->d_name, ".."))
+        {
+            puts(directory_entry->d_name);
         }
     }
-    closedir(directory);
-    return (0);
+    closedir(directory_stream);
+    return (Return_Status__Success);
 }
 
-uint8_t Reveal(String path) {
+static void Print_Unsigned(unsigned value)
+{
+    printf("%u\n", value);
+}
+
+static uint8_t Reveal_Entry(String entry_path)
+{
     struct stat metadata;
-    if (OPTIONS & is_following_symlinks_bit__ ? stat(path, &metadata) :
-                                                lstat(path, &metadata)) {
-        return (Throw_Error("the entry \"", path, "\" does not exists.",
-                            "Ensure that you did not misspelled it."));
+    if (OPTIONS & is_following_symlinks_bit__ ? stat(entry_path, &metadata) :
+                                                lstat(entry_path, &metadata))
+    {
+        return (Throw_Error("can not find the entry \"", entry_path, "\".",
+                            "Ensure that you did not misspelled its path."));
     }
-    switch (OPTIONS & ~non_data_type_bits__) {
+    switch (OPTIONS & ~non_data_type_bits__)
+    {
         Parse_Case__(Data_Type__Type, Reveal_Type(&metadata));
         Parse_Case__(Data_Type__Size, Reveal_Size(&metadata));
         Parse_Case__(Data_Type__Byte_Size, printf("%ld\n", metadata.st_size));
         Parse_Case__(Data_Type__Permissions, Reveal_Permissions(&metadata));
         Parse_Case__(Data_Type__Octal_Permissions,
                      Reveal_Octal_Permissions(&metadata));
-        Parse_Return_Case__(Data_Type__User, Reveal_User(&metadata, path));
+        Parse_Return_Case__(Data_Type__User, Reveal_User(&metadata,
+                                                         entry_path));
         Parse_Case__(Data_Type__User_Uid, Print_Unsigned(metadata.st_uid));
-        Parse_Return_Case__(Data_Type__Group, Reveal_Group(&metadata, path));
+        Parse_Return_Case__(Data_Type__Group, Reveal_Group(&metadata,
+                                                           entry_path));
         Parse_Case__(Data_Type__Group_Gid, Print_Unsigned(metadata.st_gid));
         Parse_Return_Case__(Data_Type__Modified_Date,
-                            Reveal_Modified_Date(&metadata));
+                            Reveal_Modified_Date(&metadata))
     default:
-        switch (metadata.st_mode & S_IFMT) {
-            Parse_Return_Case__(S_IFREG, Reveal_File(path));
-            Parse_Return_Case__(S_IFDIR, Reveal_Directory(path));
+        switch (metadata.st_mode & S_IFMT)
+        {
+            Parse_Return_Case__(S_IFREG, Reveal_File(entry_path));
+            Parse_Return_Case__(S_IFDIR, Reveal_Directory(entry_path));
             Parse_Return_Case__(S_IFLNK,
                                 Throw_Error("can not reveal the contents of "
-                                            "symlink \"", path, "\".", "Did "
-                                            "you mean to use the "
+                                            "the symlink \"", entry_path, "\".",
+                                            "Try to use the "
                                             "\"--follow-symlinks\" option "
-                                            "before it?"));
+                                            "before it."));
         default:
-            return (Throw_Error("can not reveal the contents of \"", path,
-                                "\" due to its unreadable nature.", NULL));
+            return (Throw_Error("can not reveal the contents of the entry \"",
+                                entry_path, "\" due to its unreadable nature.",
+                                NULL));
         }
     }
-    return (0);
+    return (Return_Status__Success);
 }
 
-int main(const int total_of_arguments, const char** arguments) {
-    if (total_of_arguments == 1) {
-        return (Reveal("."));
+int main(const int total_of_arguments, Array_Of_String arguments,
+         Array_Of_String __environment_variables)
+{
+    if (total_of_arguments == 1)
+    {
+        return (Reveal_Entry("."));
     }
     for (int argument_index = 1; argument_index < total_of_arguments;
-         argument_index++) {
-        Parse_Metadata_Option__("version", program_version__);
+         argument_index++)
+    {
         Parse_Metadata_Option__("help", program_help__);
+        Parse_Metadata_Option__("version", program_version__);
     }
-    const char* last_path = ".";
+    const char* last_entry_path = ".";
     for (int argument_index = 1; argument_index < total_of_arguments;
-         argument_index++) {
+         argument_index++)
+    {
+        const uint8_t is_last_argument = argument_index == total_of_arguments -
+                                                           1;
         Parse_Data_Type_Option__("contents", Data_Type__Contents);
         Parse_Data_Type_Option__("type", Data_Type__Type);
         Parse_Data_Type_Option__("size", Data_Type__Size);
@@ -308,11 +387,13 @@ int main(const int total_of_arguments, const char** arguments) {
                                      OPTIONS |= is_following_symlinks_bit__);
         Parse_Non_Data_Type_Option__("unfollow-symlinks",
                                      OPTIONS &= ~is_following_symlinks_bit__);
-        if (Reveal(arguments[argument_index])) {
+        String entry_path = arguments[argument_index];
+        if (Reveal_Entry(entry_path))
+        {
             continue;
         }
-        OPTIONS &= ~is_expecting_path_bit__;
-        last_path = arguments[argument_index];
+        OPTIONS &= ~is_expecting_entry_path_bit__;
+        last_entry_path = entry_path;
     }
     return !!(OPTIONS & had_error_bit__);
 }

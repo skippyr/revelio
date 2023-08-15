@@ -1,26 +1,19 @@
 # Reveal
 ## About
-A program that reveals information about entries in the Linux's file system,
-such as their: contents, type, size, permissions, ownership and modified date.
-Its features were implemented in a way to make it a fair good alternative for
-scripting.
+This repository contains the source code of Reveal, a program that reveals
+information about entries in the file system of POSIX-like operating systems,
+such as their: contents, type, permissions, ownership and modified date.
 
-Here are some usage preview that you can check out:
+It was created with the idea to be an alternative for some utilities from
+coreutils: such as `ls`, `cat` and `stat`. By providing much simple and
+scalable interactions, it becomes a perfect tool for scripting languages.
 
-- Revealing a directory: in the preview below, `reveal` was used to reveal the
-                         contents of a directory.
+Here is a preview that you can check out: in this one, `reveal` was used
+to both reveal different types of data from a directory and a file. It also
+shows an example of interaction with other utilities from coreutils: `sort`,
+`fmt` and `echo`.
 
-![](assets/preview-0.webp)
-
-- Revealing a file: in the preview below, `reveal` was used to reveal the
-                    contents of a file.
-
-![](assets/preview-1.webp)
-
-- Revealing file properties: in the preview below, `reveal` was used to reveal
-                             the size, permissions and user of a file.
-
-![](assets/preview-2.webp)
+![](preview.webp)
 
 ## Installation
 ### Dependencies
@@ -28,7 +21,7 @@ In order to install and run this software properly, the following dependencies
 must be installed:
 
 - `git`: required to clone this repository.
-- `clang`, `make` and Linux headers for C: required to compile the source code.
+- `clang`, `make` and POSIX headers for C: required to compile the source code.
 
 ### Procedures
 Using a command-line utility, follow these steps:
@@ -38,6 +31,17 @@ Using a command-line utility, follow these steps:
 ```bash
 git clone --depth 1 https://github.com/skippyr/reveal
 ```
+
+The option `--depth` with value `1` specifies to Git that you only want to
+download the latest commit, instead of the whole commit tree it would do
+by default.
+
+Alternatively, you can download its source code directly from GitHub. Access
+its page there, click on the button labeled `Code` in the top of the page,
+then, on the dropdown menu, click on `Download ZIP`.
+
+This will download a ZIP file containing the repository, you just have to
+extract it somewhere in your machine.
 
 - Access the repository's directory.
 
@@ -51,16 +55,23 @@ cd reveal
 make
 ```
 
-- Add the binary `reveal`, now in your current directory, in a directory that is
-  being tracked in your system's `PATH` environment variable in order to turn it
-  into an available command in your shell sessions.
+- Now, `reveal` should be a binary available in your current directory. Add it
+  to a directory that is being tracked in your system's `PATH` environment
+  variable, in order to make it an available command in all of your shell
+  sessions.
 
-- Open a new shell session to reload the environment variables. The program
+- Open a new shell session to reload your environment variables. The program
   should now be installed and available for you to use.
 
+  As a quick test, you can make it reveal your current directory:
+
+  ```bash
+  reveal
+  ```
+
 ## Usage
-Access its help page by running it using the `--help` options. There you will
-find instructions on how to use it, available options and their descriptions.
+In its help page you will find instructions on how to use it, available options
+and their descriptions. Access it by running it with the `--help` option:
 
 ```bash
 reveal --help
