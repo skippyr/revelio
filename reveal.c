@@ -113,7 +113,8 @@ typedef enum
 {
     Return_Status__Success,
     Return_Status__Error
-} Return_Status;
+}
+Return_Status;
 typedef enum
 {
     Data_Type__Contents,
@@ -127,9 +128,10 @@ typedef enum
     Data_Type__Group,
     Data_Type__Group_Gid,
     Data_Type__Modified_Date
-} Data_Type;
+}
+Data_Type;
 typedef const char* const String;
-typedef const char* const* const Array_Of_String;
+typedef String* const Array_Of_String;
 typedef const struct stat* const Metadata;
 
 static uint8_t Throw_Error(String description_split_0,
