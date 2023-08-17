@@ -9,7 +9,7 @@
 #include <time.h>
 
 #define program_name__    "reveal"
-#define program_version__ "v9.0.7"
+#define program_version__ "v9.1.0"
 #define program_help__                                                         \
     "Usage: " program_name__ " [OPTION]... [PATH]...\n"                        \
     "Reveals information about entries in the file system.\n\n"                \
