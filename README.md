@@ -8,12 +8,23 @@ It was created with the idea to be an alternative for some utilities from
 coreutils: such as `ls`, `cat` and `stat`. By providing much simple and
 scalable interactions, it becomes a perfect tool for scripting languages.
 
-Here is a preview that you can check out: in this one, `reveal` was used
-to both reveal different types of data from a directory and a file. It also
-shows an example of interaction with other utilities from coreutils: `sort`,
-`fmt` and `echo`.
+Here some usage previews that you can check out:
 
-![](preview.webp)
+- Revealing a directory: in this preview, `reveal` was used to reveal the
+                         contents of a directory, its entries.
+
+![](assets/preview-directory.webp)
+
+- Revealing a file: in this preview, `reveal` was used to reveal the contents
+                    of a file, the text inside of it.
+
+![](assets/preview-file.webp)
+
+- Revealing file properties: in this preview, `reveal` was used to reveal
+                             some properties of a file: its size, permissions
+                             and the user and group that owns it.
+
+![](assets/preview-file-properties.webp)
 
 ## Installation
 ### Dependencies
