@@ -9,7 +9,7 @@
 #include <time.h>
 
 #define program_name__    "reveal"
-#define program_version__ "v9.1.0"
+#define program_version__ "v9.1.1"
 #define program_help__                                                         \
     "Usage: " program_name__ " [OPTION]... [PATH]...\n"                        \
     "Reveals information about entries in the file system.\n\n"                \
@@ -328,15 +328,15 @@ static Return_Status Reveal_Directory(String directory_path)
     while ((directory_entry = readdir(directory_stream)))
     {
         Skip_Dot_Directory_Entries__;
-        void* directory_entry_allocation =
-            malloc(sizeof(directory_entry->d_name));
+        const size_t directory_entry_size = strlen(directory_entry->d_name) + 1;
+        void* directory_entry_allocation = malloc(directory_entry_size);
         if (!directory_entry_allocation)
         {
             Throw_Error("can not allocate memory to reveal the contents of the "
                         "directory", directory_path, ".");
         }
         memcpy(directory_entry_allocation, directory_entry->d_name,
-               sizeof(directory_entry->d_name));
+               directory_entry_size);
         directory_entries[directory_entry_index] = directory_entry_allocation;
         directory_entry_index++;
     }
