@@ -3,6 +3,7 @@
 #include <pwd.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
@@ -134,10 +135,11 @@ typedef enum
 }
 Data_Type;
 
-static Return_Status Throw_Error(String description_split_0,
+static Return_Status Write_Error(String description_split_0,
                                  String description_split_1,
                                  String description_split_2,
                                  String fix_suggestion);
+static void Throw_Error(String description);
 static void Reveal_Type(Metadata metadata);
 static void Reveal_Size(Metadata metadata);
 static void Parse_Permission_Bit(Metadata metadata, uint16_t permission_bit,
@@ -154,7 +156,7 @@ static Return_Status Reveal_Entry(String entry_path);
 
 static uint8_t OPTIONS = is_following_symlinks_bit__;
 
-static Return_Status Throw_Error(String description_split_0,
+static Return_Status Write_Error(String description_split_0,
                                  String description_split_1,
                                  String description_split_2,
                                  String fix_suggestion)
@@ -166,6 +168,12 @@ static Return_Status Throw_Error(String description_split_0,
             Parse_Null_String__(fix_suggestion), fix_suggestion ? "\n" : "");
     OPTIONS |= had_error_bit__;
     return (Return_Status__Failure);
+}
+
+static void Throw_Error(String description)
+{
+    Write_Error(description, NULL, NULL, NULL);
+    exit(EXIT_FAILURE);
 }
 
 static void Reveal_Type(Metadata metadata)
@@ -232,7 +240,7 @@ static Return_Status Reveal_User(Metadata metadata, String entry_path)
     const struct passwd* const user = getpwuid(metadata->st_uid);
     if (!user)
     {
-        return (Throw_Error("can not discover user that owns the entry \"",
+        return (Write_Error("can not discover user that owns the entry \"",
                             entry_path, "\".", "Ensure that the entry is not "
                             "dangling."));
     }
@@ -245,7 +253,7 @@ static Return_Status Reveal_Group(Metadata metadata, String entry_path)
     const struct group* const group = getgrgid(metadata->st_gid);
     if (!group)
     {
-        return (Throw_Error("can not discover group that owns the entry \"",
+        return (Write_Error("can not discover group that owns the entry \"",
                             entry_path, "\".", "Ensure that the entry is not "
                             "dangling."));
     }
@@ -259,7 +267,7 @@ static Return_Status Reveal_Modified_Date(Metadata metadata)
     if (!strftime(modified_date, sizeof(modified_date), "%a %b %d %T %Z %Y",
                   localtime(&metadata->st_mtime)))
     {
-        return (Throw_Error("overflowed buffer intended to store modified "
+        return (Write_Error("overflowed buffer intended to store modified "
                             "date.", NULL, NULL, NULL));
     }
     puts(modified_date);
@@ -272,7 +280,7 @@ static Return_Status Reveal_File(String file_path)
     FILE* const file_stream = fopen(file_path, read_mode);
     if (!file_stream)
     {
-        return (Throw_Error("can not open the file \"", file_path, "\".",
+        return (Write_Error("can not open the file \"", file_path, "\".",
                             "Ensure that you have permissions to read."));
     }
     char character;
@@ -289,7 +297,7 @@ static Return_Status Reveal_Directory(String directory_path)
     DIR* const directory_stream = opendir(directory_path);
     if (!directory_stream)
     {
-        return (Throw_Error("can not open the directory \"", directory_path,
+        return (Write_Error("can not open the directory \"", directory_path,
                             "\".", "Ensure that you have permissions to read "
                             "it."));
     }
@@ -317,7 +325,7 @@ static Return_Status Reveal_Entry(String entry_path)
     if (OPTIONS & is_following_symlinks_bit__ ? stat(entry_path, &metadata) :
                                                 lstat(entry_path, &metadata))
     {
-        return (Throw_Error("can not find the entry \"", entry_path, "\".",
+        return (Write_Error("can not find the entry \"", entry_path, "\".",
                             "Ensure that you did not misspelled its path."));
     }
     switch (OPTIONS & ~non_data_type_bits__)
@@ -342,13 +350,13 @@ static Return_Status Reveal_Entry(String entry_path)
             Parse_Return_Case__(S_IFREG, Reveal_File(entry_path));
             Parse_Return_Case__(S_IFDIR, Reveal_Directory(entry_path));
             Parse_Return_Case__(S_IFLNK,
-                                Throw_Error("can not reveal the contents of "
+                                Write_Error("can not reveal the contents of "
                                             "the symlink \"", entry_path, "\".",
                                             "Try to use the "
                                             "\"--follow-symlinks\" option "
                                             "before it."));
         default:
-            return (Throw_Error("can not reveal the contents of the entry \"",
+            return (Write_Error("can not reveal the contents of the entry \"",
                                 entry_path, "\" due to its unreadable nature.",
                                 NULL));
         }
@@ -399,5 +407,5 @@ int main(const int total_of_arguments, Array_Of_String arguments,
         OPTIONS &= ~is_expecting_entry_path_bit__;
         last_entry_path = entry_path;
     }
-    return !!(OPTIONS & had_error_bit__);
+    return !!(OPTIONS & had_error_bit__ ? EXIT_FAILURE : EXIT_SUCCESS);
 }
