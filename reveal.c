@@ -57,6 +57,12 @@
 #define non_data_type_bits__          (is_expecting_entry_path_bit__ |         \
                                        is_following_symlinks_bit__   |         \
                                        had_error_bit__)
+#define Skip_Dot_Directory_Entries__                                           \
+    if (!strcmp(directory_entry->d_name, ".") ||                               \
+        !strcmp(directory_entry->d_name, ".."))                                \
+    {                                                                          \
+        continue;                                                              \
+    }
 #define Parse_Case__(value, action)                                            \
     case value:                                                                \
         action;                                                                \
@@ -302,13 +308,41 @@ static Return_Status Reveal_Directory(String directory_path)
                             "it."));
     }
     const struct dirent* directory_entry;
+    size_t total_of_directory_entries = 0;
     while ((directory_entry = readdir(directory_stream)))
     {
-        if (strcmp(directory_entry->d_name, ".") &&
-            strcmp(directory_entry->d_name, ".."))
+        Skip_Dot_Directory_Entries__;
+        total_of_directory_entries++;
+    }
+    const char* directory_entries[total_of_directory_entries];
+    size_t directory_entry_index = 0;
+    rewinddir(directory_stream);
+    while ((directory_entry = readdir(directory_stream)))
+    {
+        Skip_Dot_Directory_Entries__;
+        const char* directory_entry_allocation =
+            malloc(sizeof(directory_entry->d_name));
+        if (!directory_entry_allocation)
         {
-            puts(directory_entry->d_name);
+            Throw_Error("can not allocate memory to hold the directory "
+                        "entries.");
         }
+        memcpy((void*)directory_entry_allocation, directory_entry->d_name,
+               sizeof(directory_entry->d_name));
+        directory_entries[directory_entry_index] = directory_entry_allocation;
+        directory_entry_index++;
+    }
+    for (directory_entry_index = 0;
+         directory_entry_index < total_of_directory_entries;
+         directory_entry_index++)
+    {
+        puts(directory_entries[directory_entry_index]);
+    }
+    for (directory_entry_index = 0;
+         directory_entry_index < total_of_directory_entries;
+         directory_entry_index++)
+    {
+        free((void*)directory_entries[directory_entry_index]);
     }
     closedir(directory_stream);
     return (Return_Status__Success);
