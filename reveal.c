@@ -317,6 +317,11 @@ static Return_Status Reveal_Directory(String directory_path)
         Skip_Dot_Directory_Entries__;
         total_of_directory_entries++;
     }
+    if (total_of_directory_entries == 0)
+    {
+        closedir(directory_stream);
+        return (Return_Status__Success);
+    }
     void* directory_entries[total_of_directory_entries];
     size_t directory_entry_index = 0;
     rewinddir(directory_stream);
