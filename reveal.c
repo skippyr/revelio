@@ -145,7 +145,8 @@ static Return_Status Write_Error(String description_split_0,
                                  String description_split_1,
                                  String description_split_2,
                                  String fix_suggestion);
-static void Throw_Error(String description);
+static void Throw_Error(String description_split_0, String description_split_1,
+                        String description_split_2);
 static void Reveal_Type(Metadata metadata);
 static void Reveal_Size(Metadata metadata);
 static void Parse_Permission_Bit(Metadata metadata, uint16_t permission_bit,
@@ -176,9 +177,11 @@ static Return_Status Write_Error(String description_split_0,
     return (Return_Status__Failure);
 }
 
-static void Throw_Error(String description)
+static void Throw_Error(String description_split_0, String description_split_1,
+                        String description_split_2)
 {
-    Write_Error(description, NULL, NULL, NULL);
+    Write_Error(description_split_0, description_split_1, description_split_2,
+                NULL);
     exit(EXIT_FAILURE);
 }
 
@@ -324,8 +327,8 @@ static Return_Status Reveal_Directory(String directory_path)
             malloc(sizeof(directory_entry->d_name));
         if (!directory_entry_allocation)
         {
-            Throw_Error("can not allocate memory to hold the directory "
-                        "entries.");
+            Throw_Error("can not allocate memory to reveal the contents of the "
+                        "directory", directory_path, ".");
         }
         memcpy(directory_entry_allocation, directory_entry->d_name,
                sizeof(directory_entry->d_name));
@@ -336,21 +339,27 @@ static Return_Status Reveal_Directory(String directory_path)
          directory_entry_index < total_of_directory_entries - 1;
          directory_entry_index++)
     {
-        size_t swap_index = directory_entry_index;
-        for (size_t sort_index = directory_entry_index;
-             sort_index < total_of_directory_entries;
-             sort_index++)
+        size_t swap_directory_entry_index = directory_entry_index;
+        for (size_t check_directory_entry_index = directory_entry_index;
+             check_directory_entry_index < total_of_directory_entries;
+             check_directory_entry_index++)
         {
-            if (strcmp(directory_entries[sort_index],
-                       directory_entries[swap_index]) < 0)
+            if (strcmp(directory_entries[check_directory_entry_index],
+                       directory_entries[swap_directory_entry_index]) < 0)
             {
-                swap_index = sort_index;
+                swap_directory_entry_index = check_directory_entry_index;
             }
         }
-        void* temporary_allocation = directory_entries[directory_entry_index];
+        if (swap_directory_entry_index == directory_entry_index)
+        {
+            continue;
+        }
+        void* temporary_swap_allocation =
+            directory_entries[directory_entry_index];
         directory_entries[directory_entry_index] =
-            directory_entries[swap_index];
-        directory_entries[swap_index] = temporary_allocation;
+            directory_entries[swap_directory_entry_index];
+        directory_entries[swap_directory_entry_index] =
+            temporary_swap_allocation;
     }
     for (directory_entry_index = 0;
          directory_entry_index < total_of_directory_entries;
