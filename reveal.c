@@ -109,10 +109,13 @@
         continue;                                                              \
     )
 
+typedef const char* const String;
+typedef String* const Array_Of_String;
+typedef const struct stat* const Metadata;
 typedef enum
 {
     Return_Status__Success,
-    Return_Status__Error
+    Return_Status__Failure
 }
 Return_Status;
 typedef enum
@@ -130,32 +133,31 @@ typedef enum
     Data_Type__Modified_Date
 }
 Data_Type;
-typedef const char* const String;
-typedef String* const Array_Of_String;
-typedef const struct stat* const Metadata;
 
-static uint8_t Throw_Error(String description_split_0,
-                           String description_split_1,
-                           String description_split_2, String fix_suggestion);
+static Return_Status Throw_Error(String description_split_0,
+                                 String description_split_1,
+                                 String description_split_2,
+                                 String fix_suggestion);
 static void Reveal_Type(Metadata metadata);
 static void Reveal_Size(Metadata metadata);
 static void Parse_Permission_Bit(Metadata metadata, uint16_t permission_bit,
                                  const char permission_bit_character);
 static void Reveal_Permissions(Metadata metadata);
 static void Reveal_Octal_Permissions(Metadata metadata);
-static uint8_t Reveal_User(Metadata metadata, String entry_path);
-static uint8_t Reveal_Group(Metadata metadata, String entry_path);
-static uint8_t Reveal_Modified_Date(Metadata metadata);
-static uint8_t Reveal_File(String file_path);
-static uint8_t Reveal_Directory(String directory_path);
+static Return_Status Reveal_User(Metadata metadata, String entry_path);
+static Return_Status Reveal_Group(Metadata metadata, String entry_path);
+static Return_Status Reveal_Modified_Date(Metadata metadata);
+static Return_Status Reveal_File(String file_path);
+static Return_Status Reveal_Directory(String directory_path);
 static void Print_Unsigned(unsigned value);
-static uint8_t Reveal_Entry(String entry_path);
+static Return_Status Reveal_Entry(String entry_path);
 
 static uint8_t OPTIONS = is_following_symlinks_bit__;
 
-static uint8_t Throw_Error(String description_split_0,
-                           String description_split_1,
-                           String description_split_2, String fix_suggestion)
+static Return_Status Throw_Error(String description_split_0,
+                                 String description_split_1,
+                                 String description_split_2,
+                                 String fix_suggestion)
 {
     fprintf(stderr, "%s: %s%s%s\n%s%s", program_name__,
             Parse_Null_String__(description_split_0),
@@ -163,7 +165,7 @@ static uint8_t Throw_Error(String description_split_0,
             Parse_Null_String__(description_split_2),
             Parse_Null_String__(fix_suggestion), fix_suggestion ? "\n" : "");
     OPTIONS |= had_error_bit__;
-    return (Return_Status__Error);
+    return (Return_Status__Failure);
 }
 
 static void Reveal_Type(Metadata metadata)
@@ -225,7 +227,7 @@ static void Reveal_Octal_Permissions(Metadata metadata)
                                          S_IXOTH));
 }
 
-static uint8_t Reveal_User(Metadata metadata, String entry_path)
+static Return_Status Reveal_User(Metadata metadata, String entry_path)
 {
     const struct passwd* const user = getpwuid(metadata->st_uid);
     if (!user)
@@ -238,7 +240,7 @@ static uint8_t Reveal_User(Metadata metadata, String entry_path)
     return (Return_Status__Success);
 }
 
-static uint8_t Reveal_Group(Metadata metadata, String entry_path)
+static Return_Status Reveal_Group(Metadata metadata, String entry_path)
 {
     const struct group* const group = getgrgid(metadata->st_gid);
     if (!group)
@@ -251,7 +253,7 @@ static uint8_t Reveal_Group(Metadata metadata, String entry_path)
     return (Return_Status__Success);
 }
 
-static uint8_t Reveal_Modified_Date(Metadata metadata)
+static Return_Status Reveal_Modified_Date(Metadata metadata)
 {
     char modified_date[29];
     if (!strftime(modified_date, sizeof(modified_date), "%a %b %d %T %Z %Y",
@@ -264,7 +266,7 @@ static uint8_t Reveal_Modified_Date(Metadata metadata)
     return (Return_Status__Success);
 }
 
-static uint8_t Reveal_File(String file_path)
+static Return_Status Reveal_File(String file_path)
 {
     String read_mode = "r";
     FILE* const file_stream = fopen(file_path, read_mode);
@@ -282,7 +284,7 @@ static uint8_t Reveal_File(String file_path)
     return (Return_Status__Success);
 }
 
-static uint8_t Reveal_Directory(String directory_path)
+static Return_Status Reveal_Directory(String directory_path)
 {
     DIR* const directory_stream = opendir(directory_path);
     if (!directory_stream)
@@ -309,7 +311,7 @@ static void Print_Unsigned(unsigned value)
     printf("%u\n", value);
 }
 
-static uint8_t Reveal_Entry(String entry_path)
+static Return_Status Reveal_Entry(String entry_path)
 {
     struct stat metadata;
     if (OPTIONS & is_following_symlinks_bit__ ? stat(entry_path, &metadata) :
@@ -390,7 +392,7 @@ int main(const int total_of_arguments, Array_Of_String arguments,
         Parse_Non_Data_Type_Option__("unfollow-symlinks",
                                      OPTIONS &= ~is_following_symlinks_bit__);
         String entry_path = arguments[argument_index];
-        if (Reveal_Entry(entry_path))
+        if (Reveal_Entry(entry_path) == Return_Status__Failure)
         {
             continue;
         }
