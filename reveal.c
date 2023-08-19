@@ -135,14 +135,14 @@ typedef enum
 }
 Data_Type;
 
+static void Parse_Permission_Bit(Metadata entry_metadata,
+                                 const uint16_t permission_bit,
+                                 const char permission_character);
 static Return_Status Print_Error(String error_description_split_0,
                                  String error_description_split_1,
                                  String error_description_split_2,
                                  String error_fix_suggestion);
 static void Print_Unsigned_Value(unsigned value);
-static void Parse_Permission_Bit(Metadata entry_metadata,
-                                 const uint16_t permission_bit,
-                                 const char permission_character);
 static void Sort_Directory_Entries_Alphabetically(
     void** directory_entries, size_t total_of_directory_entries);
 static void Reveal_Type(Metadata entry_metadata);
