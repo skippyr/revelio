@@ -4,9 +4,8 @@ This repository contains the source code of Reveal, a program that reveals
 information about entries in the file system of POSIX-like operating systems,
 such as their: contents, type, permissions, ownership and modified date.
 
-It was created with the idea to be an alternative for some utilities from
-coreutils: such as `ls`, `cat` and `stat`. By providing much simple and
-scalable interactions, it becomes a perfect tool for scripting languages.
+By simple and scalable interactions, it becomes a perfect tool for scripting
+languages.
 
 Here some usage previews that you can check out:
 
