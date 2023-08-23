@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <time.h>
 
 #define PGR_NAME "reveal"
 #define PGR_VER "v10.0.0"
@@ -169,6 +170,18 @@ reveal_own_id(unsigned id)
 }
 
 static int
+reveal_mod_date(struct stat *s)
+{
+	char m[29];
+	if (strftime(m, sizeof(m), "%a %b %d %T %Z %Y",
+		localtime(&s->st_mtime)) == 0)
+		return print_err("overflowed modified date buffer.", NULL, NULL,
+			NULL);
+	puts(m);
+	return 0;
+}
+
+static int
 reveal_file(char *path)
 {
 	FILE *f = fopen(path, "r");
@@ -220,6 +233,7 @@ reveal(char *path)
 		PARSE_CASE(DT_USR_ID, reveal_own_id(s.st_uid));
 		PARSE_RET_CASE(DT_GRP, reveal_grp(&s, path));
 		PARSE_CASE(DT_GRP_ID, reveal_own_id(s.st_gid));
+		PARSE_RET_CASE(DT_MOD_DATE, reveal_mod_date(&s));
 	default:
 		return reveal_ctts(&s, path);
 	}
