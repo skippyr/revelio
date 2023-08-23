@@ -16,6 +16,12 @@
 #define PARSE_RET_CASE(v, a)\
 	case v:\
 		return a;
+#define PARSE_SIZE_PREF_MUL(v, c)\
+	z = s->st_size / v;\
+	if ((int)z) {\
+		printf("%.1f%cB\n", z, c);\
+		return;\
+	}
 #define PARSE_OPT(o, t, a)\
 	if (!strcmp("--" o, t)) {\
 		a;\
@@ -47,7 +53,7 @@ typedef enum {
 	DT_CTTS,
 	DT_TYPE,
 	DT_SIZE,
-	DT_BT_SIZE,
+	DT_B_SIZE,
 	DT_PERMS,
 	DT_OCT_PERMS,
 	DT_USR,
@@ -90,6 +96,22 @@ reveal_type(struct stat *s)
 	default:
 		puts("unknown");
 	}
+}
+
+static void
+reveal_size(struct stat *s)
+{
+	float z;
+	PARSE_SIZE_PREF_MUL(1e9, 'G');
+	PARSE_SIZE_PREF_MUL(1e6, 'M');
+	PARSE_SIZE_PREF_MUL(1e3, 'k');
+	printf("%ldB\n", s->st_size);
+}
+
+static void
+reveal_b_size(struct stat *s)
+{
+	printf("%ld\n", s->st_size);
 }
 
 static int
@@ -136,6 +158,8 @@ reveal(char *path)
 			"you misspelled it.");
 	switch (DT) {
 		PARSE_CASE(DT_TYPE, reveal_type(&s));
+		PARSE_CASE(DT_SIZE, reveal_size(&s));
+		PARSE_CASE(DT_B_SIZE, reveal_b_size(&s));
 	default:
 		return reveal_ctts(&s, path);
 	}
@@ -156,7 +180,7 @@ parse_dt_opts(char *arg, char *path, bool is_last)
 	PARSE_DT_OPT("contents", DT_CTTS);
 	PARSE_DT_OPT("type", DT_TYPE);
 	PARSE_DT_OPT("size", DT_SIZE);
-	PARSE_DT_OPT("bt-size", DT_BT_SIZE);
+	PARSE_DT_OPT("b-size", DT_B_SIZE);
 	PARSE_DT_OPT("perms", DT_PERMS);
 	PARSE_DT_OPT("oct-perms", DT_OCT_PERMS);
 	PARSE_DT_OPT("usr", DT_USR);
