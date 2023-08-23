@@ -75,7 +75,51 @@ static void
 help()
 {
 	printf("Usage: %s [OPTION | PATH]...\n", PGR_NAME);
-	puts("Reveals information about entries in the file system.");
+	puts("Reveals information about entries in the file system.\n");
+	puts("META OPTIONS");
+	puts("These options retrieve information about the program.\n");
+	puts("  --version  print its version.");
+	puts("  --help     print this help.\n");
+	puts("DATA TYPE OPTIONS");
+	puts("These options change the data type to retrieve from the entries "
+		"following them.");
+	puts("  --ctts (default)  print its contents.");
+	puts("  --type            print its type: regular, directory, symlink, "
+		"socket, fifo,\n                    character, block or "
+		"unknown.");
+	puts("  --size            print its size in a convenient unit: "
+		"gigabyte (GB),\n                    megabyte (MB), kilobyte "
+		"(kB) or byte (B).");
+	puts("  --bt-size         print its size in bytes, no unit besides.");
+	puts("  --perms           print its read (r), write (w) and execute "
+		"(x) permissions\n                    for user, group and "
+		"others.");
+	puts("  --oct-perms       print its permissions in octal base.");
+	puts("  --usr             print the user that owns it.");
+	puts("  --usr-id          print the ID of the user that owns it.");
+	puts("  --grp             print the group that owns it.");
+	puts("  --grp-id          print the ID of the group that owns it.");
+	puts("  --mod-date        print the date when its contents were last "
+		"modified.\n");
+	puts("All these options expect a path following them. If not provided, "
+		"they will\nconsider the last valid one given or, else, the "
+		"current directory.\n");
+	puts("If none of these is provided, the one marked as default will be "
+		"considered.\n");
+	puts("SYMLINKS OPTIONS");
+	puts("These options change how symlinks following them will be "
+		"handled, possibly\nchanging the origin of the data "
+		"retrieved.\n");
+	puts("  --follow-symlinks (default)  follow symlinks.");
+	puts("  --unfollow-symlinks          don't follow symlinks.\n");
+	puts("If none of these is provided, the one marked as default will be "
+		"considered.\n");
+	puts("EXIT CODES");
+	puts("Code 1 will be throw if an error happens and 0 otherwise.\n");
+	puts("SUPPORT");
+	puts("Report issues, questions and suggestions through its issues "
+		"page:");
+	puts("<https://github.com/skippyr/reveal/issues>");
 }
 
 static int
@@ -84,6 +128,7 @@ print_err(char *desc0, char *desc1, char *desc2, char *fix)
 	fprintf(stderr, "%s: %s%s%s\n%s%s", PGR_NAME, PARSE_NULL_STR(desc0),
 		PARSE_NULL_STR(desc1), PARSE_NULL_STR(desc2),
 		PARSE_NULL_STR(fix), fix ? "\n" : "");
+	HAD_ERR = true;
 	return 1;
 }
 
@@ -321,7 +366,7 @@ parse_lnk_opts(char *arg, char *path, bool is_last)
 static int
 parse_dt_opts(char *arg, char *path, bool is_last)
 {
-	PARSE_DT_OPT("contents", DT_CTTS);
+	PARSE_DT_OPT("ctts", DT_CTTS);
 	PARSE_DT_OPT("type", DT_TYPE);
 	PARSE_DT_OPT("size", DT_SIZE);
 	PARSE_DT_OPT("bt-size", DT_BT_SIZE);
