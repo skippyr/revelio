@@ -8,7 +8,14 @@
 #define PGR_VER "v10.0.0"
 #define PARSE_EXIT_CODE(e) (e != 0 ? EXIT_FAILURE : EXIT_SUCCESS)
 #define PARSE_NULL_STR(s) (s ? s : "")
-#define PARSE_RET_CASE(v, a) case v: return a;
+#define PARSE_CASE(v, a)\
+	case v:\
+		a;\
+		break;
+#define PARSE_PUTS_CASE(v, t) PARSE_CASE(v, puts(t);)
+#define PARSE_RET_CASE(v, a)\
+	case v:\
+		return a;
 #define PARSE_OPT(o, t, a)\
 	if (!strcmp("--" o, t)) {\
 		a;\
@@ -69,6 +76,22 @@ print_err(char *desc0, char *desc1, char *desc2, char *fix)
 	return 1;
 }
 
+static void
+reveal_type(struct stat *s)
+{
+	switch (s->st_mode & S_IFMT) {
+		PARSE_PUTS_CASE(S_IFREG, "regular");
+		PARSE_PUTS_CASE(S_IFDIR, "directory");
+		PARSE_PUTS_CASE(S_IFLNK, "symlink");
+		PARSE_PUTS_CASE(S_IFSOCK, "socket");
+		PARSE_PUTS_CASE(S_IFIFO, "fifo");
+		PARSE_PUTS_CASE(S_IFCHR, "character");
+		PARSE_PUTS_CASE(S_IFBLK, "block");
+	default:
+		puts("unknown");
+	}
+}
+
 static int
 reveal_file(char *path)
 {
@@ -112,9 +135,11 @@ reveal(char *path)
 		return print_err("can't find entry \"", path, "\".", "Check if "
 			"you misspelled it.");
 	switch (DT) {
+		PARSE_CASE(DT_TYPE, reveal_type(&s));
 	default:
 		return reveal_ctts(&s, path);
 	}
+	return 0;
 }
 
 static int
