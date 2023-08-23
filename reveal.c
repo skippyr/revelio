@@ -75,7 +75,7 @@ static void
 help()
 {
 	printf("Usage: %s [OPTION | PATH]...\n", PGR_NAME);
-	puts("Reveals information about entries in the file system.\n");
+	puts("Reveals data from entries in the file system.\n");
 	puts("META OPTIONS");
 	puts("These options retrieve information about the program.\n");
 	puts("  --ver   print its version.");
