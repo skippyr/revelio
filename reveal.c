@@ -2,31 +2,34 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #define PGR_NAME "reveal"
-#define PGR_VER "v9.1.3"
+#define PGR_VER "v10.0.0"
 #define PARSE_EXIT_CODE(e) (e != 0 ? EXIT_FAILURE : EXIT_SUCCESS)
-#define PARSE_OPT(opt, tgt, act)\
-	if (!strcmp("--" opt, tgt)) {\
-		act;\
+#define PARSE_NULL_STR(s) (s ? s : "")
+#define PARSE_RET_CASE(v, a) case v: return a;
+#define PARSE_OPT(o, t, a)\
+	if (!strcmp("--" o, t)) {\
+		a;\
 	}
-#define PARSE_META_OPT(opt, act)\
-	PARSE_OPT(opt, argv[i],\
-		act;\
+#define PARSE_META_OPT(o, a)\
+	PARSE_OPT(o, argv[i],\
+		a;\
 		exit(EXIT_SUCCESS);\
 	)
-#define PARSE_DT_OPT(opt, dt)\
-	PARSE_OPT(opt, arg,\
+#define PARSE_DT_OPT(o, d)\
+	PARSE_OPT(o, arg,\
 		if (AW_ARG)\
 			reveal(path);\
-		DT = dt;\
+		DT = d;\
 		AW_ARG = true;\
 		if (is_last)\
 			reveal(path);\
 		return 1;\
 	)
-#define PARSE_LNK_OPT(opt, f)\
-	PARSE_OPT(opt, arg,\
+#define PARSE_LNK_OPT(o, f)\
+	PARSE_OPT(o, arg,\
 		if (is_last)\
 			reveal(path);\
 		F_LNK = f;\
@@ -58,10 +61,60 @@ help()
 }
 
 static int
+print_err(char *desc0, char *desc1, char *desc2, char *fix)
+{
+	fprintf(stderr, "%s: %s%s%s\n%s%s", PGR_NAME, PARSE_NULL_STR(desc0),
+		PARSE_NULL_STR(desc1), PARSE_NULL_STR(desc2),
+		PARSE_NULL_STR(fix), fix ? "\n" : "");
+	return 1;
+}
+
+static int
+reveal_file(char *path)
+{
+	FILE *f = fopen(path, "r");
+	if (!f)
+		return print_err("can't open file \"", path, "\"", "Check if "
+			"you have permission to read it.");
+	char c;
+	while ((c = fgetc(f)) != EOF)
+		putchar(c);
+	fclose(f);
+	return 0;
+}
+
+static int
+reveal_dir(char *path)
+{
+	return 0;
+}
+
+static int
+reveal_ctts(struct stat *s, char *path)
+{
+	switch (s->st_mode & S_IFMT) {
+		PARSE_RET_CASE(S_IFREG, reveal_file(path));
+		PARSE_RET_CASE(S_IFDIR, reveal_dir(path));
+		PARSE_RET_CASE(S_IFLNK, print_err("can't read symlink \"", path,
+			"\".", "Try to use the \"--follow-symlinks\" option "
+			"before it."))
+	default:
+		return print_err("can't read contents of \"", path, "\".",
+			"Its type is unreadable.");
+	}
+}
+
+static int
 reveal(char *path)
 {
-	printf("Path: %s\nDt: %i\nFLNK: %i\n", path, DT, F_LNK);
-	return 0;
+	struct stat s;
+	if (F_LNK ? stat(path, &s) : lstat(path, &s) < 0)
+		return print_err("can't find entry \"", path, "\".", "Check if "
+			"you misspelled it.");
+	switch (DT) {
+	default:
+		return reveal_ctts(&s, path);
+	}
 }
 
 static int
@@ -78,14 +131,14 @@ parse_dt_opts(char *arg, char *path, bool is_last)
 	PARSE_DT_OPT("contents", DT_CTTS);
 	PARSE_DT_OPT("type", DT_TYPE);
 	PARSE_DT_OPT("size", DT_SIZE);
-	PARSE_DT_OPT("byte-size", DT_BT_SIZE);
-	PARSE_DT_OPT("permissions", DT_PERMS);
-	PARSE_DT_OPT("octal-permissions", DT_OCT_PERMS);
-	PARSE_DT_OPT("user", DT_USR);
-	PARSE_DT_OPT("user-uid", DT_USR_ID);
-	PARSE_DT_OPT("group", DT_GRP);
-	PARSE_DT_OPT("group-gid", DT_GRP_ID);
-	PARSE_DT_OPT("modified-date", DT_MOD_DATE);
+	PARSE_DT_OPT("bt-size", DT_BT_SIZE);
+	PARSE_DT_OPT("perms", DT_PERMS);
+	PARSE_DT_OPT("oct-perms", DT_OCT_PERMS);
+	PARSE_DT_OPT("usr", DT_USR);
+	PARSE_DT_OPT("usr-id", DT_USR_ID);
+	PARSE_DT_OPT("grp", DT_GRP);
+	PARSE_DT_OPT("grp-id", DT_GRP_ID);
+	PARSE_DT_OPT("mod-date", DT_MOD_DATE);
 	return 0;
 }
 
@@ -97,7 +150,7 @@ parse_non_meta_opts(int argc, char **argv)
 		char *arg = argv[i];
 		bool is_last = i == argc - 1;
 		if (parse_dt_opts(arg, path, is_last) ||
-			parse_lnk_opts(arg, path, is_last) || reveal(path))
+			parse_lnk_opts(arg, path, is_last) || reveal(arg))
 			continue;
 		AW_ARG = false;
 		path = arg;
