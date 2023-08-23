@@ -58,7 +58,7 @@ typedef enum {
 	DT_CTTS,
 	DT_TYPE,
 	DT_SIZE,
-	DT_B_SIZE,
+	DT_BT_SIZE,
 	DT_PERMS,
 	DT_OCT_PERMS,
 	DT_USR,
@@ -121,7 +121,7 @@ reveal_size(struct stat *s)
 }
 
 static void
-reveal_b_size(struct stat *s)
+reveal_bt_size(struct stat *s)
 {
 	printf("%ld\n", s->st_size);
 }
@@ -214,7 +214,7 @@ get_dir_size(DIR *d)
 }
 
 static void
-alloc_dir_ents(DIR *d, void **es)
+alloc_dir_ents(DIR *d, void **ents)
 {
 	struct dirent *e;
 	size_t i = 0;
@@ -225,26 +225,26 @@ alloc_dir_ents(DIR *d, void **es)
 		size_t s = strlen(e->d_name) + 1;
 		void *a = malloc(s);
 		if (!a)
-			die("can not allocate memory.");
+			die("can't allocate memory.");
 		memcpy(a, e->d_name, s);
-		es[i] = a;
+		ents[i] = a;
 		i++;
 	}
 }
 
 static void
-sort_dir_ents(void **es, size_t s)
+sort_dir_ents(void **ents, size_t ents_size)
 {
-	for (size_t i = 0; i < s - 1; i++) {
+	for (size_t i = 0; i < ents_size - 1; i++) {
 		size_t w = i;
-		for (size_t j = i + 1; j < s; j++)
-			if (strcmp(es[j], es[w]) < 0)
+		for (size_t j = i + 1; j < ents_size; j++)
+			if (strcmp(ents[j], ents[w]) < 0)
 				w = j;
 		if (w == i)
 			continue;
-		void *t = es[i];
-		es[i] = es[w];
-		es[w] = t;
+		void *t = ents[i];
+		ents[i] = ents[w];
+		ents[w] = t;
 	}
 }
 
@@ -296,7 +296,7 @@ reveal(char *path)
 	switch (DT) {
 		PARSE_CASE(DT_TYPE, reveal_type(&s));
 		PARSE_CASE(DT_SIZE, reveal_size(&s));
-		PARSE_CASE(DT_B_SIZE, reveal_b_size(&s));
+		PARSE_CASE(DT_BT_SIZE, reveal_bt_size(&s));
 		PARSE_CASE(DT_PERMS, reveal_perms(&s));
 		PARSE_CASE(DT_OCT_PERMS, reveal_oct_perms(&s));
 		PARSE_RET_CASE(DT_USR, reveal_usr(&s, path));
@@ -324,7 +324,7 @@ parse_dt_opts(char *arg, char *path, bool is_last)
 	PARSE_DT_OPT("contents", DT_CTTS);
 	PARSE_DT_OPT("type", DT_TYPE);
 	PARSE_DT_OPT("size", DT_SIZE);
-	PARSE_DT_OPT("b-size", DT_B_SIZE);
+	PARSE_DT_OPT("bt-size", DT_BT_SIZE);
 	PARSE_DT_OPT("perms", DT_PERMS);
 	PARSE_DT_OPT("oct-perms", DT_OCT_PERMS);
 	PARSE_DT_OPT("usr", DT_USR);
