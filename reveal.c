@@ -50,7 +50,7 @@
 	PARSE_OPT(o, arg,\
 		if (is_last)\
 			reveal(path);\
-		F_LNK = f;\
+		FLW_LNK = f;\
 		return 1;\
 	)
 
@@ -69,7 +69,7 @@ typedef enum {
 } data_type_t;
 
 static data_type_t DT = DT_CTTS;
-static bool HAD_ERR = false, F_LNK = true, AW_ARG = false;
+static bool HAD_ERR = false, FLW_LNK = true, AW_ARG = false;
 
 static void
 help()
@@ -110,8 +110,8 @@ help()
 	puts("These options change how symlinks following them will be "
 		"handled, possibly\nchanging the origin of the data "
 		"retrieved.\n");
-	puts("  --follow-symlinks (default)  follow symlinks.");
-	puts("  --unfollow-symlinks          don't follow symlinks.\n");
+	puts("  --flw-lnk (default)  follow symlinks.");
+	puts("  --uflw-lnk           don't follow symlinks.\n");
 	puts("If none of these is provided, the one marked as default will be "
 		"considered.\n");
 	puts("EXIT CODES");
@@ -323,8 +323,8 @@ reveal_ctts(struct stat *s, char *path)
 		PARSE_RET_CASE(S_IFREG, reveal_file(path));
 		PARSE_RET_CASE(S_IFDIR, reveal_dir(path));
 		PARSE_RET_CASE(S_IFLNK, print_err("can't read symlink \"", path,
-			"\".", "Try to use the \"--follow-symlinks\" option "
-			"before it."))
+			"\".", "Try to use the \"--flw-lnk\" option before "
+			"it."))
 	default:
 		return print_err("can't read contents of \"", path, "\".",
 			"Its type is unreadable.");
@@ -335,7 +335,7 @@ static int
 reveal(char *path)
 {
 	struct stat s;
-	if (F_LNK ? stat(path, &s) : lstat(path, &s))
+	if (FLW_LNK ? stat(path, &s) : lstat(path, &s))
 		return print_err("can't find entry \"", path, "\".", "Check if "
 			"you misspelled it.");
 	switch (DT) {
@@ -358,8 +358,8 @@ reveal(char *path)
 static int
 parse_lnk_opts(char *arg, char *path, bool is_last)
 {
-	PARSE_LNK_OPT("follow-symlinks", true);
-	PARSE_LNK_OPT("unfollow-symlinks", false);
+	PARSE_LNK_OPT("flw-lnk", true);
+	PARSE_LNK_OPT("uflw-lnk", false);
 	return 0;
 }
 
