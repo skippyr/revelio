@@ -10,7 +10,7 @@
 
 #define PGR_NAME "reveal"
 #define PGR_VER "v10.0.0"
-#define PARSE_EXIT_CODE(e) (e != 0 ? EXIT_FAILURE : EXIT_SUCCESS)
+#define PARSE_EXIT_CODE(e) (e ? EXIT_FAILURE : EXIT_SUCCESS)
 #define PARSE_NULL_STR(s) (s ? s : "")
 #define PARSE_CASE(v, a)\
 	case v:\
@@ -226,8 +226,8 @@ static int
 reveal_mod_date(struct stat *s)
 {
 	char m[29];
-	if (strftime(m, sizeof(m), "%a %b %d %T %Z %Y",
-		localtime(&s->st_mtime)) == 0)
+	if (!strftime(m, sizeof(m), "%a %b %d %T %Z %Y",
+		localtime(&s->st_mtime)))
 		return print_err("overflowed modified date buffer.", NULL, NULL,
 			NULL);
 	puts(m);
@@ -335,7 +335,7 @@ static int
 reveal(char *path)
 {
 	struct stat s;
-	if (F_LNK ? stat(path, &s) : lstat(path, &s) < 0)
+	if (F_LNK ? stat(path, &s) : lstat(path, &s))
 		return print_err("can't find entry \"", path, "\".", "Check if "
 			"you misspelled it.");
 	switch (DT) {
