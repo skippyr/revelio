@@ -1,3 +1,5 @@
+#include <grp.h>
+#include <pwd.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -139,6 +141,34 @@ reveal_oct_perms(struct stat *s)
 }
 
 static int
+reveal_usr(struct stat *s, char *path)
+{
+	struct passwd *u = getpwuid(s->st_uid);
+	if (!u)
+		return print_err("can't find user that owns \"", path, "\".",
+			"Ensure that it is not a dangling symlink.");
+	puts(u->pw_name);
+	return 0;
+}
+
+static int
+reveal_grp(struct stat *s, char *path)
+{
+	struct group *g = getgrgid(s->st_gid);
+	if (!g)
+		return print_err("can't find group that owns \"", path, "\".",
+			"Ensure that it is not a dangling symlink.");
+	puts(g->gr_name);
+	return 0;
+}
+
+static void
+reveal_own_id(unsigned id)
+{
+	printf("%u\n", id);
+}
+
+static int
 reveal_file(char *path)
 {
 	FILE *f = fopen(path, "r");
@@ -186,6 +216,10 @@ reveal(char *path)
 		PARSE_CASE(DT_B_SIZE, reveal_b_size(&s));
 		PARSE_CASE(DT_PERMS, reveal_perms(&s));
 		PARSE_CASE(DT_OCT_PERMS, reveal_oct_perms(&s));
+		PARSE_RET_CASE(DT_USR, reveal_usr(&s, path));
+		PARSE_CASE(DT_USR_ID, reveal_own_id(s.st_uid));
+		PARSE_RET_CASE(DT_GRP, reveal_grp(&s, path));
+		PARSE_CASE(DT_GRP_ID, reveal_own_id(s.st_gid));
 	default:
 		return reveal_ctts(&s, path);
 	}
