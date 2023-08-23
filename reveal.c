@@ -92,9 +92,9 @@ help()
 		"gigabyte (GB),\n                    megabyte (MB), kilobyte "
 		"(kB) or byte (B).");
 	puts("  --bt-size         print its size in bytes, no unit besides.");
-	puts("  --perms           print its read (r), write (w) and execute "
-		"(x) permissions\n                    for user, group and "
-		"others.");
+	puts("  --perms           print its read (r), write (w), execute "
+		"(x) and lack (-)\n                    permissions for user, "
+		"group and others.");
 	puts("  --oct-perms       print its permissions in octal base.");
 	puts("  --usr             print the user that owns it.");
 	puts("  --usr-id          print the ID of the user that owns it.");
