@@ -1,3 +1,4 @@
+#include <dirent.h>
 #include <grp.h>
 #include <pwd.h>
 #include <stdbool.h>
@@ -84,6 +85,13 @@ print_err(char *desc0, char *desc1, char *desc2, char *fix)
 		PARSE_NULL_STR(desc1), PARSE_NULL_STR(desc2),
 		PARSE_NULL_STR(fix), fix ? "\n" : "");
 	return 1;
+}
+
+static int
+die(char *desc)
+{
+	print_err(desc, NULL, NULL, NULL);
+	exit(EXIT_FAILURE);
 }
 
 static void
@@ -196,8 +204,53 @@ reveal_file(char *path)
 }
 
 static int
+get_dir_size(DIR *d)
+{
+	size_t s = 0;
+	while (readdir(d))
+		s++;
+	s -= 2;
+	return s;
+}
+
+static void
+alloc_dir_ents(DIR *d, void **es)
+{
+	struct dirent *e;
+	size_t i = 0;
+	rewinddir(d);
+	while ((e = readdir(d))) {
+		if (!strcmp(e->d_name, ".") || !strcmp(e->d_name, ".."))
+			continue;
+		size_t s = strlen(e->d_name) + 1;
+		void *a = malloc(s);
+		if (!a)
+			die("can not allocate memory.");
+		memcpy(a, e->d_name, s);
+		es[i] = a;
+		i++;
+	}
+}
+
+static int
 reveal_dir(char *path)
 {
+	DIR *d = opendir(path);
+	if (!d)
+		return print_err("can't open directory \"", path, "\"", "Check "
+			"if you have permission to read it.");
+	size_t s = get_dir_size(d);
+	if (!s) {
+		closedir(d);
+		return 0;
+	}
+	void *es[s];
+	alloc_dir_ents(d, es);
+	for (size_t i = 0; i < s; i++) {
+		puts(es[i]);
+		free(es[i]);
+	}
+	closedir(d);
 	return 0;
 }
 
