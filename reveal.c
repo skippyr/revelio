@@ -54,7 +54,7 @@
 		return 1;\
 	)
 
-typedef enum {
+enum data_type {
 	DT_CTTS,
 	DT_TYPE,
 	DT_SIZE,
@@ -66,9 +66,9 @@ typedef enum {
 	DT_GRP,
 	DT_GRP_ID,
 	DT_MOD_DATE
-} data_type_t;
+};
 
-static data_type_t DT = DT_CTTS;
+static enum data_type DT = DT_CTTS;
 static bool HAD_ERR = false, FLW_LNK = true, AW_ARG = false;
 
 static void
