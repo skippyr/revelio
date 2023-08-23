@@ -9,7 +9,7 @@
 #include <time.h>
 
 #define PGR_NAME "reveal"
-#define PGR_VER "v10.0.0"
+#define PGR_VERSION "v10.0.0"
 #define PARSE_EXIT_CODE(e) (e ? EXIT_FAILURE : EXIT_SUCCESS)
 #define PARSE_NULL_STR(s) (s ? s : "")
 #define PARSE_CASE(v, a)\
@@ -78,8 +78,8 @@ help()
 	puts("Reveals data from entries in the file system.\n");
 	puts("META OPTIONS");
 	puts("These options retrieve information about the program.\n");
-	puts("  --ver   print its version.");
-	puts("  --help  print this help.\n");
+	puts("  --version  print its version.");
+	puts("  --help     print this help.\n");
 	puts("DATA TYPE OPTIONS");
 	puts("These options change the data type to retrieve from the entries "
 		"following them.\n");
@@ -400,7 +400,7 @@ static void
 parse_meta_opts(int argc, char **argv)
 {
 	for (int i = 1; i < argc; i++) {
-		PARSE_META_OPT("ver", puts(PGR_VER));
+		PARSE_META_OPT("version", puts(PGR_VERSION));
 		PARSE_META_OPT("help", help());
 	}
 }
