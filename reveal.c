@@ -82,11 +82,12 @@ help()
 	puts("  --help     print this help.\n");
 	puts("DATA TYPE OPTIONS");
 	puts("These options change the data type to retrieve from the entries "
-		"following them.");
+		"following them.\n");
 	puts("  --ctts (default)  print its contents.");
-	puts("  --type            print its type: regular, directory, symlink, "
-		"socket, fifo,\n                    character, block or "
-		"unknown.");
+	puts("  --type            print its type: regular (r), directory (d), "
+		"symlink (l),\n                    socket (s), fifo (f), "
+		"character device (c), block device (b)\n                    "
+		"or unknown (-).");
 	puts("  --size            print its size in a convenient unit: "
 		"gigabyte (GB),\n                    megabyte (MB), kilobyte "
 		"(kB) or byte (B).");
@@ -143,15 +144,15 @@ static void
 reveal_type(struct stat *s)
 {
 	switch (s->st_mode & S_IFMT) {
-		PARSE_PUTS_CASE(S_IFREG, "regular");
-		PARSE_PUTS_CASE(S_IFDIR, "directory");
-		PARSE_PUTS_CASE(S_IFLNK, "symlink");
-		PARSE_PUTS_CASE(S_IFSOCK, "socket");
-		PARSE_PUTS_CASE(S_IFIFO, "fifo");
-		PARSE_PUTS_CASE(S_IFCHR, "character");
-		PARSE_PUTS_CASE(S_IFBLK, "block");
+		PARSE_PUTS_CASE(S_IFREG, "r");
+		PARSE_PUTS_CASE(S_IFDIR, "d");
+		PARSE_PUTS_CASE(S_IFLNK, "l");
+		PARSE_PUTS_CASE(S_IFSOCK, "s");
+		PARSE_PUTS_CASE(S_IFIFO, "f");
+		PARSE_PUTS_CASE(S_IFCHR, "c");
+		PARSE_PUTS_CASE(S_IFBLK, "b");
 	default:
-		puts("unknown");
+		puts("-");
 	}
 }
 
@@ -190,7 +191,7 @@ reveal_perms(struct stat *s)
 static void
 reveal_oct_perms(struct stat *s)
 {
-	printf("0%o\n", s->st_mode & (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP |
+	printf("%o\n", s->st_mode & (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP |
 		S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH));
 }
 
@@ -323,8 +324,8 @@ reveal_ctts(struct stat *s, char *path)
 		PARSE_RET_CASE(S_IFREG, reveal_file(path));
 		PARSE_RET_CASE(S_IFDIR, reveal_dir(path));
 		PARSE_RET_CASE(S_IFLNK, print_err("can't read symlink \"", path,
-			"\".", "Try to use the \"--flw-lnk\" option before "
-			"it."))
+			"\".", "Try to use the \"--flw-lnk\" option right "
+			"before it."))
 	default:
 		return print_err("can't read contents of \"", path, "\".",
 			"Its type is unreadable.");
