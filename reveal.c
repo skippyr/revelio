@@ -232,6 +232,22 @@ alloc_dir_ents(DIR *d, void **es)
 	}
 }
 
+static void
+sort_dir_ents(void **es, size_t s)
+{
+	for (size_t i = 0; i < s - 1; i++) {
+		size_t w = i;
+		for (size_t j = i + 1; j < s; j++)
+			if (strcmp(es[j], es[w]) < 0)
+				w = j;
+		if (w == i)
+			continue;
+		void *t = es[i];
+		es[i] = es[w];
+		es[w] = t;
+	}
+}
+
 static int
 reveal_dir(char *path)
 {
@@ -246,6 +262,7 @@ reveal_dir(char *path)
 	}
 	void *es[s];
 	alloc_dir_ents(d, es);
+	sort_dir_ents(es, s);
 	for (size_t i = 0; i < s; i++) {
 		puts(es[i]);
 		free(es[i]);
