@@ -16,10 +16,10 @@
 	case v:\
 		a;\
 		break;
-#define PARSE_PUTS_CASE(v, t) PARSE_CASE(v, puts(t);)
 #define PARSE_RET_CASE(v, a)\
 	case v:\
 		return a;
+#define PARSE_TYPE_CASE(v, t) PARSE_CASE(v, printf("%c\n", t);)
 #define PARSE_SIZE_PREF_MUL(v, c)\
 	z = s->st_size / v;\
 	if ((int)z) {\
@@ -78,8 +78,8 @@ help()
 	puts("Reveals information about entries in the file system.\n");
 	puts("META OPTIONS");
 	puts("These options retrieve information about the program.\n");
-	puts("  --version  print its version.");
-	puts("  --help     print this help.\n");
+	puts("  --ver   print its version.");
+	puts("  --help  print this help.\n");
 	puts("DATA TYPE OPTIONS");
 	puts("These options change the data type to retrieve from the entries "
 		"following them.\n");
@@ -144,13 +144,13 @@ static void
 reveal_type(struct stat *s)
 {
 	switch (s->st_mode & S_IFMT) {
-		PARSE_PUTS_CASE(S_IFREG, "r");
-		PARSE_PUTS_CASE(S_IFDIR, "d");
-		PARSE_PUTS_CASE(S_IFLNK, "l");
-		PARSE_PUTS_CASE(S_IFSOCK, "s");
-		PARSE_PUTS_CASE(S_IFIFO, "f");
-		PARSE_PUTS_CASE(S_IFCHR, "c");
-		PARSE_PUTS_CASE(S_IFBLK, "b");
+		PARSE_TYPE_CASE(S_IFREG, 'r');
+		PARSE_TYPE_CASE(S_IFDIR, 'd');
+		PARSE_TYPE_CASE(S_IFLNK, 'l');
+		PARSE_TYPE_CASE(S_IFSOCK, 's');
+		PARSE_TYPE_CASE(S_IFIFO, 'f');
+		PARSE_TYPE_CASE(S_IFCHR, 'c');
+		PARSE_TYPE_CASE(S_IFBLK, 'b');
 	default:
 		puts("-");
 	}
@@ -400,7 +400,7 @@ static void
 parse_meta_opts(int argc, char **argv)
 {
 	for (int i = 1; i < argc; i++) {
-		PARSE_META_OPT("version", puts(PGR_VER));
+		PARSE_META_OPT("ver", puts(PGR_VER));
 		PARSE_META_OPT("help", help());
 	}
 }
