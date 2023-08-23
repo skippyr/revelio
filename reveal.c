@@ -22,6 +22,7 @@
 		printf("%.1f%cB\n", z, c);\
 		return;\
 	}
+#define PARSE_PERM(b, c) putchar(s->st_mode & b ? c : lack_chr);
 #define PARSE_OPT(o, t, a)\
 	if (!strcmp("--" o, t)) {\
 		a;\
@@ -114,6 +115,29 @@ reveal_b_size(struct stat *s)
 	printf("%ld\n", s->st_size);
 }
 
+static void
+reveal_perms(struct stat *s)
+{
+	char read_chr = 'r', write_chr = 'w', exec_chr = 'x', lack_chr = '-';
+	PARSE_PERM(S_IRUSR, read_chr);
+	PARSE_PERM(S_IWUSR, write_chr);
+	PARSE_PERM(S_IXUSR, exec_chr);
+	PARSE_PERM(S_IRGRP, read_chr);
+	PARSE_PERM(S_IWGRP, write_chr);
+	PARSE_PERM(S_IXGRP, exec_chr);
+	PARSE_PERM(S_IROTH, read_chr);
+	PARSE_PERM(S_IWOTH, write_chr);
+	PARSE_PERM(S_IXOTH, exec_chr);
+	putchar('\n');
+}
+
+static void
+reveal_oct_perms(struct stat *s)
+{
+	printf("0%o\n", s->st_mode & (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP |
+		S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH));
+}
+
 static int
 reveal_file(char *path)
 {
@@ -160,6 +184,8 @@ reveal(char *path)
 		PARSE_CASE(DT_TYPE, reveal_type(&s));
 		PARSE_CASE(DT_SIZE, reveal_size(&s));
 		PARSE_CASE(DT_B_SIZE, reveal_b_size(&s));
+		PARSE_CASE(DT_PERMS, reveal_perms(&s));
+		PARSE_CASE(DT_OCT_PERMS, reveal_oct_perms(&s));
 	default:
 		return reveal_ctts(&s, path);
 	}
