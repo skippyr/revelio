@@ -15,6 +15,8 @@
 #define PRS_R_CASE(v, a) case v: return a;
 #define PRS_CASE(v, a) case v: a; break;
 #define PRS_PUTS_CASE(v, t) PRS_CASE(v, puts(t))
+#define PRS_SZ_P_MUL(p, c) z = s->st_size / (p); if ((int)z) {\
+	printf("%.1f%cB\n", z, c); return;}
 #define PRS_PRM(p, c) putchar(s->st_mode & p ? c : '-')
 #define PRS_OPT(o, t, a) if (!strcmp("--" o, t)) {a;}
 #define PRS_MT_OPT(o, t) PRS_OPT(o, a[i], t; exit(EXIT_SUCCESS))
@@ -79,17 +81,33 @@ rvl_tp(struct stat *s)
 }
 
 static void
+rvl_sz(struct stat *s)
+{
+	float z = 0;
+	PRS_SZ_P_MUL(1e9, 'G');
+	PRS_SZ_P_MUL(1e6, 'M');
+	PRS_SZ_P_MUL(1e3, 'k');
+	printf("%ldB\n", s->st_size);
+}
+
+static void
+rvl_bt_sz(struct stat *s)
+{
+	printf("%ld\n", s->st_size);
+}
+
+static void
 rvl_prm(struct stat *s)
 {
 	PRS_PRM(S_IRUSR, 'r');
 	PRS_PRM(S_IWUSR, 'w');
-	PRS_PRM(S_IXUSR, 'e');
+	PRS_PRM(S_IXUSR, 'x');
 	PRS_PRM(S_IRGRP, 'r');
 	PRS_PRM(S_IWGRP, 'w');
-	PRS_PRM(S_IXGRP, 'e');
+	PRS_PRM(S_IXGRP, 'x');
 	PRS_PRM(S_IROTH, 'r');
 	PRS_PRM(S_IWOTH, 'w');
-	PRS_PRM(S_IXOTH, 'e');
+	PRS_PRM(S_IXOTH, 'x');
 	putchar('\n');
 }
 
@@ -244,6 +262,8 @@ rvl(char *p)
 			"misspelled it.");
 	switch (DT) {
 		PRS_CASE(DT_TP, rvl_tp(&s));
+		PRS_CASE(DT_SZ, rvl_sz(&s));
+		PRS_CASE(DT_BT_SZ, rvl_bt_sz(&s));
 		PRS_CASE(DT_PRM, rvl_prm(&s));
 		PRS_CASE(DT_OCT_PRM, rvl_oct_prm(&s));
 		PRS_R_CASE(DT_USR, rvl_usr(&s, p));
