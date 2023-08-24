@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <time.h>
 
 #define PGR_NAME "reveal"
 #define PGR_VRS "v11.0.0"
@@ -142,6 +143,18 @@ rvl_own_id(unsigned i)
 }
 
 static int
+rvl_m_date(struct stat *s)
+{
+	char m[29];
+	if (!strftime(m, sizeof(m), "%a %b %d %T %Z %Y",
+		localtime(&s->st_mtime)))
+		return pr_err("overflowed modified date buffer.", NULL, NULL,
+			NULL);
+	puts(m);
+	return 0;
+}
+
+static int
 g_dir_sz(DIR *d)
 {
 	size_t s = 0;
@@ -237,6 +250,7 @@ rvl(char *p)
 		PRS_CASE(DT_USR_ID, rvl_own_id(s.st_uid));
 		PRS_R_CASE(DT_GRP, rvl_grp(&s, p));
 		PRS_CASE(DT_GRP_ID, rvl_own_id(s.st_gid));
+		PRS_R_CASE(DT_M_DATE, rvl_m_date(&s));
 	default:
 		return rvl_ct(&s, p);
 	}
