@@ -25,20 +25,20 @@
 #define PRS_LNK_OPT(o, f) PRS_OPT(o, g, if (l) {rvl(p);} FLW_LNK = f; return 1;)
 
 enum dt {
-	DT_CT,
-	DT_TP,
-	DT_SZ,
-	DT_BT_SZ,
-	DT_PRM,
-	DT_OCT_PRM,
-	DT_USR,
-	DT_USR_ID,
+	DT_C,
+	DT_T,
+	DT_S,
+	DT_BS,
+	DT_P,
+	DT_OP,
+	DT_U,
+	DT_UI,
 	DT_GRP,
-	DT_GRP_ID,
-	DT_M_DATE
+	DT_G,
+	DT_MD
 };
 
-static enum dt DT = DT_CT;
+static enum dt DT = DT_C;
 static bool H_ERR = false, FLW_LNK = true, AW_ARG = false;
 
 static void
@@ -113,7 +113,7 @@ die(char *d)
 }
 
 static void
-rvl_tp(struct stat *s)
+rvl_t(struct stat *s)
 {
 	switch (s->st_mode & S_IFMT) {
 		PRS_PUTS_CASE(S_IFREG, "r");
@@ -129,7 +129,7 @@ rvl_tp(struct stat *s)
 }
 
 static void
-rvl_sz(struct stat *s)
+rvl_s(struct stat *s)
 {
 	float z = 0;
 	PRS_SZ_P_MUL(1e9, 'G');
@@ -139,13 +139,13 @@ rvl_sz(struct stat *s)
 }
 
 static void
-rvl_bt_sz(struct stat *s)
+rvl_bs(struct stat *s)
 {
 	printf("%ld\n", s->st_size);
 }
 
 static void
-rvl_prm(struct stat *s)
+rvl_p(struct stat *s)
 {
 	PRS_PRM(S_IRUSR, 'r');
 	PRS_PRM(S_IWUSR, 'w');
@@ -160,14 +160,14 @@ rvl_prm(struct stat *s)
 }
 
 static void
-rvl_oct_prm(struct stat *s)
+rvl_op(struct stat *s)
 {
 	printf("%o\n", s->st_mode & (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP |
 		S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH));
 }
 
 static int
-rvl_usr(struct stat *s, char *p)
+rvl_u(struct stat *s, char *p)
 {
 	struct passwd *u = getpwuid(s->st_uid);
 	if (!u)
@@ -178,7 +178,7 @@ rvl_usr(struct stat *s, char *p)
 }
 
 static int
-rvl_grp(struct stat *s, char *p)
+rvl_g(struct stat *s, char *p)
 {
 	struct group *g = getgrgid(s->st_gid);
 	if (!g)
@@ -203,13 +203,13 @@ rvl_reg(char *p)
 }
 
 static void
-rvl_own_id(unsigned i)
+rvl_id(unsigned i)
 {
 	printf("%u\n", i);
 }
 
 static int
-rvl_m_date(struct stat *s)
+rvl_md(struct stat *s)
 {
 	char m[29];
 	if (!strftime(m, sizeof(m), "%a %b %d %T %Z %Y",
@@ -221,7 +221,7 @@ rvl_m_date(struct stat *s)
 }
 
 static int
-g_dir_sz(DIR *d)
+get_dir_s(DIR *d)
 {
 	size_t s = 0;
 	for (; readdir(d); s++);
@@ -270,7 +270,7 @@ rvl_dir(char *p)
 	if (!d)
 		return pr_err("can't open directory \"", p, "\"", "Check if "
 			"you have permission to read it.");
-	size_t s = g_dir_sz(d);
+	size_t s = get_dir_s(d);
 	if (!s) {
 		closedir(d);
 		return 0;
@@ -287,7 +287,7 @@ rvl_dir(char *p)
 }
 
 static int
-rvl_ct(struct stat *s, char *p)
+rvl_c(struct stat *s, char *p)
 {
 	switch (s->st_mode & S_IFMT) {
 		PRS_R_CASE(S_IFREG, rvl_reg(p));
@@ -308,18 +308,18 @@ rvl(char *p)
 		return pr_err("can't find entry \"", p, "\".", "Check if you "
 			"misspelled it.");
 	switch (DT) {
-		PRS_CASE(DT_TP, rvl_tp(&s));
-		PRS_CASE(DT_SZ, rvl_sz(&s));
-		PRS_CASE(DT_BT_SZ, rvl_bt_sz(&s));
-		PRS_CASE(DT_PRM, rvl_prm(&s));
-		PRS_CASE(DT_OCT_PRM, rvl_oct_prm(&s));
-		PRS_R_CASE(DT_USR, rvl_usr(&s, p));
-		PRS_CASE(DT_USR_ID, rvl_own_id(s.st_uid));
-		PRS_R_CASE(DT_GRP, rvl_grp(&s, p));
-		PRS_CASE(DT_GRP_ID, rvl_own_id(s.st_gid));
-		PRS_R_CASE(DT_M_DATE, rvl_m_date(&s));
+		PRS_CASE(DT_T, rvl_t(&s));
+		PRS_CASE(DT_S, rvl_s(&s));
+		PRS_CASE(DT_BS, rvl_bs(&s));
+		PRS_CASE(DT_P, rvl_p(&s));
+		PRS_CASE(DT_OP, rvl_op(&s));
+		PRS_R_CASE(DT_U, rvl_u(&s, p));
+		PRS_CASE(DT_UI, rvl_id(s.st_uid));
+		PRS_R_CASE(DT_GRP, rvl_g(&s, p));
+		PRS_CASE(DT_G, rvl_id(s.st_gid));
+		PRS_R_CASE(DT_MD, rvl_md(&s));
 	default:
-		return rvl_ct(&s, p);
+		return rvl_c(&s, p);
 	}
 	return 0;
 }
@@ -335,17 +335,17 @@ prs_lnk_opts(char *p, char *g, bool l)
 static int
 prs_dt_opts(char *p, char *g, bool l)
 {
-	PRS_DT_OPT("c", DT_CT);
-	PRS_DT_OPT("t", DT_TP);
-	PRS_DT_OPT("s", DT_SZ);
-	PRS_DT_OPT("bs", DT_BT_SZ);
-	PRS_DT_OPT("p", DT_PRM);
-	PRS_DT_OPT("op", DT_OCT_PRM);
-	PRS_DT_OPT("u", DT_USR);
-	PRS_DT_OPT("ui", DT_USR_ID);
+	PRS_DT_OPT("c", DT_C);
+	PRS_DT_OPT("t", DT_T);
+	PRS_DT_OPT("s", DT_S);
+	PRS_DT_OPT("bs", DT_BS);
+	PRS_DT_OPT("p", DT_P);
+	PRS_DT_OPT("op", DT_OP);
+	PRS_DT_OPT("u", DT_U);
+	PRS_DT_OPT("ui", DT_UI);
 	PRS_DT_OPT("g", DT_GRP);
-	PRS_DT_OPT("gi", DT_GRP_ID);
-	PRS_DT_OPT("md", DT_M_DATE);
+	PRS_DT_OPT("gi", DT_G);
+	PRS_DT_OPT("md", DT_MD);
 	return 0;
 }
 
