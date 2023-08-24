@@ -18,7 +18,7 @@
 #define PRS_SZ_P_MUL(p, c) z = s->st_size / (p); if ((int)z) {\
 	printf("%.1f%cB\n", z, c); return;}
 #define PRS_PRM(p, c) putchar(s->st_mode & p ? c : '-')
-#define PRS_OPT(o, t, a) if (!strcmp("--" o, t)) {a;}
+#define PRS_OPT(o, t, a) if (!strcmp("-" o, t)) {a;}
 #define PRS_MT_OPT(o, t) PRS_OPT(o, a[i], t; exit(EXIT_SUCCESS))
 #define PRS_DT_OPT(o, d) PRS_OPT(o, g, if (AW_ARG) {rvl(p);} DT = d;\
 	AW_ARG = true; if (l) {rvl(p);}; return 1)
@@ -45,7 +45,55 @@ static void
 help(void)
 {
 	printf("Usage: %s [OPTION | PATH]...\n", PGR_NAME);
-	puts("Reveals information about entries in the file system.");
+	puts("Reveals info about entries in the file system.\n");
+	puts("META OPTIONS");
+	puts("These options retrieve information about the program.\n");
+	puts("  -v  print its version.");
+	puts("  -h  print this help.\n");
+	puts("DATA TYPE OPTIONS");
+	puts("These options change the data type to retrieve from the entries "
+		"following them.\n");
+	puts("  -c (default)  print its contents.");
+	puts("  -t            print its type: regular (r), directory (d), "
+		"symlink (l),\n                socket (s), fifo (f), character "
+		"device (c), block device (b)\n                or unknown "
+		"(-).");
+	puts("  -s            print its size in a convenient unit: gigabyte "
+		"(GB),\n                megabyte (MB), kilobyte (kB) or byte "
+		"(B).");
+	puts("  -bs           print its size in bytes with no unit besides.");
+	puts("  -p            print its read (r), write (w), execute (x) and "
+		"lack (-)\n                permissions for user, group and "
+		"others.");
+	puts("  -op           print its permissions in octal base.");
+	puts("  -u            print the user that owns it.");
+	puts("  -ui           print the ID of the user that owns it.");
+	puts("  -g            print the group that owns it.");
+	puts("  -gi           print the ID of the group that owns it.");
+	puts("  -md           print the date when its contents were last "
+		"modified.\n");
+	puts("All these options expect a path following them. If not provided, "
+		"they will\nconsider the last valid one given or, else, the "
+		"current directory.\n");
+	puts("If none of these is provided, the one marked as default will be "
+		"considered.\n");
+	puts("SYMLINKS OPTIONS");
+	puts("These options change how symlinks following them will be "
+		"handled, possibly\nchanging the origin of the data "
+		"retrieved.\n");
+	puts("  -fl (default)  follow symlinks.");
+	puts("  -dfl           don't follow symlinks.\n");
+	puts("If none of these is provided, the one marked as default will be "
+		"considered.\n");
+	puts("EXIT CODES");
+	puts("Code 1 will be throw if an error happens and 0 otherwise.\n");
+	puts("SOURCE CODE");
+	puts("Its source code is available at:");
+	puts("<https://github.com/skippyr/reveal>.\n");
+	puts("SUPPORT");
+	puts("Report issues, questions and suggestions through its issues "
+		"page:");
+	puts("<https://github.com/skippyr/reveal/issues>");
 }
 
 static int
@@ -245,8 +293,7 @@ rvl_ct(struct stat *s, char *p)
 		PRS_R_CASE(S_IFREG, rvl_reg(p));
 		PRS_R_CASE(S_IFDIR, rvl_dir(p));
 		PRS_R_CASE(S_IFLNK, pr_err("can't read symlink \"", p, "\".",
-			"Try to use the \"--flw-lnk\" option right before "
-			"it."));
+			"Try to use the \"-fl\" option right before it."));
 	default:
 		return pr_err("can't read contents of \"", p, "\".",
 			"Its type is unreadable.");
@@ -280,25 +327,25 @@ rvl(char *p)
 static int
 prs_lnk_opts(char *p, char *g, bool l)
 {
-	PRS_LNK_OPT("follow-symlinks", true);
-	PRS_LNK_OPT("unfollow-symlinks", false);
+	PRS_LNK_OPT("fl", true);
+	PRS_LNK_OPT("dfl", false);
 	return 0;
 }
 
 static int
 prs_dt_opts(char *p, char *g, bool l)
 {
-	PRS_DT_OPT("contents", DT_CT);
-	PRS_DT_OPT("type", DT_TP);
-	PRS_DT_OPT("size", DT_SZ);
-	PRS_DT_OPT("byte-size", DT_BT_SZ);
-	PRS_DT_OPT("permissions", DT_PRM);
-	PRS_DT_OPT("octal-permissions", DT_OCT_PRM);
-	PRS_DT_OPT("user", DT_USR);
-	PRS_DT_OPT("user-id", DT_USR_ID);
-	PRS_DT_OPT("group", DT_GRP);
-	PRS_DT_OPT("group-id", DT_GRP_ID);
-	PRS_DT_OPT("modified-date", DT_M_DATE);
+	PRS_DT_OPT("c", DT_CT);
+	PRS_DT_OPT("t", DT_TP);
+	PRS_DT_OPT("s", DT_SZ);
+	PRS_DT_OPT("bs", DT_BT_SZ);
+	PRS_DT_OPT("p", DT_PRM);
+	PRS_DT_OPT("op", DT_OCT_PRM);
+	PRS_DT_OPT("u", DT_USR);
+	PRS_DT_OPT("ui", DT_USR_ID);
+	PRS_DT_OPT("g", DT_GRP);
+	PRS_DT_OPT("gi", DT_GRP_ID);
+	PRS_DT_OPT("md", DT_M_DATE);
 	return 0;
 }
 
@@ -320,8 +367,8 @@ static void
 prs_mt_opts(int c, char **a)
 {
 	for (int i = 1; i < c; i++) {
-		PRS_MT_OPT("version", puts(PGR_VRS));
-		PRS_MT_OPT("help", help());
+		PRS_MT_OPT("v", puts(PGR_VRS));
+		PRS_MT_OPT("h", help());
 	}
 }
 
