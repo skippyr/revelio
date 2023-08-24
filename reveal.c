@@ -12,6 +12,7 @@
 #define PRS_R_CASE(v, a) case v: return a;
 #define PRS_CASE(v, a) case v: a; break;
 #define PRS_PUTS_CASE(v, t) PRS_CASE(v, puts(t))
+#define PRS_PRM(p, c) putchar(s->st_mode & p ? c : lack)
 #define PRS_OPT(o, t, a) if (!strcmp("--" o, t)) {a;}
 #define PRS_MT_OPT(o, t) PRS_OPT(o, a[i], t; exit(EXIT_SUCCESS))
 #define PRS_DT_OPT(o, d) PRS_OPT(o, g, if (AW_ARG) {rvl(p);} DT = d;\
@@ -72,6 +73,29 @@ rvl_tp(struct stat *s)
 	default:
 		puts("-");
 	}
+}
+
+static void
+rvl_prm(struct stat *s)
+{
+	char read = 'r', write = 'w', exec = 'x', lack = '-';
+	PRS_PRM(S_IRUSR, read);
+	PRS_PRM(S_IWUSR, write);
+	PRS_PRM(S_IXUSR, exec);
+	PRS_PRM(S_IRGRP, read);
+	PRS_PRM(S_IWGRP, write);
+	PRS_PRM(S_IXGRP, exec);
+	PRS_PRM(S_IROTH, read);
+	PRS_PRM(S_IWOTH, write);
+	PRS_PRM(S_IXOTH, exec);
+	putchar('\n');
+}
+
+static void
+rvl_oct_prm(struct stat *s)
+{
+	printf("%o\n", s->st_mode & (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP |
+		S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH));
 }
 
 static int
@@ -178,6 +202,8 @@ rvl(char *p)
 			"misspelled it.");
 	switch (DT) {
 		PRS_CASE(DT_TP, rvl_tp(&s));
+		PRS_CASE(DT_PRM, rvl_prm(&s));
+		PRS_CASE(DT_OCT_PRM, rvl_oct_prm(&s));
 	default:
 		return rvl_ct(&s, p);
 	}
@@ -200,7 +226,7 @@ prs_dt_opts(char *p, char *g, bool l)
 	PRS_DT_OPT("size", DT_SZ);
 	PRS_DT_OPT("byte-size", DT_BT_SZ);
 	PRS_DT_OPT("permissions", DT_PRM);
-	PRS_DT_OPT("oct-permissions", DT_OCT_PRM);
+	PRS_DT_OPT("octal-permissions", DT_OCT_PRM);
 	PRS_DT_OPT("user", DT_USR);
 	PRS_DT_OPT("user-id", DT_USR_ID);
 	PRS_DT_OPT("group", DT_GRP);
