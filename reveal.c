@@ -1,4 +1,6 @@
 #include <dirent.h>
+#include <grp.h>
+#include <pwd.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,7 +14,7 @@
 #define PRS_R_CASE(v, a) case v: return a;
 #define PRS_CASE(v, a) case v: a; break;
 #define PRS_PUTS_CASE(v, t) PRS_CASE(v, puts(t))
-#define PRS_PRM(p, c) putchar(s->st_mode & p ? c : lack)
+#define PRS_PRM(p, c) putchar(s->st_mode & p ? c : '-')
 #define PRS_OPT(o, t, a) if (!strcmp("--" o, t)) {a;}
 #define PRS_MT_OPT(o, t) PRS_OPT(o, a[i], t; exit(EXIT_SUCCESS))
 #define PRS_DT_OPT(o, d) PRS_OPT(o, g, if (AW_ARG) {rvl(p);} DT = d;\
@@ -78,16 +80,15 @@ rvl_tp(struct stat *s)
 static void
 rvl_prm(struct stat *s)
 {
-	char read = 'r', write = 'w', exec = 'x', lack = '-';
-	PRS_PRM(S_IRUSR, read);
-	PRS_PRM(S_IWUSR, write);
-	PRS_PRM(S_IXUSR, exec);
-	PRS_PRM(S_IRGRP, read);
-	PRS_PRM(S_IWGRP, write);
-	PRS_PRM(S_IXGRP, exec);
-	PRS_PRM(S_IROTH, read);
-	PRS_PRM(S_IWOTH, write);
-	PRS_PRM(S_IXOTH, exec);
+	PRS_PRM(S_IRUSR, 'r');
+	PRS_PRM(S_IWUSR, 'w');
+	PRS_PRM(S_IXUSR, 'e');
+	PRS_PRM(S_IRGRP, 'r');
+	PRS_PRM(S_IWGRP, 'w');
+	PRS_PRM(S_IXGRP, 'e');
+	PRS_PRM(S_IROTH, 'r');
+	PRS_PRM(S_IWOTH, 'w');
+	PRS_PRM(S_IXOTH, 'e');
 	putchar('\n');
 }
 
@@ -96,6 +97,28 @@ rvl_oct_prm(struct stat *s)
 {
 	printf("%o\n", s->st_mode & (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP |
 		S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH));
+}
+
+static int
+rvl_usr(struct stat *s, char *p)
+{
+	struct passwd *u = getpwuid(s->st_uid);
+	if (!u)
+		return pr_err("can't find user that owns \"", p, "\".",
+			"Ensure that it is not a dangling symlink.");
+	puts(u->pw_name);
+	return 0;
+}
+
+static int
+rvl_grp(struct stat *s, char *p)
+{
+	struct group *g = getgrgid(s->st_gid);
+	if (!g)
+		return pr_err("can't find group that owns \"", p, "\".",
+			"Ensure that it is not a dangling symlink.");
+	puts(g->gr_name);
+	return 0;
 }
 
 static int
@@ -110,6 +133,12 @@ rvl_reg(char *p)
 		putchar(c);
 	fclose(f);
 	return 0;
+}
+
+static void
+rvl_own_id(unsigned i)
+{
+	printf("%u\n", i);
 }
 
 static int
@@ -204,6 +233,10 @@ rvl(char *p)
 		PRS_CASE(DT_TP, rvl_tp(&s));
 		PRS_CASE(DT_PRM, rvl_prm(&s));
 		PRS_CASE(DT_OCT_PRM, rvl_oct_prm(&s));
+		PRS_R_CASE(DT_USR, rvl_usr(&s, p));
+		PRS_CASE(DT_USR_ID, rvl_own_id(s.st_uid));
+		PRS_R_CASE(DT_GRP, rvl_grp(&s, p));
+		PRS_CASE(DT_GRP_ID, rvl_own_id(s.st_gid));
 	default:
 		return rvl_ct(&s, p);
 	}
@@ -230,7 +263,7 @@ prs_dt_opts(char *p, char *g, bool l)
 	PRS_DT_OPT("user", DT_USR);
 	PRS_DT_OPT("user-id", DT_USR_ID);
 	PRS_DT_OPT("group", DT_GRP);
-	PRS_DT_OPT("group-gid", DT_GRP_ID);
+	PRS_DT_OPT("group-id", DT_GRP_ID);
 	PRS_DT_OPT("modified-date", DT_M_DATE);
 	return 0;
 }
