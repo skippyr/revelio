@@ -10,6 +10,8 @@
 #define EXIT_CD(e) (e ? EXIT_FAILURE : EXIT_SUCCESS)
 #define NULL_STR(s) (s ? s : "")
 #define PRS_R_CASE(v, a) case v: return a;
+#define PRS_CASE(v, a) case v: a; break;
+#define PRS_PUTS_CASE(v, t) PRS_CASE(v, puts(t))
 #define PRS_OPT(o, t, a) if (!strcmp("--" o, t)) {a;}
 #define PRS_MT_OPT(o, t) PRS_OPT(o, a[i], t; exit(EXIT_SUCCESS))
 #define PRS_DT_OPT(o, d) PRS_OPT(o, g, if (AW_ARG) {rvl(p);} DT = d;\
@@ -54,6 +56,22 @@ die(char *d)
 {
 	pr_err(d, NULL, NULL, NULL);
 	exit(EXIT_FAILURE);
+}
+
+static void
+rvl_tp(struct stat *s)
+{
+	switch (s->st_mode & S_IFMT) {
+		PRS_PUTS_CASE(S_IFREG, "r");
+		PRS_PUTS_CASE(S_IFDIR, "d");
+		PRS_PUTS_CASE(S_IFLNK, "l");
+		PRS_PUTS_CASE(S_IFSOCK, "s");
+		PRS_PUTS_CASE(S_IFIFO, "f");
+		PRS_PUTS_CASE(S_IFCHR, "c");
+		PRS_PUTS_CASE(S_IFBLK, "b");
+	default:
+		puts("-");
+	}
 }
 
 static int
@@ -137,7 +155,7 @@ rvl_dir(char *p)
 }
 
 static int
-rvl_ctts(struct stat *s, char *p)
+rvl_ct(struct stat *s, char *p)
 {
 	switch (s->st_mode & S_IFMT) {
 		PRS_R_CASE(S_IFREG, rvl_reg(p));
@@ -159,9 +177,11 @@ rvl(char *p)
 		return pr_err("can't find entry \"", p, "\".", "Check if you "
 			"misspelled it.");
 	switch (DT) {
+		PRS_CASE(DT_TP, rvl_tp(&s));
 	default:
-		return rvl_ctts(&s, p);
+		return rvl_ct(&s, p);
 	}
+	return 0;
 }
 
 static int
