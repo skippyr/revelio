@@ -1,416 +1,100 @@
-#include <dirent.h>
-#include <grp.h>
-#include <pwd.h>
-#include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <time.h>
+#include <stdio.h>
 
 #define PGR_NAME "reveal"
-#define PGR_VERSION "v10.0.0"
-#define PARSE_EXIT_CODE(e) (e ? EXIT_FAILURE : EXIT_SUCCESS)
-#define PARSE_NULL_STR(s) (s ? s : "")
-#define PARSE_CASE(v, a)\
-	case v:\
-		a;\
-		break;
-#define PARSE_RET_CASE(v, a)\
-	case v:\
-		return a;
-#define PARSE_TYPE_CASE(v, t) PARSE_CASE(v, printf("%c\n", t);)
-#define PARSE_SIZE_PREF_MUL(v, c)\
-	z = s->st_size / v;\
-	if ((int)z) {\
-		printf("%.1f%cB\n", z, c);\
-		return;\
-	}
-#define PARSE_PERM(b, c) putchar(s->st_mode & b ? c : lack_chr);
-#define PARSE_OPT(o, t, a)\
-	if (!strcmp("--" o, t)) {\
-		a;\
-	}
-#define PARSE_META_OPT(o, a)\
-	PARSE_OPT(o, argv[i],\
-		a;\
-		exit(EXIT_SUCCESS);\
-	)
-#define PARSE_DT_OPT(o, d)\
-	PARSE_OPT(o, arg,\
-		if (AW_ARG)\
-			reveal(path);\
-		DT = d;\
-		AW_ARG = true;\
-		if (is_last)\
-			reveal(path);\
-		return 1;\
-	)
-#define PARSE_LNK_OPT(o, f)\
-	PARSE_OPT(o, arg,\
-		if (is_last)\
-			reveal(path);\
-		FLW_LNK = f;\
-		return 1;\
-	)
+#define PGR_VRS "v11.0.0"
+#define EXIT_CD(e) (e ? EXIT_FAILURE : EXIT_SUCCESS)
+#define PRS_OPT(o, t, a) if (!strcmp("--" o, t)) {a;}
+#define PRS_MT_OPT(o, t) PRS_OPT(o, a[i], t; exit(EXIT_SUCCESS))
+#define PRS_DT_OPT(o, d) PRS_OPT(o, g, if (AW_ARG) {rvl(p);} DT = d;\
+	AW_ARG = true; if (l) {rvl(p);}; return 1)
+#define PRS_LNK_OPT(o, f) PRS_OPT(o, g, if (l) {rvl(p);} FLW_LNK = f; return 1;)
 
-enum data_type {
-	DT_CTTS,
-	DT_TYPE,
-	DT_SIZE,
-	DT_BT_SIZE,
-	DT_PERMS,
-	DT_OCT_PERMS,
+enum dt {
+	DT_CT,
+	DT_TP,
+	DT_SZ,
+	DT_BT_SZ,
+	DT_PRM,
+	DT_OCT_PRM,
 	DT_USR,
 	DT_USR_ID,
 	DT_GRP,
 	DT_GRP_ID,
-	DT_MOD_DATE
+	DT_M_DATE
 };
 
-static enum data_type DT = DT_CTTS;
-static bool HAD_ERR = false, FLW_LNK = true, AW_ARG = false;
+static enum dt DT = DT_CT;
+static bool H_ERR = false, FLW_LNK = true, AW_ARG = false;
 
 static void
-help()
+help(void)
 {
 	printf("Usage: %s [OPTION | PATH]...\n", PGR_NAME);
-	puts("Reveals data from entries in the file system.\n");
-	puts("META OPTIONS");
-	puts("These options retrieve information about the program.\n");
-	puts("  --version  print its version.");
-	puts("  --help     print this help.\n");
-	puts("DATA TYPE OPTIONS");
-	puts("These options change the data type to retrieve from the entries "
-		"following them.\n");
-	puts("  --ctts (default)  print its contents.");
-	puts("  --type            print its type: regular (r), directory (d), "
-		"symlink (l),\n                    socket (s), fifo (f), "
-		"character device (c), block device (b)\n                    "
-		"or unknown (-).");
-	puts("  --size            print its size in a convenient unit: "
-		"gigabyte (GB),\n                    megabyte (MB), kilobyte "
-		"(kB) or byte (B).");
-	puts("  --bt-size         print its size in bytes, no unit besides.");
-	puts("  --perms           print its read (r), write (w), execute "
-		"(x) and lack (-)\n                    permissions for user, "
-		"group and others.");
-	puts("  --oct-perms       print its permissions in octal base.");
-	puts("  --usr             print the user that owns it.");
-	puts("  --usr-id          print the ID of the user that owns it.");
-	puts("  --grp             print the group that owns it.");
-	puts("  --grp-id          print the ID of the group that owns it.");
-	puts("  --mod-date        print the date when its contents were last "
-		"modified.\n");
-	puts("All these options expect a path following them. If not provided, "
-		"they will\nconsider the last valid one given or, else, the "
-		"current directory.\n");
-	puts("If none of these is provided, the one marked as default will be "
-		"considered.\n");
-	puts("SYMLINKS OPTIONS");
-	puts("These options change how symlinks following them will be "
-		"handled, possibly\nchanging the origin of the data "
-		"retrieved.\n");
-	puts("  --flw-lnk (default)  follow symlinks.");
-	puts("  --uflw-lnk           don't follow symlinks.\n");
-	puts("If none of these is provided, the one marked as default will be "
-		"considered.\n");
-	puts("EXIT CODES");
-	puts("Code 1 will be throw if an error happens and 0 otherwise.\n");
-	puts("SUPPORT");
-	puts("Report issues, questions and suggestions through its issues "
-		"page:");
-	puts("<https://github.com/skippyr/reveal/issues>");
+	puts("Reveals information about entries in the file system.");
 }
 
 static int
-print_err(char *desc0, char *desc1, char *desc2, char *fix)
+rvl(char *p)
 {
-	fprintf(stderr, "%s: %s%s%s\n%s%s", PGR_NAME, PARSE_NULL_STR(desc0),
-		PARSE_NULL_STR(desc1), PARSE_NULL_STR(desc2),
-		PARSE_NULL_STR(fix), fix ? "\n" : "");
-	HAD_ERR = true;
-	return 1;
-}
-
-static int
-die(char *desc)
-{
-	print_err(desc, NULL, NULL, NULL);
-	exit(EXIT_FAILURE);
-}
-
-static void
-reveal_type(struct stat *s)
-{
-	switch (s->st_mode & S_IFMT) {
-		PARSE_TYPE_CASE(S_IFREG, 'r');
-		PARSE_TYPE_CASE(S_IFDIR, 'd');
-		PARSE_TYPE_CASE(S_IFLNK, 'l');
-		PARSE_TYPE_CASE(S_IFSOCK, 's');
-		PARSE_TYPE_CASE(S_IFIFO, 'f');
-		PARSE_TYPE_CASE(S_IFCHR, 'c');
-		PARSE_TYPE_CASE(S_IFBLK, 'b');
-	default:
-		puts("-");
-	}
-}
-
-static void
-reveal_size(struct stat *s)
-{
-	float z;
-	PARSE_SIZE_PREF_MUL(1e9, 'G');
-	PARSE_SIZE_PREF_MUL(1e6, 'M');
-	PARSE_SIZE_PREF_MUL(1e3, 'k');
-	printf("%ldB\n", s->st_size);
-}
-
-static void
-reveal_bt_size(struct stat *s)
-{
-	printf("%ld\n", s->st_size);
-}
-
-static void
-reveal_perms(struct stat *s)
-{
-	char read_chr = 'r', write_chr = 'w', exec_chr = 'x', lack_chr = '-';
-	PARSE_PERM(S_IRUSR, read_chr);
-	PARSE_PERM(S_IWUSR, write_chr);
-	PARSE_PERM(S_IXUSR, exec_chr);
-	PARSE_PERM(S_IRGRP, read_chr);
-	PARSE_PERM(S_IWGRP, write_chr);
-	PARSE_PERM(S_IXGRP, exec_chr);
-	PARSE_PERM(S_IROTH, read_chr);
-	PARSE_PERM(S_IWOTH, write_chr);
-	PARSE_PERM(S_IXOTH, exec_chr);
-	putchar('\n');
-}
-
-static void
-reveal_oct_perms(struct stat *s)
-{
-	printf("%o\n", s->st_mode & (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP |
-		S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH));
-}
-
-static int
-reveal_usr(struct stat *s, char *path)
-{
-	struct passwd *u = getpwuid(s->st_uid);
-	if (!u)
-		return print_err("can't find user that owns \"", path, "\".",
-			"Ensure that it is not a dangling symlink.");
-	puts(u->pw_name);
+	printf("Path: %s\nDT: %i\nFL: %i\n", p, DT, FLW_LNK);
 	return 0;
 }
 
 static int
-reveal_grp(struct stat *s, char *path)
+prs_lnk_opts(char *p, char *g, bool l)
 {
-	struct group *g = getgrgid(s->st_gid);
-	if (!g)
-		return print_err("can't find group that owns \"", path, "\".",
-			"Ensure that it is not a dangling symlink.");
-	puts(g->gr_name);
+	PRS_LNK_OPT("follow-symlinks", true);
+	PRS_LNK_OPT("unfollow-symlinks", false);
+	return 0;
+}
+
+static int
+prs_dt_opts(char *p, char *g, bool l)
+{
+	PRS_DT_OPT("contents", DT_CT);
+	PRS_DT_OPT("type", DT_TP);
+	PRS_DT_OPT("size", DT_SZ);
+	PRS_DT_OPT("byte-size", DT_BT_SZ);
+	PRS_DT_OPT("permissions", DT_PRM);
+	PRS_DT_OPT("oct-permissions", DT_OCT_PRM);
+	PRS_DT_OPT("user", DT_USR);
+	PRS_DT_OPT("user-id", DT_USR_ID);
+	PRS_DT_OPT("group", DT_GRP);
+	PRS_DT_OPT("group-gid", DT_GRP_ID);
+	PRS_DT_OPT("modified-date", DT_M_DATE);
 	return 0;
 }
 
 static void
-reveal_own_id(unsigned id)
+prs_nmt_opts(int c, char **a)
 {
-	printf("%u\n", id);
-}
-
-static int
-reveal_mod_date(struct stat *s)
-{
-	char m[29];
-	if (!strftime(m, sizeof(m), "%a %b %d %T %Z %Y",
-		localtime(&s->st_mtime)))
-		return print_err("overflowed modified date buffer.", NULL, NULL,
-			NULL);
-	puts(m);
-	return 0;
-}
-
-static int
-reveal_file(char *path)
-{
-	FILE *f = fopen(path, "r");
-	if (!f)
-		return print_err("can't open file \"", path, "\"", "Check if "
-			"you have permission to read it.");
-	char c;
-	while ((c = fgetc(f)) != EOF)
-		putchar(c);
-	fclose(f);
-	return 0;
-}
-
-static int
-get_dir_size(DIR *d)
-{
-	size_t s = 0;
-	while (readdir(d))
-		s++;
-	s -= 2;
-	return s;
-}
-
-static void
-alloc_dir_ents(DIR *d, void **ents)
-{
-	struct dirent *e;
-	size_t i = 0;
-	rewinddir(d);
-	while ((e = readdir(d))) {
-		if (!strcmp(e->d_name, ".") || !strcmp(e->d_name, ".."))
+	char *p = ".";
+	for (int i = 1; i < c; i++) {
+		char *g = a[i];
+		bool l = i == c - 1;
+		if (prs_dt_opts(p, g, l) || prs_lnk_opts(p, g, l) || rvl(p))
 			continue;
-		size_t s = strlen(e->d_name) + 1;
-		void *a = malloc(s);
-		if (!a)
-			die("can't allocate memory.");
-		memcpy(a, e->d_name, s);
-		ents[i] = a;
-		i++;
 	}
 }
 
 static void
-sort_dir_ents(void **ents, size_t ents_size)
+prs_mt_opts(int c, char **a)
 {
-	for (size_t i = 0; i < ents_size - 1; i++) {
-		size_t w = i;
-		for (size_t j = i + 1; j < ents_size; j++)
-			if (strcmp(ents[j], ents[w]) < 0)
-				w = j;
-		if (w == i)
-			continue;
-		void *t = ents[i];
-		ents[i] = ents[w];
-		ents[w] = t;
-	}
-}
-
-static int
-reveal_dir(char *path)
-{
-	DIR *d = opendir(path);
-	if (!d)
-		return print_err("can't open directory \"", path, "\"", "Check "
-			"if you have permission to read it.");
-	size_t s = get_dir_size(d);
-	if (!s) {
-		closedir(d);
-		return 0;
-	}
-	void *es[s];
-	alloc_dir_ents(d, es);
-	sort_dir_ents(es, s);
-	for (size_t i = 0; i < s; i++) {
-		puts(es[i]);
-		free(es[i]);
-	}
-	closedir(d);
-	return 0;
-}
-
-static int
-reveal_ctts(struct stat *s, char *path)
-{
-	switch (s->st_mode & S_IFMT) {
-		PARSE_RET_CASE(S_IFREG, reveal_file(path));
-		PARSE_RET_CASE(S_IFDIR, reveal_dir(path));
-		PARSE_RET_CASE(S_IFLNK, print_err("can't read symlink \"", path,
-			"\".", "Try to use the \"--flw-lnk\" option right "
-			"before it."))
-	default:
-		return print_err("can't read contents of \"", path, "\".",
-			"Its type is unreadable.");
-	}
-}
-
-static int
-reveal(char *path)
-{
-	struct stat s;
-	if (FLW_LNK ? stat(path, &s) : lstat(path, &s))
-		return print_err("can't find entry \"", path, "\".", "Check if "
-			"you misspelled it.");
-	switch (DT) {
-		PARSE_CASE(DT_TYPE, reveal_type(&s));
-		PARSE_CASE(DT_SIZE, reveal_size(&s));
-		PARSE_CASE(DT_BT_SIZE, reveal_bt_size(&s));
-		PARSE_CASE(DT_PERMS, reveal_perms(&s));
-		PARSE_CASE(DT_OCT_PERMS, reveal_oct_perms(&s));
-		PARSE_RET_CASE(DT_USR, reveal_usr(&s, path));
-		PARSE_CASE(DT_USR_ID, reveal_own_id(s.st_uid));
-		PARSE_RET_CASE(DT_GRP, reveal_grp(&s, path));
-		PARSE_CASE(DT_GRP_ID, reveal_own_id(s.st_gid));
-		PARSE_RET_CASE(DT_MOD_DATE, reveal_mod_date(&s));
-	default:
-		return reveal_ctts(&s, path);
-	}
-	return 0;
-}
-
-static int
-parse_lnk_opts(char *arg, char *path, bool is_last)
-{
-	PARSE_LNK_OPT("flw-lnk", true);
-	PARSE_LNK_OPT("uflw-lnk", false);
-	return 0;
-}
-
-static int
-parse_dt_opts(char *arg, char *path, bool is_last)
-{
-	PARSE_DT_OPT("ctts", DT_CTTS);
-	PARSE_DT_OPT("type", DT_TYPE);
-	PARSE_DT_OPT("size", DT_SIZE);
-	PARSE_DT_OPT("bt-size", DT_BT_SIZE);
-	PARSE_DT_OPT("perms", DT_PERMS);
-	PARSE_DT_OPT("oct-perms", DT_OCT_PERMS);
-	PARSE_DT_OPT("usr", DT_USR);
-	PARSE_DT_OPT("usr-id", DT_USR_ID);
-	PARSE_DT_OPT("grp", DT_GRP);
-	PARSE_DT_OPT("grp-id", DT_GRP_ID);
-	PARSE_DT_OPT("mod-date", DT_MOD_DATE);
-	return 0;
-}
-
-static void
-parse_non_meta_opts(int argc, char **argv)
-{
-	char *path = ".";
-	for (int i = 1; i < argc; i++) {
-		char *arg = argv[i];
-		bool is_last = i == argc - 1;
-		if (parse_dt_opts(arg, path, is_last) ||
-			parse_lnk_opts(arg, path, is_last) || reveal(arg))
-			continue;
-		AW_ARG = false;
-		path = arg;
-	}
-}
-
-static void
-parse_meta_opts(int argc, char **argv)
-{
-	for (int i = 1; i < argc; i++) {
-		PARSE_META_OPT("version", puts(PGR_VERSION));
-		PARSE_META_OPT("help", help());
+	for (int i = 1; i < c; i++) {
+		PRS_MT_OPT("version", puts(PGR_VRS));
+		PRS_MT_OPT("help", help());
 	}
 }
 
 int
-main(int argc, char **argv)
+main(int c, char **a)
 {
-	if (argc == 1)
-		return PARSE_EXIT_CODE(reveal("."));
-	parse_meta_opts(argc, argv);
-	parse_non_meta_opts(argc, argv);
-	return PARSE_EXIT_CODE(HAD_ERR ? EXIT_FAILURE : EXIT_SUCCESS);
+	if (c == 1)
+		return EXIT_CD(rvl("."));
+	prs_mt_opts(c, a);
+	prs_nmt_opts(c, a);
+	return EXIT_CD(H_ERR);
 }
