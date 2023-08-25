@@ -1,16 +1,17 @@
 # Reveal
 ## About
 This repository contains the source code of Reveal, a program that reveals
-data about entries in the file system of POSIX-like operating system: such as
-contents, type, size, permissions, ownership and modified date.
+info about entries in the file system of POSIX-like operating system: such as
+their contents, type, size, permissions, ownership and modified date.
 
-Its simple output turns it into a great alternative for scripting languages.
+Its simple options and output turns it into a great alternative for scripting
+languages.
 
-Here is a preview that you can check it out:
+Here is a usage preview that you can check it out:
 
 ![](preview.webp)
 
-In this preview, `reveal` was used to reveal some data from a regular file: its
+In this preview, `reveal` was used to get info about a regular file: its
 contents, size, permissions and the user that owns it.
 
 ## Installation
@@ -51,7 +52,7 @@ make
 For usage instructions and more, read its help page.
 
 ```bash
-reveal --help
+reveal -h
 ```
 
 ## Support

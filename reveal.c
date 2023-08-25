@@ -20,9 +20,9 @@
 #define PRS_PRM(p, c) putchar(s->st_mode & p ? c : '-')
 #define PRS_OPT(o, t, a) if (!strcmp("-" o, t)) {a;}
 #define PRS_MT_OPT(o, t) PRS_OPT(o, a[i], t; exit(EXIT_SUCCESS))
-#define PRS_DT_OPT(o, d) PRS_OPT(o, g, if (AW_ARG) {rvl(p);} DT = d;\
-	AW_ARG = true; if (l) {rvl(p);}; return 1)
-#define PRS_LNK_OPT(o, f) PRS_OPT(o, g, if (l) {rvl(p);} FLW_LNK = f; return 1;)
+#define PRS_DT_OPT(o, d) PRS_OPT(o, g, if (EARG) {rvl(p);} DT = d;\
+	EARG = true; if (l) {rvl(p);}; return 1)
+#define PRS_LNK_OPT(o, f) PRS_OPT(o, g, if (l) {rvl(p);} FL = f; return 1;)
 
 enum dt {
 	DT_C,
@@ -39,7 +39,7 @@ enum dt {
 };
 
 static enum dt DT = DT_C;
-static bool H_ERR = false, FLW_LNK = true, AW_ARG = false;
+static bool ERR = false, FL = true, EARG = false;
 
 static void
 help(void)
@@ -101,7 +101,7 @@ pr_err(char *d0, char *d1, char *d2, char *f)
 {
 	fprintf(stderr, "%s: %s%s%s\n%s%s", PGR_NAME, NULL_STR(d0),
 		NULL_STR(d1), NULL_STR(d2), NULL_STR(f), f ? "\n" : "");
-	H_ERR = true;
+	ERR = true;
 	return 1;
 }
 
@@ -304,7 +304,7 @@ static int
 rvl(char *p)
 {
 	struct stat s;
-	if (FLW_LNK ? stat(p, &s) : lstat(p, &s))
+	if (FL ? stat(p, &s) : lstat(p, &s))
 		return pr_err("can't find entry \"", p, "\".", "Check if you "
 			"misspelled it.");
 	switch (DT) {
@@ -358,7 +358,7 @@ prs_nmt_opts(int c, char **a)
 		bool l = i == c - 1;
 		if (prs_dt_opts(p, g, l) || prs_lnk_opts(p, g, l) || rvl(g))
 			continue;
-		AW_ARG = false;
+		EARG = false;
 		p = g;
 	}
 }
@@ -379,5 +379,5 @@ main(int c, char **a)
 		return EXIT_CD(rvl("."));
 	prs_mt_opts(c, a);
 	prs_nmt_opts(c, a);
-	return EXIT_CD(H_ERR);
+	return EXIT_CD(ERR);
 }
