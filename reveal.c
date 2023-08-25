@@ -213,7 +213,7 @@ static void alcdire(DIR *d, void **e) {
 	}
 }
 
-static void strdire(void **e, size_t s) {
+static void srtdire(void **e, size_t s) {
 	for (size_t i = 0; i < s - 1; i++) {
 		size_t w = i;
 		for (size_t c = i + 1; c < s; c++)
@@ -239,7 +239,7 @@ static int rvldir(char *p) {
 	}
 	void *e[s];
 	alcdire(d, e);
-	strdire(e, s);
+	srtdire(e, s);
 	for (size_t i = 0; i < s; i++) {
 		puts(e[i]);
 		free(e[i]);
