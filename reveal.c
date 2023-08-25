@@ -33,8 +33,8 @@ enum dt {
 	DT_OP,
 	DT_U,
 	DT_UI,
-	DT_GRP,
 	DT_G,
+	DT_GI,
 	DT_MD
 };
 
@@ -273,8 +273,8 @@ static int rvl(char *p) {
 		PRSCASE(DT_OP, rvlop(&s));
 		PRSRCASE(DT_U, rvlu(&s, p));
 		PRSCASE(DT_UI, rvlid(s.st_uid));
-		PRSRCASE(DT_GRP, rvlg(&s, p));
-		PRSCASE(DT_G, rvlid(s.st_gid));
+		PRSRCASE(DT_G, rvlg(&s, p));
+		PRSCASE(DT_GI, rvlid(s.st_gid));
 		PRSRCASE(DT_MD, rvlmd(&s));
 	default:
 		return rvlc(&s, p);
@@ -297,8 +297,8 @@ static int prsdtopts(char *p, char *g, bool l) {
 	PRSDTOPT("op", DT_OP);
 	PRSDTOPT("u", DT_U);
 	PRSDTOPT("ui", DT_UI);
-	PRSDTOPT("g", DT_GRP);
-	PRSDTOPT("gi", DT_G);
+	PRSDTOPT("g", DT_G);
+	PRSDTOPT("gi", DT_GI);
 	PRSDTOPT("md", DT_MD);
 	return 0;
 }
