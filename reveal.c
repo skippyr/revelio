@@ -21,9 +21,9 @@ printf("%.1f%cB\n", z, c); return;}
 #define PARSEOPT(o, t, a) if (!strcmp("-" o, t)) {a;}
 #define PARSEMETAOPT(o, a) PARSEOPT(o, args[i], a; exit(EXIT_SUCCESS))
 #define PARSEDTOPT(o, d) PARSEOPT(o, arg, if (AWARG) {reveal(path);} DT = d;\
-AWARG = true; if (islast) {reveal(path);} return 1;)
+AWARG = true; if (islast) {reveal(path);} return 1)
 #define PARSELNKOPT(o, f) PARSEOPT(o, arg, if (islast) {reveal(path);}\
-FLLNK = f; return 1;)
+FLLNK = f; return 1)
 
 enum datatype {
 	DT_CTTS,
