@@ -1,7 +1,6 @@
-file=reveal
-opt=z
+f=reveal
 
-${file}:
-	clang ${file}.c -o ${file} -O${opt}
+${f}:
+	clang ${f}.c -o ${f} -Oz
 
-.PHONY: ${file}
+.PHONY: ${f}
