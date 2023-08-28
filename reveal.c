@@ -9,7 +9,7 @@
 #include <time.h>
 
 #define PGR_NAME "reveal"
-#define PGR_VRS "v11.0.1"
+#define PGR_VRS "v11.0.2"
 #define PARSE_EXIT_CD(e) (e ? EXIT_FAILURE : EXIT_SUCCESS)
 #define PARSE_NULL_STR(s) (s ? s : "")
 #define PARSE_RET_CASE(v, a) case v: return a;
@@ -63,7 +63,7 @@ help(void)
 	printf("Usage: %s [OPTION | PATH]...\n", PGR_NAME);
 	puts("Reveals info about entries in the file system.\n");
 	puts("META OPTIONS");
-	puts("These options retrieve information about the program.\n");
+	puts("These options retrieve info about the program.\n");
 	puts("  -v  print its version.");
 	puts("  -h  print this help.\n");
 	puts("DATA TYPE OPTIONS");
@@ -72,7 +72,7 @@ help(void)
 	puts("  -c (default)  print its contents.");
 	puts("  -t            print its type: regular (r), directory (d), "
 	"symlink (l),\n                socket (s), fifo (f), character device "
-	"(c), block device (b)\n                or unknown (-).");
+	"(c), block device (b) or\n                unknown (-).");
 	puts("  -s            print its size in a convenient unit: gigabyte "
 	"(GB),\n                megabyte (MB), kilobyte (kB) or byte (B).");
 	puts("  -bs           print its size in bytes with no unit besides.");
@@ -101,12 +101,14 @@ help(void)
 	printf("Code %i will be throw if an error happens and %i "
 	"otherwise.\n\n", EXIT_FAILURE, EXIT_SUCCESS);
 	puts("SOURCE CODE");
-	puts("Its source code is available at:");
-	puts("<https://github.com/skippyr/reveal>.\n");
+	puts("Its source code is available at: "
+	"<https://github.com/skippyr/reveal>.\n");
 	puts("SUPPORT");
-	puts("Report issues, questions and suggestions through its issues "
+	puts("If you need any kind of support, for instance: help with "
+	"troubleshooting, have\nquestions about it or want to give improvement "
+	"suggestions, please report them\nby filing new issues in its issues "
 	"page:");
-	puts("<https://github.com/skippyr/reveal/issues>");
+	puts("<https://github.com/skippyr/reveal/issues>.");
 }
 
 static void
