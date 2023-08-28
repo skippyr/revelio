@@ -1,18 +1,20 @@
 # Reveal
 ## About
-This repository contains the source code of Reveal, a program that reveals info about entries in the file system of POSIX-like operating system: such as their contents, type, size, permissions, ownership and modified date.
+This repository contains the source code of Reveal, a program that reveals info about entries in the file system of POSIX-like operating systems, such as their: contents, type, size, permissions, ownership and modified date.
 
-Its simple options and output turns it into a great alternative for scripting languages.
+Here are some previews that you can check it out:
 
-Here is a usage preview that you can check it out:
+> In the following preview, `reveal` was used to reveal the contents of the shell's current directory: its entries.
 
-![](preview.webp)
+![](assets/preview-dir.png)
 
-In this preview, `reveal` was used to get info about a regular file: its contents, size, permissions and the user that owns it.
+> In the following preview, `reveal` was used to reveal some info of a regular file: its contents, size, permissions and the user that owns it.
+
+![](assets/preview-file.png)
 
 ## Installation
 ### Dependencies
-In order to install and run this software properly, the following dependencies must be installed.
+In order to install and run this software properly, the following dependencies must be installed:
 
 - `git`: it will be used to clone this repository.
 - `clang`, `make` and POSIX C headers: they will be used to compile the source code.
@@ -36,9 +38,9 @@ cd reveal
 make
 ```
 
-- Add the binary file `reveal`, now in your current directory, to a directory that is being tracked in your `PATH` environment variable.
+- Add the binary `reveal`, now in the directory that you are in, to a directory that is in your system's `PATH` environment variable in order to make it an available command in your future shell sessions.
 
-- Open a new shell session to reload those variables, and now it should be installed.
+- Open a new shell session. It should now be installed and ready for you to use.
 
 ## Usage
 For usage instructions and more, read its help page.
@@ -48,7 +50,7 @@ reveal -h
 ```
 
 ## Support
-Report issues, questions and suggestions through its [issues page](https://github.com/skippyr/reveal/issues).
+If you need any kind of support, for instance: help with troubleshooting, have questions about it or want to give improvement suggestions, please report them by filing new issues in its [issues page](https://github.com/skippyr/reveal/issues).
 
 ## Copyright
 This software is under the MIT license. A copy of the license is bundled with the source code.
