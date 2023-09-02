@@ -1,14 +1,14 @@
 # Reveal
 ## About
-This repository contains the source code of Reveal, a program that reveals info about entries in the file system of POSIX-like operating systems, such as their: contents, type, size, permissions, ownership and modified date.
+This repository contains the source code of Reveal, a program that reveals information about entries in the filesystem of POSIX-like operating systems, such as their: contents, type, size, permissions, ownership and modified date.
 
 Here are some previews that you can check it out:
 
-> In the following preview, `reveal` was used to reveal the contents of the shell's current directory: its entries.
+> In the following preview, `reveal` was used to reveal the contents of a directory: its entries.
 
 ![](assets/preview-dir.png)
 
-> In the following preview, `reveal` was used to reveal some info of a regular file: its contents, size, permissions and the user that owns it.
+> In the following preview, `reveal` was used to reveal some information of a file: its contents, size, permissions and the user that owns it.
 
 ![](assets/preview-file.png)
 
