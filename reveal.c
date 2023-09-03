@@ -26,7 +26,7 @@
                                                      value ? character : '-')
 #define Parse_Return_Case__(value, action)                                     \
     case value:                                                                \
-        return action;
+        return (action);
 #define Parse_Case__(value, action)                                            \
     case value:                                                                \
         action;                                                                \
@@ -53,7 +53,7 @@
         {                                                                      \
             Reveal(path);                                                      \
         }                                                                      \
-        return 1;                                                              \
+        return (1);                                                            \
     )
 #define Parse_Symlink_Option__(option, is_following_symlinks)                  \
     Parse_Option__(option, argument,                                           \
@@ -62,7 +62,7 @@
             Reveal(path);                                                      \
         }                                                                      \
         IS_FOLLOWING_SYMLINKS = is_following_symlinks;                         \
-        return 1;                                                              \
+        return (1);                                                            \
     )
 
 enum Data_Type
@@ -139,7 +139,7 @@ Get_Total_Of_Directory_Entries(DIR *stream)
 {
     size_t total_of_entries = 0;
     for (struct dirent *entry; (entry = readdir(stream)); total_of_entries++);
-    return total_of_entries -= 2;
+    return (total_of_entries -= 2);
 }
 
 static void
@@ -177,7 +177,7 @@ Print_Error(char *description_0, char *description_1, char *description_2,
             Parse_Null_String__(description_2), Parse_Null_String__(fix),
             fix ? "\n" : "");
     HAD_ERROR = 1;
-    return 1;
+    return (1);
 }
 
 static void
@@ -330,11 +330,11 @@ Reveal_User(char *path, struct stat *metadata)
     struct passwd *user = getpwuid(metadata->st_uid);
     if (!user)
     {
-        return Print_Error("can't discover user that owns \"", path, "\".",
-                           "Ensure that it isn't a dangling symlink.");
+        return (Print_Error("can't discover user that owns \"", path, "\".",
+                            "Ensure that it isn't a dangling symlink."));
     }
     puts(user->pw_name);
-    return 0;
+    return (0);
 }
 
 static uint8_t
@@ -343,11 +343,11 @@ Reveal_Group(char *path, struct stat *metadata)
     struct group *group = getgrgid(metadata->st_gid);
     if (!group)
     {
-        return Print_Error("can't discover group that owns \"", path, "\".",
-                           "Ensure that it isn't a dangling symlink.");
+        return (Print_Error("can't discover group that owns \"", path, "\".",
+                            "Ensure that it isn't a dangling symlink."));
     }
     puts(group->gr_name);
-    return 0;
+    return (0);
 }
 
 static void
@@ -365,13 +365,13 @@ Reveal_File(char *path)
     FILE *stream = fopen(path, "r");
     if (!stream)
     {
-        return Print_Error("can't open file \"", path, "\".", "Ensure that you "
-                           "have permission to read it.");
+        return (Print_Error("can't open file \"", path, "\".", "Ensure that "
+                            "you have permission to read it."));
     }
     for (char character; (character = fgetc(stream)) != EOF;
          putchar(character));
     fclose(stream);
-    return 0;
+    return (0);
 }
 
 static uint8_t
@@ -380,14 +380,14 @@ Reveal_Directory(char *path)
     DIR *stream = opendir(path);
     if (!stream)
     {
-        return Print_Error("can't open directory \"", path, "\".", "Ensure "
-                           "that you have permission to read it.");
+        return (Print_Error("can't open directory \"", path, "\".", "Ensure "
+                            "that you have permission to read it."));
     }
     size_t total_of_entries = Get_Total_Of_Directory_Entries(stream);
     if (!total_of_entries)
     {
         closedir(stream);
-        return 0;
+        return (0);
     }
     void *entries[total_of_entries];
     rewinddir(stream);
@@ -399,7 +399,7 @@ Reveal_Directory(char *path)
         free(entries[entry_index]);
     }
     closedir(stream);
-    return 0;
+    return (0);
 }
 
 static uint8_t
@@ -414,8 +414,8 @@ Reveal_Contents(char *path, struct stat *metadata)
                                                  "use the \"-fl\" option right "
                                                  "before it."));
     default:
-        return Print_Error("can't reveal contents of \"", path, "\" due to its "
-                           "unreadable type.", 0);
+        return (Print_Error("can't reveal contents of \"", path, "\" due to "
+                            "its unreadable type.", 0));
     }
 }
 
@@ -425,8 +425,8 @@ Reveal(char *path)
     struct stat metadata;
     if (IS_FOLLOWING_SYMLINKS ? stat(path, &metadata) : lstat(path, &metadata))
     {
-        return Print_Error("can't find entry \"", path, "\".", "Ensure that "
-                           "you did not misspelled it.");
+        return (Print_Error("can't find entry \"", path, "\".", "Ensure that "
+                            "you did not misspelled it."));
     }
     switch (DATA_TYPE)
     {
@@ -442,9 +442,9 @@ Reveal(char *path)
         Parse_Case__(Data_Type__Group_Id, Reveal_Ownership_Id(metadata.st_gid));
         Parse_Case__(Data_Type__Modified_Date, Reveal_Modified_Date(&metadata));
     default:
-        return Reveal_Contents(path, &metadata);
+        return (Reveal_Contents(path, &metadata));
     }
-    return 0;
+    return (0);
 }
 
 static void
@@ -472,7 +472,7 @@ Parse_Data_Type_Options(char *path, char *argument, uint8_t is_last_argument)
     Parse_Data_Type_Option__("g", Data_Type__Group);
     Parse_Data_Type_Option__("gi", Data_Type__Group_Id);
     Parse_Data_Type_Option__("md", Data_Type__Modified_Date);
-    return 0;
+    return (0);
 }
 
 static uint8_t
@@ -480,7 +480,7 @@ Parse_Symlink_Options(char *path, char *argument, uint8_t is_last_argument)
 {
     Parse_Symlink_Option__("fl", 1);
     Parse_Symlink_Option__("dfl", 0);
-    return 0;
+    return (0);
 }
 
 static void
@@ -508,9 +508,9 @@ main(int total_of_arguments, char **arguments)
 {
     if (total_of_arguments == 1)
     {
-        return Parse_Exit_Code__(Reveal("."));
+        return (Parse_Exit_Code__(Reveal(".")));
     }
     Parse_Metadata_Options(total_of_arguments, arguments);
     Parse_Non_Metadata_Options(total_of_arguments, arguments);
-    return Parse_Exit_Code__(HAD_ERROR);
+    return (Parse_Exit_Code__(HAD_ERROR));
 }
