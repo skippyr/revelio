@@ -9,28 +9,29 @@
 #include <string.h>
 #include <time.h>
 
-#define program_name__ "reveal"
-#define program_version__ "v11.0.3"
+#define program_name__    "reveal"
+#define program_version__ "v11.0.4"
 
-#define Parse_Exit_Code__(exit_code) (exit_code ? EXIT_FAILURE : EXIT_SUCCESS)
-#define Parse_Null_String__(string) (string ? string : "")
-#define Parse_Puts_Case__(value, text) Parse_Case__(value, puts(text))
-#define Parse_Size_Prefix_Multiplier__(value, character)                       \
-    size = metadata->st_size / (value);                                        \
+#define Parse_Exit_Code__(exit_code)     (exit_code ? EXIT_FAILURE :           \
+                                                      EXIT_SUCCESS)
+#define Parse_Null_String__(string)      (string ? string : "")
+#define Parse_Permission__(permission, character)                              \
+    putchar(metadata->st_mode & (permission) ? character : '-');
+#define Parse_Puts_Case__(value, string) Parse_Case__(value, puts(string))
+#define Parse_Return_Case__(value, action)                                     \
+    case (value):                                                              \
+        return (action);
+#define Parse_Case__(value, action)                                            \
+    case (value):                                                              \
+        action;                                                                \
+        break;
+#define Parse_Size_Prefix_Multiplier__(multiplier, character)                  \
+    size = metadata->st_size / (multiplier);                                   \
     if ((int)size)                                                             \
     {                                                                          \
         printf("%.1f%cB\n", size, character);                                  \
         return;                                                                \
     }
-#define Parse_Permission__(value, character) putchar(metadata->st_mode &       \
-                                                     value ? character : '-')
-#define Parse_Return_Case__(value, action)                                     \
-    case value:                                                                \
-        return (action);
-#define Parse_Case__(value, action)                                            \
-    case value:                                                                \
-        action;                                                                \
-        break;
 #define Parse_Option__(option, argument, action)                               \
     if (!strcmp("-" option, argument))                                         \
     {                                                                          \
@@ -81,101 +82,47 @@ enum Data_Type
 };
 
 static enum Data_Type DATA_TYPE = Data_Type__Contents;
-static uint8_t HAD_ERROR = 0, IS_FOLLOWING_SYMLINKS = 1,
-               IS_AWAITING_PATH_ARGUMENT = 0;
+static uint8_t        IS_AWAITING_PATH_ARGUMENT = 0,
+                      IS_FOLLOWING_SYMLINKS     = 1,
+                      HAD_ERROR                 = 0;
 
-static void Allocate_Directory_Entries(DIR *stream, void **entries);
-static size_t Get_Total_Of_Directory_Entries(DIR *stream);
-static void Sort_Directory_Entries(void **entries, size_t total_of_entries);
-static uint8_t Print_Error(char *description_0, char *description_1,
-                           char *description_2, char *fix);
-static void Print_Help(void);
-static void Throw_Error(char *description);
-static void Reveal_Type(struct stat *metadata);
-static void Reveal_Size(struct stat *metadata);
-static void Reveal_Byte_Size(struct stat *metadata);
-static void Reveal_Permissions(struct stat *metadata);
-static void Reveal_Octal_Permissions(struct stat *metadata);
-static void Reveal_Ownership_Id(unsigned id);
+static uint8_t Print_Error(char *first_description, char *second_description,
+                           char *third_description, char *fix_suggestion);
+static void    Print_Help(void);
+static void    Throw_Error(char *description);
+static void    Allocate_Directory_Entries(DIR *stream, char **entries);
+static void    Sort_Directory_Entries(char **entries, size_t total_of_entries);
+static size_t  Get_Total_Of_Directory_Entries(DIR *stream);
+static void    Reveal_Type(struct stat *metadata);
+static void    Reveal_Size(struct stat *metadata);
+static void    Reveal_Byte_Size(struct stat *metadata);
+static void    Reveal_Permissions(struct stat *metadata);
+static void    Reveal_Octal_Permissions(struct stat *metadata);
 static uint8_t Reveal_User(char *path, struct stat *metadata);
 static uint8_t Reveal_Group(char *path, struct stat *metadata);
-static void Reveal_Modified_Date(struct stat *metadata);
+static void    Reveal_Ownership_Id(unsigned id);
+static void    Reveal_Modified_Date(struct stat *metadata);
 static uint8_t Reveal_File(char *path);
 static uint8_t Reveal_Directory(char *path);
 static uint8_t Reveal_Contents(char *path, struct stat *metadata);
 static uint8_t Reveal(char *path);
-static void Parse_Metadata_Options(int total_of_arguments, char **arguments);
+static void    Parse_Metadata_Options(int total_of_arguments, char **arguments);
 static uint8_t Parse_Data_Type_Options(char *path, char *argument,
                                        uint8_t is_last_argument);
 static uint8_t Parse_Symlink_Options(char *path, char *argument,
                                      uint8_t is_last_argument);
-static void Parse_Non_Metadata_Options(int total_of_arguments,
-                                       char **arguments);
-
-static void
-Allocate_Directory_Entries(DIR *stream, void **entries)
-{
-    size_t entry_index = 0;
-    for (struct dirent *entry; (entry = readdir(stream));)
-    {
-        if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
-        {
-            continue;
-        }
-        size_t size = strlen(entry->d_name) + 1;
-        void *allocation = malloc(size);
-        if (!allocation)
-        {
-            Throw_Error("can't allocate enough memory.");
-        }
-        memcpy(allocation, entry->d_name, size);
-        entries[entry_index] = allocation;
-        entry_index++;
-    }
-}
-
-static size_t
-Get_Total_Of_Directory_Entries(DIR *stream)
-{
-    size_t total_of_entries = 0;
-    for (struct dirent *entry; (entry = readdir(stream)); total_of_entries++);
-    return (total_of_entries -= 2);
-}
-
-static void
-Sort_Directory_Entries(void **entries, size_t total_of_entries)
-{
-    for (size_t entry_index = 0; entry_index < total_of_entries - 1;
-         entry_index++)
-    {
-        size_t swap_index = entry_index;
-        for (size_t check_index = entry_index + 1;
-             check_index < total_of_entries; check_index++)
-        {
-            if (strcmp(entries[check_index], entries[swap_index]) < 0)
-            {
-                swap_index =  check_index;
-            }
-        }
-        if (swap_index == entry_index)
-        {
-            continue;
-        }
-        void *swap_entry = entries[entry_index];
-        entries[entry_index] = entries[swap_index];
-        entries[swap_index] = swap_entry;
-    }
-}
+static void    Parse_Non_Metadata_Option(int total_of_arguments,
+                                         char **arguments);
 
 static uint8_t
-Print_Error(char *description_0, char *description_1, char *description_2,
-            char *fix)
+Print_Error(char *first_description, char *second_description,
+            char *third_description, char *fix_suggestion)
 {
     fprintf(stderr, "%s: %s%s%s\n%s%s", program_name__,
-            Parse_Null_String__(description_0),
-            Parse_Null_String__(description_1),
-            Parse_Null_String__(description_2), Parse_Null_String__(fix),
-            fix ? "\n" : "");
+            Parse_Null_String__(first_description),
+            Parse_Null_String__(second_description),
+            Parse_Null_String__(third_description),
+            Parse_Null_String__(fix_suggestion), fix_suggestion ? "\n" : "");
     HAD_ERROR = 1;
     return (1);
 }
@@ -184,7 +131,7 @@ static void
 Print_Help(void)
 {
     printf("Usage: %s [OPTION | PATH]...\n", program_name__);
-    puts("Reveals information about entries in the filesystem.");
+    puts("Reveals information about entries in the file system.");
     puts("");
     puts("METADATA OPTIONS");
     puts("These options retrieve information about the program.");
@@ -263,6 +210,61 @@ Throw_Error(char *description)
 }
 
 static void
+Allocate_Directory_Entries(DIR *stream, char **entries)
+{
+    size_t entry_index = 0;
+    for (struct dirent *entry; (entry = readdir(stream));)
+    {
+        if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
+        {
+            continue;
+        }
+        size_t size       = strlen(entry->d_name) + 1;
+        char  *allocation = malloc(size);
+        if (!allocation)
+        {
+            Throw_Error("can't allocate enough memory.");
+        }
+        memcpy(allocation, entry->d_name, size);
+        entries[entry_index] = allocation;
+        entry_index++;
+    }
+}
+
+static void
+Sort_Directory_Entries(char **entries, size_t total_of_entries)
+{
+    for (size_t entry_index = 0; entry_index < total_of_entries - 1;
+         entry_index++)
+    {
+        size_t swap_index = entry_index;
+        for (size_t check_index = entry_index + 1;
+             check_index < total_of_entries; check_index++)
+        {
+            if (strcmp(entries[check_index], entries[swap_index]) < 0)
+            {
+                swap_index = check_index;
+            }
+        }
+        if (swap_index == entry_index)
+        {
+            continue;
+        }
+        char *swap_entry     = entries[entry_index];
+        entries[entry_index] = entries[swap_index];
+        entries[swap_index]  = swap_entry;
+    }
+}
+
+static size_t
+Get_Total_Of_Directory_Entries(DIR *stream)
+{
+    size_t total_of_entries = 0;
+    for (struct dirent *entry; (entry = readdir(stream)); total_of_entries++);
+    return (total_of_entries -= 2);
+}
+
+static void
 Reveal_Type(struct stat *metadata)
 {
     switch (metadata->st_mode & S_IFMT)
@@ -275,7 +277,7 @@ Reveal_Type(struct stat *metadata)
         Parse_Puts_Case__(S_IFCHR, "c");
         Parse_Puts_Case__(S_IFBLK, "b");
     default:
-            puts("-");
+        puts("-");
     }
 }
 
@@ -318,12 +320,6 @@ Reveal_Octal_Permissions(struct stat *metadata)
                                         S_IXOTH));
 }
 
-static void
-Reveal_Ownership_Id(unsigned id)
-{
-    printf("%u\n", id);
-}
-
 static uint8_t
 Reveal_User(char *path, struct stat *metadata)
 {
@@ -331,7 +327,7 @@ Reveal_User(char *path, struct stat *metadata)
     if (!user)
     {
         return (Print_Error("can't discover user that owns \"", path, "\".",
-                            "Ensure that it isn't a dangling symlink."));
+                            "Check if that isn't a dangling symlink."));
     }
     puts(user->pw_name);
     return (0);
@@ -344,10 +340,16 @@ Reveal_Group(char *path, struct stat *metadata)
     if (!group)
     {
         return (Print_Error("can't discover group that owns \"", path, "\".",
-                            "Ensure that it isn't a dangling symlink."));
+                            "Check if that isn't a dangling symlink."));
     }
     puts(group->gr_name);
     return (0);
+}
+
+static void
+Reveal_Ownership_Id(unsigned id)
+{
+    printf("%u\n", id);
 }
 
 static void
@@ -365,8 +367,8 @@ Reveal_File(char *path)
     FILE *stream = fopen(path, "r");
     if (!stream)
     {
-        return (Print_Error("can't open file \"", path, "\".", "Ensure that "
-                            "you have permission to read it."));
+        return (Print_Error("can't open file \"", path, "\".", "Check if you "
+                            "have permission to read it."));
     }
     for (char character; (character = fgetc(stream)) != EOF;
          putchar(character));
@@ -380,8 +382,8 @@ Reveal_Directory(char *path)
     DIR *stream = opendir(path);
     if (!stream)
     {
-        return (Print_Error("can't open directory \"", path, "\".", "Ensure "
-                            "that you have permission to read it."));
+        return (Print_Error("can't open directory \"", path, "\".", "Check if "
+                            "you have permission to read it."));
     }
     size_t total_of_entries = Get_Total_Of_Directory_Entries(stream);
     if (!total_of_entries)
@@ -389,7 +391,7 @@ Reveal_Directory(char *path)
         closedir(stream);
         return (0);
     }
-    void *entries[total_of_entries];
+    char *entries[total_of_entries];
     rewinddir(stream);
     Allocate_Directory_Entries(stream, entries);
     Sort_Directory_Entries(entries, total_of_entries);
@@ -409,10 +411,11 @@ Reveal_Contents(char *path, struct stat *metadata)
     {
         Parse_Return_Case__(S_IFREG, Reveal_File(path));
         Parse_Return_Case__(S_IFDIR, Reveal_Directory(path));
-        Parse_Return_Case__(S_IFLNK, Print_Error("can't reveal symlink \"",
-                                                 path, "\".", "Experiment to "
-                                                 "use the \"-fl\" option right "
-                                                 "before it."));
+        Parse_Return_Case__(S_IFLNK, Print_Error("can't reveal contents of "
+                                                 "symlink \"", path, "\".",
+                                                 "Experiment to use the "
+                                                 "\"-fl\" option right before "
+                                                 "it."));
     default:
         return (Print_Error("can't reveal contents of \"", path, "\" due to "
                             "its unreadable type.", 0));
@@ -425,8 +428,8 @@ Reveal(char *path)
     struct stat metadata;
     if (IS_FOLLOWING_SYMLINKS ? stat(path, &metadata) : lstat(path, &metadata))
     {
-        return (Print_Error("can't find entry \"", path, "\".", "Ensure that "
-                            "you did not misspelled it."));
+        return (Print_Error("can't find entry \"", path, "\".", "Check if you "
+                            "misspelled it."));
     }
     switch (DATA_TYPE)
     {
@@ -453,8 +456,8 @@ Parse_Metadata_Options(int total_of_arguments, char **arguments)
     for (int argument_index = 1; argument_index < total_of_arguments;
          argument_index++)
     {
-        Parse_Metadata_Option__("v", puts(program_version__));
         Parse_Metadata_Option__("h", Print_Help());
+        Parse_Metadata_Option__("v", puts(program_version__));
     }
 }
 
@@ -484,13 +487,13 @@ Parse_Symlink_Options(char *path, char *argument, uint8_t is_last_argument)
 }
 
 static void
-Parse_Non_Metadata_Options(int total_of_arguments, char **arguments)
+Parse_Non_Metadata_Option(int total_of_arguments, char **arguments)
 {
     char *path = ".";
     for (int argument_index = 1; argument_index < total_of_arguments;
          argument_index++)
     {
-        char *argument = arguments[argument_index];
+        char   *argument         = arguments[argument_index];
         uint8_t is_last_argument = argument_index == total_of_arguments - 1;
         if (Parse_Data_Type_Options(path, argument, is_last_argument) ||
             Parse_Symlink_Options(path, argument, is_last_argument) ||
@@ -511,6 +514,6 @@ main(int total_of_arguments, char **arguments)
         return (Parse_Exit_Code__(Reveal(".")));
     }
     Parse_Metadata_Options(total_of_arguments, arguments);
-    Parse_Non_Metadata_Options(total_of_arguments, arguments);
+    Parse_Non_Metadata_Option(total_of_arguments, arguments);
     return (Parse_Exit_Code__(HAD_ERROR));
 }

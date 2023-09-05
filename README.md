@@ -1,23 +1,24 @@
 # Reveal
-## About
-This repository contains the source code of Reveal, a program that reveals information about entries in the filesystem of POSIX-like operating systems, such as their: contents, type, size, permissions, ownership and modified date.
+This repository contains the source code of Reveal, a program that reveals
+information about entries in the file system of POSIX-like operating systems
+such as: their contents, type, size, permissions, ownerships and modified date.
 
-Here are some previews that you can check it out:
+It simple options and output turns it into a great alternative for scripting
+languages.
 
-> In the following preview, `reveal` was used to reveal the contents of a directory: its entries.
+Here is a preview that you can check it out: in it, `reveal` was used to reveal
+the contents of a directory and a file and also some properties of that file:
+its size, permissions and the user that owns it.
 
-![](assets/preview-dir.png)
-
-> In the following preview, `reveal` was used to reveal some information of a file: its contents, size, permissions and the user that owns it.
-
-![](assets/preview-file.png)
+![](assets/preview.png)
 
 ## Installation
 ### Dependencies
-In order to install and run this software properly, the following dependencies must be installed:
+In order to install this software, the following dependencies must be installed:
 
 - `git`: it will be used to clone this repository.
-- `clang`, `make` and POSIX C headers: they will be used to compile the source code.
+- `make`, a C compiler (`clang`, for example) and C POSIX headers: those will
+   be used to compile the source code.
 
 ### Procedures
 - Clone this repository using `git`.
@@ -38,9 +39,21 @@ cd reveal
 make
 ```
 
-- Add the binary `reveal`, now in the directory that you are in, to a directory that is in your system's `PATH` environment variable in order to make it an available command in your future shell sessions.
+> [!NOTE]
+  By default, any compilation will use `cc` as the compiler. That is usually a
+  symlink for the operating system's C compiler. However, if you want to use
+  another, you can give it as an argument to `make`. For instance, you can use
+  `clang` instead:
 
-- Open a new shell session. It should now be installed and ready for you to use.
+```bash
+make COMPILER=clang
+```
+
+- Add the binary `reveal`, now inside of the `binaries` directory, to a
+  directory that is being tracked in your system's `PATH` environment variable.
+
+- Open a new shell session. Now the program should be installed and ready
+  for you to use.
 
 ## Usage
 For usage instructions and more, read its help page.
@@ -50,7 +63,10 @@ reveal -h
 ```
 
 ## Support
-If you need any kind of support, for instance: help with troubleshooting, have questions about it or want to give improvement suggestions, please report them by filing new issues in its [issues page](https://github.com/skippyr/reveal/issues).
+If you need any kind of support, for instance: help with troubleshooting, have
+questions about it or want to give improvement suggestions, please report them
+by filing new issues in its [issues page](https://github.com/skippyr/reveal/issues).
 
 ## Copyright
-This software is under the MIT license. A copy of the license is bundled with the source code.
+This software is under the MIT license. A copy of the license is bundled with
+the source code.

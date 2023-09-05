@@ -1,7 +1,14 @@
-file=reveal
-optimization_level=z
+SOURCES_DIRECTORY  = sources
+BINARIES_DIRECTORY = binaries
+COMPILER           = cc
+COMPILER_OPTIONS   = -Oz -Wall
 
-${file}:
-	clang ${file}.c -o ${file} -O${optimization_level}
+all: ${BINARIES_DIRECTORY}/reveal
 
-.PHONY: ${file}
+${BINARIES_DIRECTORY}/%: ${SOURCES_DIRECTORY}/%.c
+	mkdir -p ${BINARIES_DIRECTORY}
+	${COMPILER} ${COMPILER_OPTIONS} ${<} -o ${@}
+
+clean:
+	rm -rf ${BINARIES_DIRECTORY}
+
