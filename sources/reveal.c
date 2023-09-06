@@ -15,9 +15,9 @@
 #define Parse_Exit_Code__(exit_code)     (exit_code ? EXIT_FAILURE :           \
                                                       EXIT_SUCCESS)
 #define Parse_Null_String__(string)      (string ? string : "")
+#define Parse_Puts_Case__(value, string) Parse_Case__(value, puts(string))
 #define Parse_Permission__(permission, character)                              \
     putchar(metadata->st_mode & (permission) ? character : '-');
-#define Parse_Puts_Case__(value, string) Parse_Case__(value, puts(string))
 #define Parse_Return_Case__(value, action)                                     \
     case (value):                                                              \
         return (action);
@@ -48,7 +48,7 @@
         {                                                                      \
             Reveal(path);                                                      \
         }                                                                      \
-        DATA_TYPE = data_type;                                                 \
+        DATA_TYPE                 = data_type;                                 \
         IS_AWAITING_PATH_ARGUMENT = 1;                                         \
         if (is_last_argument)                                                  \
         {                                                                      \
@@ -81,7 +81,7 @@ enum Data_Type
     Data_Type__Modified_Date
 };
 
-static enum Data_Type DATA_TYPE = Data_Type__Contents;
+static enum Data_Type DATA_TYPE                 = Data_Type__Contents;
 static uint8_t        IS_AWAITING_PATH_ARGUMENT = 0,
                       IS_FOLLOWING_SYMLINKS     = 1,
                       HAD_ERROR                 = 0;
@@ -502,7 +502,7 @@ Parse_Non_Metadata_Option(int total_of_arguments, char **arguments)
             continue;
         }
         IS_AWAITING_PATH_ARGUMENT = 0;
-        path = argument;
+        path                      = argument;
     }
 }
 
