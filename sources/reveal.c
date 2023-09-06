@@ -496,7 +496,7 @@ Parse_Non_Metadata_Option(int total_of_arguments, char **arguments)
         char   *argument         = arguments[argument_index];
         uint8_t is_last_argument = argument_index == total_of_arguments - 1;
         if (Parse_Data_Type_Options(path, argument, is_last_argument) ||
-            Parse_Symlink_Options(path, argument, is_last_argument) ||
+            Parse_Symlink_Options(path, argument, is_last_argument)   ||
             Reveal(argument))
         {
             continue;
