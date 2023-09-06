@@ -269,13 +269,13 @@ Reveal_Type(struct stat *metadata)
 {
     switch (metadata->st_mode & S_IFMT)
     {
-        Parse_Puts_Case__(S_IFREG, "r");
-        Parse_Puts_Case__(S_IFDIR, "d");
-        Parse_Puts_Case__(S_IFLNK, "l");
-        Parse_Puts_Case__(S_IFSOCK, "s");
-        Parse_Puts_Case__(S_IFIFO, "f");
-        Parse_Puts_Case__(S_IFCHR, "c");
-        Parse_Puts_Case__(S_IFBLK, "b");
+        Parse_Puts_Case__(S_IFREG, "regular");
+        Parse_Puts_Case__(S_IFDIR, "directory");
+        Parse_Puts_Case__(S_IFLNK, "link");
+        Parse_Puts_Case__(S_IFSOCK, "socket");
+        Parse_Puts_Case__(S_IFIFO, "fifo");
+        Parse_Puts_Case__(S_IFCHR, "character");
+        Parse_Puts_Case__(S_IFBLK, "block");
     default:
         puts("-");
     }
