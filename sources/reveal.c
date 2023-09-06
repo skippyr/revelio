@@ -267,20 +267,25 @@ Get_Total_Of_Directory_Entries(DIR *stream)
 static void
 Reveal_Type(struct stat *metadata)
 {
+    /* Modified: instead of printing the first letter now it prints full type name, more clarity */
     switch (metadata->st_mode & S_IFMT)
     {
-        Parse_Puts_Case__(S_IFREG, "r");
-        Parse_Puts_Case__(S_IFDIR, "d");
-        Parse_Puts_Case__(S_IFLNK, "l");
-        Parse_Puts_Case__(S_IFSOCK, "s");
-        Parse_Puts_Case__(S_IFIFO, "f");
-        Parse_Puts_Case__(S_IFCHR, "c");
-        Parse_Puts_Case__(S_IFBLK, "b");
+        Parse_Puts_Case__(S_IFREG, "Regular");
+        Parse_Puts_Case__(S_IFDIR, "Directory");
+        Parse_Puts_Case__(S_IFLNK, "Link");
+        Parse_Puts_Case__(S_IFSOCK, "Socket");
+        Parse_Puts_Case__(S_IFIFO, "Fifo");
+        Parse_Puts_Case__(S_IFCHR, "Character Driver");
+        Parse_Puts_Case__(S_IFBLK, "Block Driver");
     default:
         puts("-");
     }
 }
 
+/**
+ * Reveal Size with ./reveal -s PATH is unclear or not working, it only shows size
+ * in kB, can't specify MB or GB in any way.
+*/
 static void
 Reveal_Size(struct stat *metadata)
 {
