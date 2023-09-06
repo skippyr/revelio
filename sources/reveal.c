@@ -10,7 +10,7 @@
 #include <time.h>
 
 #define program_name__    "reveal"
-#define program_version__ "v11.0.4"
+#define program_version__ "v12.0.0"
 
 #define Parse_Exit_Code__(exit_code)     (exit_code ? EXIT_FAILURE :           \
                                                       EXIT_SUCCESS)
@@ -147,14 +147,14 @@ Print_Help(void)
          "following them.");
     puts("");
     puts("    -c (default)    reveal its contents.");
-    puts("    -t              reveal its type: regular (r), directory (d), "
-         "symlink (l),");
-    puts("                    socket (s), fifo (f), character device (c), "
-         "block device (b)");
-    puts("                    or unknown (-).");
-    puts("    -s              reveal its size using a convenient unit: "
-         "gigabyte (GB),");
-    puts("                    megabyte (MB), kilobyte (kB) or byte (B).");
+    puts("    -t              reveal its type: regular, directory, symlink, "
+         "socket, fifo,");
+    puts("                    character, block or unknown.");
+    puts("    -s              reveal its size automatically using the most "
+         "convenient unit");
+    puts("                    for a human to read: gigabyte (GB), "
+         "megabyte (MB),");
+    puts("                    kilobyte (kB) or byte (B).");
     puts("    -bs             reveal its size in bytes with no unit beside.");
     puts("    -p              reveal its read (r), write (w), execute (x) and "
          "lack (-)");
@@ -271,13 +271,13 @@ Reveal_Type(struct stat *metadata)
     {
         Parse_Puts_Case__(S_IFREG, "regular");
         Parse_Puts_Case__(S_IFDIR, "directory");
-        Parse_Puts_Case__(S_IFLNK, "link");
+        Parse_Puts_Case__(S_IFLNK, "symlink");
         Parse_Puts_Case__(S_IFSOCK, "socket");
         Parse_Puts_Case__(S_IFIFO, "fifo");
         Parse_Puts_Case__(S_IFCHR, "character");
         Parse_Puts_Case__(S_IFBLK, "block");
     default:
-        puts("-");
+        puts("unknown");
     }
 }
 
