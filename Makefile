@@ -5,10 +5,10 @@ COMPILER_OPTIONS   = -Oz -Wall
 
 all: ${BINARIES_DIRECTORY}/reveal
 
+clean:
+	rm -rf ${BINARIES_DIRECTORY}
+
 ${BINARIES_DIRECTORY}/%: ${SOURCES_DIRECTORY}/%.c
 	mkdir -p ${BINARIES_DIRECTORY}
 	${COMPILER} ${COMPILER_OPTIONS} ${<} -o ${@}
-
-clean:
-	rm -rf ${BINARIES_DIRECTORY}
 
