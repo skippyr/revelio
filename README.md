@@ -6,11 +6,17 @@ such as: their contents, type, size, permissions, ownerships and modified date.
 It simple options and output turns it into a great alternative for scripting
 languages.
 
-Here is a preview that you can check it out: in it, `reveal` was used to reveal
-the contents of a directory and a file and also some properties of that file:
-its size, permissions and the user that owns it.
+Here are some previews that you can check it out:
 
-![](assets/preview.png)
+> In this preview, `reveal` was used to reveal the contents of a directory:
+> its entries.
+
+![](assets/preview-directory.png)
+
+> In this preview, `reveal` was used to reveal the contents of a file and some
+> of its properties: its size, permissions and the user that owns it.
+
+![](assets/preview-file.png)
 
 ## Installation
 ### Dependencies
@@ -59,13 +65,17 @@ make COMPILER=clang
 For usage instructions and more, read its help page.
 
 ```bash
-reveal -h
+reveal --help
 ```
 
-## Support
-If you need any kind of support, for instance: help with troubleshooting, have
-questions about it or want to give improvement suggestions, please report them
-by filing new issues in its [issues page](https://github.com/skippyr/reveal/issues).
+## Issues And Contributions
+You can use its [issues page](https://github.com/skippyr/reveal/issues) to
+provide your feedback, to report any issue you are facing or to ask for help.
+
+You can also fork it and send pull requests to be reviewed.
+
+All kinds of contribution, from people of any skill level, is always
+appreciated.
 
 ## Copyright
 This software is under the MIT license. A copy of the license is bundled with
