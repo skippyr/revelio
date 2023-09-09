@@ -111,8 +111,8 @@ static uint8_t Parse_Data_Type_Options(char *path, char *argument,
 static uint8_t Parse_Symlink_Options(char *path, char *argument,
                                      uint8_t is_last_argument);
 static void    Parse_Metadata_Options(int total_of_arguments, char **arguments);
-static void    Parse_Non_Metadata_Option(int total_of_arguments,
-                                         char **arguments);
+static void    Parse_Non_Metadata_Options(int total_of_arguments,
+                                          char **arguments);
 
 static uint8_t Print_Error(char *first_description, char *second_description,
                            char *third_description, char *fix_suggestion)
@@ -477,7 +477,7 @@ static void Parse_Metadata_Options(int total_of_arguments, char **arguments)
     }
 }
 
-static void Parse_Non_Metadata_Option(int total_of_arguments, char **arguments)
+static void Parse_Non_Metadata_Options(int total_of_arguments, char **arguments)
 {
     char *path = ".";
     for (int argument_index = 1; argument_index < total_of_arguments;
@@ -503,6 +503,6 @@ int main(int total_of_arguments, char **arguments)
         return (Parse_Exit_Code__(Reveal(".")));
     }
     Parse_Metadata_Options(total_of_arguments, arguments);
-    Parse_Non_Metadata_Option(total_of_arguments, arguments);
+    Parse_Non_Metadata_Options(total_of_arguments, arguments);
     return (Parse_Exit_Code__(HAD_ERROR));
 }
