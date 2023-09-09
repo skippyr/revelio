@@ -8,13 +8,13 @@ languages.
 
 Here are some previews that you can check it out:
 
-> In this preview, `reveal` was used to reveal the contents of a directory:
-> its entries.
+> **Revealing a directory:** `reveal` was used to reveal the contents of a
+> directory: its entries.
 
 ![](assets/preview-directory.png)
 
-> In this preview, `reveal` was used to reveal the contents of a file and some
-> of its properties: its size, permissions and the user that owns it.
+> **Revealing a file:** `reveal` was used to reveal the contents of a file and
+> some of its properties: its size, permissions and the user that owns it.
 
 ![](assets/preview-file.png)
 
@@ -23,8 +23,8 @@ Here are some previews that you can check it out:
 In order to install this software, the following dependencies must be installed:
 
 - `git`: it will be used to clone this repository.
-- `make`, a C compiler (`clang`, for example) and C POSIX headers: those will
-   be used to compile the source code.
+- `make`, a C++ compiler (`g++`, for example) and C POSIX headers: those will be
+   used to compile the source code.
 
 ### Procedures
 - Clone this repository using `git`.
@@ -45,14 +45,13 @@ cd reveal
 make
 ```
 
-> [!NOTE]
-  By default, any compilation will use `cc` as the compiler. That is usually a
-  symlink for the operating system's C compiler. However, if you want to use
-  another, you can give it as an argument to `make`. For instance, you can use
-  `clang` instead:
+> [!IMPORTANT]
+  By default, any compilation will use `g++` as the compiler. However, if you
+  want to use another, you can give it as an argument to `make`. For instance,
+  you can use `clang++` instead:
 
 ```bash
-make COMPILER=clang
+make COMPILER=clang++
 ```
 
 - Add the binary `reveal`, now inside of the `binaries` directory, to a
@@ -74,7 +73,7 @@ provide your feedback, to report any issue you are facing or to ask for help.
 
 You can also fork it and send pull requests to be reviewed.
 
-All kinds of contribution, from people of any skill level, is always
+All kinds of contributions, from people of any skill level, is always
 appreciated.
 
 ## Copyright

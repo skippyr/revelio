@@ -1,14 +1,13 @@
-SOURCES_DIRECTORY  = sources
+SOURCES_DIRECTORY = sources
 BINARIES_DIRECTORY = binaries
-COMPILER           = cc
-COMPILER_OPTIONS   = -Oz -Wall
+COMPILER = g++
+COMPILER_OPTIONS = -Oz -Wall -Wextra -Werror
 
 all: ${BINARIES_DIRECTORY}/reveal
 
 clean:
 	rm -rf ${BINARIES_DIRECTORY}
 
-${BINARIES_DIRECTORY}/%: ${SOURCES_DIRECTORY}/%.c
+${BINARIES_DIRECTORY}/%: ${SOURCES_DIRECTORY}/%.cpp
 	mkdir -p ${BINARIES_DIRECTORY}
-	${COMPILER} ${COMPILER_OPTIONS} ${<} -o ${@}
-
+	${COMPILER} ${COMPILER_OPTIONS} -o ${@} ${<}
