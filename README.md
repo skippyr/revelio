@@ -54,8 +54,8 @@ make
 make COMPILER=clang++
 ```
 
-- Add the binary `reveal`, now inside of the `binaries` directory, to a
-  directory that is being tracked in your system's `PATH` environment variable.
+- Add the binary `reveal`, now inside of the `build` directory, to a directory
+  that is being tracked in your system's `PATH` environment variable.
 
 - Open a new shell session. Now the program should be installed and ready
   for you to use.
