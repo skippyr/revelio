@@ -10,12 +10,14 @@
 #define PROGRAM_VERSION "v15.0.0"
 #define PARSE_SIZE_PREFIX_MULTIPLIER(multiplier, prefix)                       \
     size = metadata.st_size / (multiplier);                                    \
-    if ((int)size) {                                                           \
+    if ((int)size)                                                             \
+    {                                                                          \
         printFloatSize(size, prefix);                                          \
         return;                                                                \
     }
 #define PARSE_OPTION(option, argument, action)                                 \
-    if (!std::strcmp("--" option, argument)) {                                 \
+    if (!std::strcmp("--" option, argument))                                   \
+    {                                                                          \
         action;                                                                \
     }
 #define PARSE_METADATA_OPTION(option, action)                                  \
@@ -34,7 +36,8 @@
             isFollowingSymlinks;                                               \
         return ParseStatus::Parsed;)
 
-enum DataType {
+enum DataType
+{
     Contents,
     Type,
     Size,
@@ -48,12 +51,14 @@ enum DataType {
     ModificationDate
 };
 
-enum ParseStatus {
+enum ParseStatus
+{
     Parsed,
     NotParsed
 };
 
-enum ReturnStatus {
+enum ReturnStatus
+{
     Success,
     Failure
 };
@@ -62,36 +67,43 @@ static DataType DATA_TYPE = DataType::Contents;
 static bool HAD_ERROR = false, IS_EXPECTING_PATH_ARGUMENT = false,
             IS_FOLLOWING_SYMLINKS = true;
 
-static int parseExitCode(int exitCode) {
+static int parseExitCode(int exitCode)
+{
     return exitCode ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
 static void parsePermission(struct stat &metadata, int permission,
-                            char character) {
+                            char character)
+{
     std::cout << (metadata.st_mode & permission ? character : '-');
 }
 
 static ReturnStatus printError(std::string description,
-                               std::string fixSuggestion) {
+                               std::string fixSuggestion)
+{
     std::cerr << PROGRAM_NAME << ": " << description << std::endl;
-    if (fixSuggestion != "") {
+    if (fixSuggestion != "")
+    {
         std::cout << fixSuggestion << std::endl;
     }
     HAD_ERROR = 1;
     return ReturnStatus::Failure;
 }
 
-static void printFloatSize(float value, std::string prefix) {
+static void printFloatSize(float value, std::string prefix)
+{
     std::cout << std::fixed;
     std::cout.precision(1);
     std::cout << value << prefix << "B" << std::endl;
 }
 
-static void printByteSize(size_t size, bool isToUseUnit) {
+static void printByteSize(size_t size, bool isToUseUnit)
+{
     std::cout << size << (isToUseUnit ? "B" : "") << std::endl;
 }
 
-static void printHelp() {
+static void printHelp()
+{
     std::cout
         << "Usage: " << PROGRAM_NAME << " [OPTION | PATH]..." << std::endl
         << "Reveals information about entries in the file system." << std::endl
@@ -193,23 +205,30 @@ static void printHelp() {
         << "appreciated." << std::endl;
 }
 
-static void throwError(std::string description) {
+static void throwError(std::string description)
+{
     printError(description, "");
     std::exit(EXIT_FAILURE);
 }
 
-static void allocateDirectoryEntries(DIR *stream, char *entries[]) {
+static void allocateDirectoryEntries(DIR *stream, char *entries[])
+{
     size_t entryIndex = 0;
-    for (struct dirent *entry; (entry = readdir(stream));) {
+    for (struct dirent *entry; (entry = readdir(stream));)
+    {
         if (!std::strcmp(entry->d_name, ".") ||
-            !std::strcmp(entry->d_name, "..")) {
+            !std::strcmp(entry->d_name, ".."))
+        {
             continue;
         }
         size_t size = std::strlen(entry->d_name) + 1;
         char *allocation;
-        try {
+        try
+        {
             allocation = new char[size];
-        } catch (std::bad_alloc &) {
+        }
+        catch (std::bad_alloc &)
+        {
             throwError("can't allocate memory.");
         }
         std::memcpy(allocation, entry->d_name, size);
@@ -218,16 +237,21 @@ static void allocateDirectoryEntries(DIR *stream, char *entries[]) {
     }
 }
 
-static void sortDirectoryEntries(char *entries[], size_t totalOfEntries) {
-    for (size_t entryIndex = 0; entryIndex < totalOfEntries - 1; entryIndex++) {
+static void sortDirectoryEntries(char *entries[], size_t totalOfEntries)
+{
+    for (size_t entryIndex = 0; entryIndex < totalOfEntries - 1; entryIndex++)
+    {
         size_t swapIndex = entryIndex;
         for (size_t checkIndex = entryIndex + 1; checkIndex < totalOfEntries;
-             checkIndex++) {
-            if (std::strcmp(entries[checkIndex], entries[swapIndex]) < 0) {
+             checkIndex++)
+        {
+            if (std::strcmp(entries[checkIndex], entries[swapIndex]) < 0)
+            {
                 swapIndex = checkIndex;
             }
         }
-        if (swapIndex == entryIndex) {
+        if (swapIndex == entryIndex)
+        {
             continue;
         }
         char *swapEntry = entries[entryIndex];
@@ -236,15 +260,18 @@ static void sortDirectoryEntries(char *entries[], size_t totalOfEntries) {
     }
 }
 
-static size_t getTotalOfDirectoryEntries(DIR *stream) {
+static size_t getTotalOfDirectoryEntries(DIR *stream)
+{
     size_t totalOfEntries = 0;
     for (; readdir(stream); totalOfEntries++)
         ;
     return totalOfEntries - 2;
 }
 
-static void revealType(struct stat &metadata) {
-    switch (metadata.st_mode & S_IFMT) {
+static void revealType(struct stat &metadata)
+{
+    switch (metadata.st_mode & S_IFMT)
+    {
     case S_IFREG:
         puts("regular");
         break;
@@ -271,7 +298,8 @@ static void revealType(struct stat &metadata) {
     }
 }
 
-static void revealSize(struct stat &metadata) {
+static void revealSize(struct stat &metadata)
+{
     float size;
     PARSE_SIZE_PREFIX_MULTIPLIER(1e9, "G");
     PARSE_SIZE_PREFIX_MULTIPLIER(1e6, "M");
@@ -279,11 +307,13 @@ static void revealSize(struct stat &metadata) {
     printByteSize(metadata.st_size, true);
 }
 
-static void revealByteSize(struct stat &metadata) {
+static void revealByteSize(struct stat &metadata)
+{
     printByteSize(metadata.st_size, false);
 }
 
-static void revealPermissions(struct stat &metadata) {
+static void revealPermissions(struct stat &metadata)
+{
     char read = 'r', write = 'w', execute = 'x';
     parsePermission(metadata, S_IRUSR, read);
     parsePermission(metadata, S_IWUSR, write);
@@ -297,7 +327,8 @@ static void revealPermissions(struct stat &metadata) {
     std::cout << std::endl;
 }
 
-static void revealOctalPermissions(struct stat &metadata) {
+static void revealOctalPermissions(struct stat &metadata)
+{
     std::cout << std::oct
               << (metadata.st_mode &
                   (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP |
@@ -305,11 +336,13 @@ static void revealOctalPermissions(struct stat &metadata) {
               << std::dec << std::endl;
 }
 
-static ReturnStatus revealUser(const char *path, struct stat &metadata) {
+static ReturnStatus revealUser(const char *path, struct stat &metadata)
+{
     char buffer[255];
     struct passwd user, *result;
     if (getpwuid_r(metadata.st_uid, &user, buffer, sizeof(buffer), &result) ||
-        !result) {
+        !result)
+    {
         return printError("can't discover user that owns \"" +
                               std::string(path) + "\".",
                           "Check if that is a dangling symlink.");
@@ -318,11 +351,13 @@ static ReturnStatus revealUser(const char *path, struct stat &metadata) {
     return ReturnStatus::Success;
 }
 
-static ReturnStatus revealGroup(const char *path, struct stat &metadata) {
+static ReturnStatus revealGroup(const char *path, struct stat &metadata)
+{
     char buffer[255];
     struct group group, *result;
     if (getgrgid_r(metadata.st_gid, &group, buffer, sizeof(buffer), &result) ||
-        !result) {
+        !result)
+    {
         return printError("can't discover group that owns \"" +
                               std::string(path) + "\".",
                           "Check if that is a dangling symlink.");
@@ -331,16 +366,19 @@ static ReturnStatus revealGroup(const char *path, struct stat &metadata) {
     return ReturnStatus::Success;
 }
 
-static void revealModificationDate(struct stat &metadata) {
+static void revealModificationDate(struct stat &metadata)
+{
     char modificationDate[29];
     std::strftime(modificationDate, sizeof(modificationDate),
                   "%a %b %d %T %Z %Y", std::localtime(&metadata.st_mtime));
     std::cout << modificationDate << std::endl;
 }
 
-static ReturnStatus revealFile(const char *path) {
+static ReturnStatus revealFile(const char *path)
+{
     std::FILE *stream = std::fopen(path, "r");
-    if (!stream) {
+    if (!stream)
+    {
         return printError("can't open file \"" + std::string(path) + "\".",
                           "Check if you have permission to read it.");
     }
@@ -351,14 +389,17 @@ static ReturnStatus revealFile(const char *path) {
     return ReturnStatus::Success;
 }
 
-static ReturnStatus revealDirectory(const char *path) {
+static ReturnStatus revealDirectory(const char *path)
+{
     DIR *stream = opendir(path);
-    if (!stream) {
+    if (!stream)
+    {
         return printError("can't open directory \"" + std::string(path) + "\".",
                           "Check if you have permission to read it.");
     }
     size_t totalOfEntries = getTotalOfDirectoryEntries(stream);
-    if (!totalOfEntries) {
+    if (!totalOfEntries)
+    {
         closedir(stream);
         return ReturnStatus::Success;
     }
@@ -366,7 +407,8 @@ static ReturnStatus revealDirectory(const char *path) {
     rewinddir(stream);
     allocateDirectoryEntries(stream, entries);
     sortDirectoryEntries(entries, totalOfEntries);
-    for (auto &entry : entries) {
+    for (auto &entry : entries)
+    {
         std::cout << entry << std::endl;
         delete[] entry;
     }
@@ -374,8 +416,10 @@ static ReturnStatus revealDirectory(const char *path) {
     return ReturnStatus::Success;
 }
 
-static ReturnStatus revealContents(const char *path, struct stat &metadata) {
-    switch (metadata.st_mode & S_IFMT) {
+static ReturnStatus revealContents(const char *path, struct stat &metadata)
+{
+    switch (metadata.st_mode & S_IFMT)
+    {
     case S_IFREG:
         return revealFile(path);
     case S_IFDIR:
@@ -392,14 +436,16 @@ static ReturnStatus revealContents(const char *path, struct stat &metadata) {
     }
 }
 
-static ReturnStatus reveal(const char *path) {
+static ReturnStatus reveal(const char *path)
+{
     struct stat metadata;
-    if (IS_FOLLOWING_SYMLINKS ? stat(path, &metadata)
-                              : lstat(path, &metadata)) {
+    if (IS_FOLLOWING_SYMLINKS ? stat(path, &metadata) : lstat(path, &metadata))
+    {
         return printError("can't find entry \"" + std::string(path) + "\".",
                           "Check if you misspelled it.");
     }
-    switch (DATA_TYPE) {
+    switch (DATA_TYPE)
+    {
     case DataType::Type:
         revealType(metadata);
         break;
@@ -435,7 +481,8 @@ static ReturnStatus reveal(const char *path) {
 }
 
 static ParseStatus parseDataTypeOptions(const char *path, const char *argument,
-                                        bool isLastArgument) {
+                                        bool isLastArgument)
+{
     PARSE_DATA_TYPE_OPTION("contents", DataType::Contents);
     PARSE_DATA_TYPE_OPTION("type", DataType::Type);
     PARSE_DATA_TYPE_OPTION("size", DataType::Size);
@@ -451,16 +498,18 @@ static ParseStatus parseDataTypeOptions(const char *path, const char *argument,
 }
 
 static ParseStatus parseSymlinkOptions(const char *path, const char *argument,
-                                       bool isLastArgument) {
+                                       bool isLastArgument)
+{
     PARSE_SYMLINK_OPTION("follow-symlinks", true);
     PARSE_SYMLINK_OPTION("unfollow-symlinks", false);
     return ParseStatus::NotParsed;
 }
 
-static void parseMetadataOptions(int totalOfArguments,
-                                 const char *arguments[]) {
+static void parseMetadataOptions(int totalOfArguments, const char *arguments[])
+{
     for (int argumentIndex = 1; argumentIndex < totalOfArguments;
-         argumentIndex++) {
+         argumentIndex++)
+    {
         PARSE_METADATA_OPTION("help", printHelp());
         PARSE_METADATA_OPTION("version",
                               std::cout << PROGRAM_VERSION << std::endl);
@@ -468,17 +517,20 @@ static void parseMetadataOptions(int totalOfArguments,
 }
 
 static void parseNonMetadataOptions(int totalOfArguments,
-                                    const char *arguments[]) {
+                                    const char *arguments[])
+{
     const char *path = ".";
     for (int argumentIndex = 1; argumentIndex < totalOfArguments;
-         argumentIndex++) {
+         argumentIndex++)
+    {
         const char *argument = arguments[argumentIndex];
         bool isLastArgument = argumentIndex == totalOfArguments - 1;
         if (parseDataTypeOptions(path, argument, isLastArgument) ==
                 ParseStatus::Parsed ||
             parseSymlinkOptions(path, argument, isLastArgument) ==
                 ParseStatus::Parsed ||
-            reveal(argument) == ReturnStatus::Failure) {
+            reveal(argument) == ReturnStatus::Failure)
+        {
             continue;
         }
         IS_EXPECTING_PATH_ARGUMENT = false;
@@ -486,8 +538,10 @@ static void parseNonMetadataOptions(int totalOfArguments,
     }
 }
 
-int main(int totalOfArguments, const char *arguments[]) {
-    if (totalOfArguments == 1) {
+int main(int totalOfArguments, const char *arguments[])
+{
+    if (totalOfArguments == 1)
+    {
         return parseExitCode(reveal("."));
     }
     parseMetadataOptions(totalOfArguments, arguments);
