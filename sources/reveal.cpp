@@ -67,20 +67,19 @@ static DataType DATA_TYPE = DataType::Contents;
 static bool     HAD_ERROR = false, IS_EXPECTING_PATH_ARGUMENT = false,
             IS_FOLLOWING_SYMLINKS = true;
 
-static int
-parseExitCode(int exitCode)
+static int parseExitCode(int exitCode)
 {
     return exitCode ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
-static void
-parsePermission(struct stat &metadata, int permission, char character)
+static void parsePermission(struct stat &metadata, int permission,
+                            char character)
 {
     std::cout << (metadata.st_mode & permission ? character : '-');
 }
 
-static ReturnStatus
-printError(std::string description, std::string fixSuggestion)
+static ReturnStatus printError(std::string description,
+                               std::string fixSuggestion)
 {
     std::cerr << PROGRAM_NAME << ": " << description << std::endl;
     if (fixSuggestion != "")
@@ -91,22 +90,19 @@ printError(std::string description, std::string fixSuggestion)
     return ReturnStatus::Failure;
 }
 
-static void
-printFloatSize(float value, std::string prefix)
+static void printFloatSize(float value, std::string prefix)
 {
     std::cout << std::fixed;
     std::cout.precision(1);
     std::cout << value << prefix << "B" << std::endl;
 }
 
-static void
-printByteSize(size_t size, bool isToUseUnit)
+static void printByteSize(size_t size, bool isToUseUnit)
 {
     std::cout << size << (isToUseUnit ? "B" : "") << std::endl;
 }
 
-static void
-printHelp()
+static void printHelp()
 {
     std::cout
         << "Usage: " << PROGRAM_NAME << " [OPTION | PATH]..." << std::endl
@@ -209,15 +205,13 @@ printHelp()
         << "appreciated." << std::endl;
 }
 
-static void
-throwError(std::string description)
+static void throwError(std::string description)
 {
     printError(description, "");
     std::exit(EXIT_FAILURE);
 }
 
-static void
-allocateDirectoryEntries(DIR *stream, char *entries[])
+static void allocateDirectoryEntries(DIR *stream, char *entries[])
 {
     size_t entryIndex = 0;
     for (struct dirent *entry; (entry = readdir(stream));)
@@ -243,8 +237,7 @@ allocateDirectoryEntries(DIR *stream, char *entries[])
     }
 }
 
-static void
-sortDirectoryEntries(char *entries[], size_t totalOfEntries)
+static void sortDirectoryEntries(char *entries[], size_t totalOfEntries)
 {
     for (size_t entryIndex = 0; entryIndex < totalOfEntries - 1; entryIndex++)
     {
@@ -267,8 +260,7 @@ sortDirectoryEntries(char *entries[], size_t totalOfEntries)
     }
 }
 
-static size_t
-getTotalOfDirectoryEntries(DIR *stream)
+static size_t getTotalOfDirectoryEntries(DIR *stream)
 {
     size_t totalOfEntries = 0;
     for (; readdir(stream); totalOfEntries++)
@@ -276,8 +268,7 @@ getTotalOfDirectoryEntries(DIR *stream)
     return totalOfEntries - 2;
 }
 
-static void
-revealType(struct stat &metadata)
+static void revealType(struct stat &metadata)
 {
     switch (metadata.st_mode & S_IFMT)
     {
@@ -307,8 +298,7 @@ revealType(struct stat &metadata)
     }
 }
 
-static void
-revealSize(struct stat &metadata)
+static void revealSize(struct stat &metadata)
 {
     float size;
     PARSE_SIZE_PREFIX_MULTIPLIER(1e9, "G");
@@ -317,14 +307,12 @@ revealSize(struct stat &metadata)
     printByteSize(metadata.st_size, true);
 }
 
-static void
-revealByteSize(struct stat &metadata)
+static void revealByteSize(struct stat &metadata)
 {
     printByteSize(metadata.st_size, false);
 }
 
-static void
-revealPermissions(struct stat &metadata)
+static void revealPermissions(struct stat &metadata)
 {
     char read = 'r', write = 'w', execute = 'x';
     parsePermission(metadata, S_IRUSR, read);
@@ -339,8 +327,7 @@ revealPermissions(struct stat &metadata)
     std::cout << std::endl;
 }
 
-static void
-revealOctalPermissions(struct stat &metadata)
+static void revealOctalPermissions(struct stat &metadata)
 {
     std::cout << std::oct
               << (metadata.st_mode &
@@ -349,8 +336,7 @@ revealOctalPermissions(struct stat &metadata)
               << std::dec << std::endl;
 }
 
-static ReturnStatus
-revealUser(const char *path, struct stat &metadata)
+static ReturnStatus revealUser(const char *path, struct stat &metadata)
 {
     char          buffer[255];
     struct passwd user, *result;
@@ -365,8 +351,7 @@ revealUser(const char *path, struct stat &metadata)
     return ReturnStatus::Success;
 }
 
-static ReturnStatus
-revealGroup(const char *path, struct stat &metadata)
+static ReturnStatus revealGroup(const char *path, struct stat &metadata)
 {
     char         buffer[255];
     struct group group, *result;
@@ -381,8 +366,7 @@ revealGroup(const char *path, struct stat &metadata)
     return ReturnStatus::Success;
 }
 
-static void
-revealModificationDate(struct stat &metadata)
+static void revealModificationDate(struct stat &metadata)
 {
     char modificationDate[29];
     std::strftime(modificationDate, sizeof(modificationDate),
@@ -390,8 +374,7 @@ revealModificationDate(struct stat &metadata)
     std::cout << modificationDate << std::endl;
 }
 
-static ReturnStatus
-revealFile(const char *path)
+static ReturnStatus revealFile(const char *path)
 {
     std::FILE *stream = std::fopen(path, "r");
     if (!stream)
@@ -406,8 +389,7 @@ revealFile(const char *path)
     return ReturnStatus::Success;
 }
 
-static ReturnStatus
-revealDirectory(const char *path)
+static ReturnStatus revealDirectory(const char *path)
 {
     DIR *stream = opendir(path);
     if (!stream)
@@ -434,8 +416,7 @@ revealDirectory(const char *path)
     return ReturnStatus::Success;
 }
 
-static ReturnStatus
-revealContents(const char *path, struct stat &metadata)
+static ReturnStatus revealContents(const char *path, struct stat &metadata)
 {
     switch (metadata.st_mode & S_IFMT)
     {
@@ -455,8 +436,7 @@ revealContents(const char *path, struct stat &metadata)
     }
 }
 
-static ReturnStatus
-reveal(const char *path)
+static ReturnStatus reveal(const char *path)
 {
     struct stat metadata;
     if (IS_FOLLOWING_SYMLINKS ? stat(path, &metadata) : lstat(path, &metadata))
@@ -500,9 +480,8 @@ reveal(const char *path)
     return ReturnStatus::Success;
 }
 
-static ParseStatus
-parseDataTypeOptions(const char *path, const char *argument,
-                     bool isLastArgument)
+static ParseStatus parseDataTypeOptions(const char *path, const char *argument,
+                                        bool isLastArgument)
 {
     PARSE_DATA_TYPE_OPTION("contents", DataType::Contents);
     PARSE_DATA_TYPE_OPTION("type", DataType::Type);
@@ -518,16 +497,15 @@ parseDataTypeOptions(const char *path, const char *argument,
     return ParseStatus::NotParsed;
 }
 
-static ParseStatus
-parseSymlinkOptions(const char *path, const char *argument, bool isLastArgument)
+static ParseStatus parseSymlinkOptions(const char *path, const char *argument,
+                                       bool isLastArgument)
 {
     PARSE_SYMLINK_OPTION("follow-symlinks", true);
     PARSE_SYMLINK_OPTION("unfollow-symlinks", false);
     return ParseStatus::NotParsed;
 }
 
-static void
-parseMetadataOptions(int totalOfArguments, const char *arguments[])
+static void parseMetadataOptions(int totalOfArguments, const char *arguments[])
 {
     for (int argumentIndex = 1; argumentIndex < totalOfArguments;
          argumentIndex++)
@@ -538,8 +516,8 @@ parseMetadataOptions(int totalOfArguments, const char *arguments[])
     }
 }
 
-static void
-parseNonMetadataOptions(int totalOfArguments, const char *arguments[])
+static void parseNonMetadataOptions(int         totalOfArguments,
+                                    const char *arguments[])
 {
     const char *path = ".";
     for (int argumentIndex = 1; argumentIndex < totalOfArguments;
@@ -560,8 +538,7 @@ parseNonMetadataOptions(int totalOfArguments, const char *arguments[])
     }
 }
 
-int
-main(int totalOfArguments, const char *arguments[])
+int main(int totalOfArguments, const char *arguments[])
 {
     if (totalOfArguments == 1)
     {
