@@ -1,0 +1,21 @@
+rvl - reveal
+============
+A program that reveals info about entries in the file system of POSIX systems.
+
+Requirements
+------------
+In order to build it, you will only need a C compiler.
+
+Installation
+------------
+- Compile the rvl.c file.
+
+    cc rvl.c -O3 -o rvl
+
+- Add the binary rvl to your system's PATH variable.
+
+Help
+----
+Read its help instructions.
+
+    rvl -h
