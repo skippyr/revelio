@@ -58,7 +58,7 @@ help(void)
 	puts("DATA TYPE OPTIONS");
 	puts("Use one of these options before paths to change the data type to "
 	     "retrieve from");
-	puts("them.\n");
+	puts("them. The default will be used if none is provided.\n");
 	puts("    -c (default)  reveals its contents.");
 	puts("    -t            reveals its type: regular (r), directory (d), "
 	     "symlink (s),");
@@ -77,9 +77,10 @@ help(void)
 	puts("    -md           reveals its last modified date.\n");
 	puts("SYMLINK OPTIONS");
 	puts("Use one of these options before paths to change the way symlinks "
-	     "are handled.\n");
-	puts("  -fl            follows symlinks.");
+	     "are handled.");
+	puts("The default will be used if none is provided.\n");
 	puts("  -ul (default)  unfollows symlinks.\n");
+	puts("  -fl            follows symlinks.");
 	puts("EXIT CODES");
 	printf("It returns %d on success, and %d otherwise.\n", EXIT_SUCCESS,
 	       EXIT_FAILURE);
