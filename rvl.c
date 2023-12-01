@@ -160,8 +160,8 @@ rvlhs(struct stat *s)
 {
 	float z, m[] = {1e9, 1e6, 1e3};
 	char p[] = {'G', 'M', 'k'};
-	for (int i = 0; i < 4; i++)
-		if ((int)(z = s->st_size / m[i])) {
+	for (int i = 0; i < 3; i++)
+		if ((z = s->st_size / m[i]) >= 1) {
 			printf("%.1f%cB\n", z, p[i]);
 			return;
 		}
