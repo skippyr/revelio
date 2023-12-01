@@ -130,8 +130,7 @@ rvldir(char *p)
 	DIR *d = opendir(p);
 	if (!d)
 		die("can't open directory \"%s\".", p);
-	for (struct dirent *e; (e = readdir(d));)
-		puts(e->d_name);
+	for (struct dirent *e; (e = readdir(d)); puts(e->d_name));
 	closedir(d);
 }
 
