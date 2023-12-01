@@ -1,6 +1,7 @@
 rvl - reveal
 ============
-A program that reveals info about entries in the file system of POSIX systems.
+A program that reveals info about entries in the Linux's file system. It is
+designed to work better with scripting languages.
 
 Requirements
 ------------
