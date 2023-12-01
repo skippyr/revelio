@@ -220,7 +220,7 @@ main(int c, char **v)
 {
 	for (int i = 1; i < c; i++) {
 		MFLAG("h", help());
-		MFLAG("v", puts("v16.0.0"));
+		MFLAG("v", puts("v16.0.1"));
 	}
 	for (int i = 1; i < c; i++) {
 		DTFLAG("c", DTC);
