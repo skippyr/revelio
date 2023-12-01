@@ -12,7 +12,7 @@
 
 #define NAME "rvl"
 #define FLAG(f, a) if (!strcmp(v[i], "-" f)) {a;}
-#define MFLAG(f, a) FLAG(f, a; return EXIT_SUCCESS)
+#define MFLAG(f, a) FLAG(f, a; return 0)
 #define NFLAG(f, a) FLAG(f, a; continue)
 #define DTFLAG(f, d) NFLAG(f, dt_g = d)
 #define LFLAG(f, l) NFLAG(f, fl_g = l)
@@ -43,7 +43,7 @@ die(char *e, ...)
 	fprintf(stderr, NAME ": ");
 	vfprintf(stderr, e, a);
 	va_end(a);
-	exit(EXIT_FAILURE);
+	exit(1);
 }
 
 static void
@@ -82,8 +82,7 @@ help(void)
 	puts("  -ul (default)  unfollows symlinks.");
 	puts("  -fl            follows symlinks.\n");
 	puts("EXIT CODES");
-	printf("It returns %d on success, and %d otherwise.\n", EXIT_SUCCESS,
-	       EXIT_FAILURE);
+	puts("It returns 0 on success, and 1 otherwise.");
 }
 
 static void
@@ -250,5 +249,5 @@ main(int c, char *v[])
 		LFLAG("ul", 0);
 		rvl(v[i]);
 	}
-	return EXIT_SUCCESS;
+	return 0;
 }
