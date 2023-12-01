@@ -199,20 +199,9 @@ rvlp(struct stat *s)
 void
 rvlt(struct stat *s)
 {
-	if (S_ISREG(s->st_mode))
-		putchar('r');
-	else if (S_ISDIR(s->st_mode))
-		putchar('d');
-	else if (S_ISLNK(s->st_mode))
-		putchar('l');
-	else if (S_ISCHR(s->st_mode))
-		putchar('c');
-	else if (S_ISBLK(s->st_mode))
-		putchar('b');
-	else if (S_ISSOCK(s->st_mode))
-		putchar('s');
-	else if (S_ISFIFO(s->st_mode))
-		putchar('f');
+	putchar(S_ISREG(s->st_mode) ? 'r' : S_ISDIR(s->st_mode) ? 'd' :
+		S_ISLNK(s->st_mode) ? 'l' : S_ISCHR(s->st_mode) ? 'c' :
+		S_ISBLK(s->st_mode) ? 's' : 'f');
 	putchar('\n');
 }
 
