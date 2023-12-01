@@ -19,7 +19,7 @@
 
 enum {DTC, DTT, DTS, DTHS, DTP, DTOP, DTU, DTUI, DTG, DTGI, DTMD};
 
-static void die(char *fmt, ...);
+static void die(char *e, ...);
 static void help(void);
 static void rvl(char *p);
 static void rvldir(char *p);
@@ -36,12 +36,12 @@ static void rvlu(char *p, struct stat *s);
 int dt_g = DTC, fl_g = 0;
 
 static void
-die(char *fmt, ...)
+die(char *e, ...)
 {
 	va_list a;
-	va_start(a, fmt);
+	va_start(a, e);
 	fprintf(stderr, NAME ": ");
-	vfprintf(stderr, fmt, a);
+	vfprintf(stderr, e, a);
 	va_end(a);
 	exit(EXIT_FAILURE);
 }
