@@ -91,16 +91,15 @@ rvl(char *p)
 	struct stat s;
 	if (fl_g ? stat(p, &s) : lstat(p, &s))
 		die("can't stat \"%s\".\n", p);
-	if (dt_g == DTC) {
-		if (S_ISREG(s.st_mode))
-			rvlreg(p);
-		else if (S_ISDIR(s.st_mode))
-			rvldir(p);
-		else if (S_ISLNK(s.st_mode))
-			rvllnk(p);
-		else
-			die("can't reveal contents of \"%s\".\n", p);
-	} else if (dt_g == DTT)
+	if (dt_g == DTC && S_ISREG(s.st_mode))
+		rvlreg(p);
+	else if (dt_g == DTC && S_ISDIR(s.st_mode))
+		rvldir(p);
+	else if (dt_g == DTC && S_ISLNK(s.st_mode))
+		rvllnk(p);
+	else if (dt_g == DTC)
+		die("can't reveal contents of \"%s\".\n", p);
+	else if (dt_g == DTT)
 		rvlt(&s);
 	else if (dt_g == DTS)
 		printf("%ld\n", s.st_size);
