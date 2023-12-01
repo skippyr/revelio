@@ -216,7 +216,7 @@ rvlu(char *p, struct stat *s)
 }
 
 int
-main(int c, char *v[])
+main(int c, char **v)
 {
 	for (int i = 1; i < c; i++) {
 		MFLAG("h", help());
