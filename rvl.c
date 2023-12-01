@@ -19,23 +19,23 @@
 
 enum {DTC, DTT, DTS, DTHS, DTP, DTOP, DTU, DTUI, DTG, DTGI, DTMD};
 
-static void die(char *e, ...);
-static void help(void);
-static void rvl(char *p);
-static void rvldir(char *p);
-static void rvlg(char *p, struct stat *s);
-static void rvlhs(struct stat *s);
-static void rvllnk(char *p);
-static void rvlmd(struct stat *s);
-static void rvlp(struct stat *s);
-static void rvlreg(char *p);
-static void rvls(struct stat *s);
-static void rvlt(struct stat *s);
-static void rvlu(char *p, struct stat *s);
+void die(char *, ...);
+void help(void);
+void rvl(char *);
+void rvldir(char *);
+void rvlg(char *, struct stat *);
+void rvlhs(struct stat *);
+void rvllnk(char *);
+void rvlmd(struct stat *);
+void rvlp(struct stat *);
+void rvlreg(char *);
+void rvls(struct stat *);
+void rvlt(struct stat *);
+void rvlu(char *, struct stat *);
 
 int dt_g = DTC, fl_g = 0;
 
-static void
+void
 die(char *e, ...)
 {
 	va_list a;
@@ -46,7 +46,7 @@ die(char *e, ...)
 	exit(1);
 }
 
-static void
+void
 help(void)
 {
 	puts("Usage: " NAME " [OPTIONS | PATHS]...");
@@ -85,7 +85,7 @@ help(void)
 	puts("It returns 0 on success, and 1 otherwise.");
 }
 
-static void
+void
 rvl(char *p)
 {
 	struct stat s;
@@ -125,7 +125,7 @@ rvl(char *p)
 		rvlmd(&s);
 }
 
-static void
+void
 rvldir(char *p)
 {
 	DIR *d = opendir(p);
@@ -136,7 +136,7 @@ rvldir(char *p)
 	closedir(d);
 }
 
-static void
+void
 rvlreg(char *p)
 {
 	FILE *f = fopen(p, "r");
@@ -146,7 +146,7 @@ rvlreg(char *p)
 	fclose(f);
 }
 
-static void
+void
 rvlg(char *p, struct stat *s)
 {
 	char b[255];
@@ -156,7 +156,7 @@ rvlg(char *p, struct stat *s)
 	puts(u.gr_name);
 }
 
-static void
+void
 rvlhs(struct stat *s)
 {
 	float z, m[] = {1e9, 1e6, 1e3};
@@ -169,7 +169,7 @@ rvlhs(struct stat *s)
 	printf("%ldB\n", s->st_size);
 }
 
-static void
+void
 rvllnk(char *p)
 {
 	char b[100];
@@ -177,7 +177,7 @@ rvllnk(char *p)
 	puts(b);
 }
 
-static void
+void
 rvlmd(struct stat *s)
 {
 	char m[29];
@@ -185,7 +185,7 @@ rvlmd(struct stat *s)
 	puts(m);
 }
 
-static void
+void
 rvlp(struct stat *s)
 {
 	unsigned long p[] = {S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP, S_IWGRP,
@@ -196,7 +196,7 @@ rvlp(struct stat *s)
 	putchar('\n');
 }
 
-static void
+void
 rvlt(struct stat *s)
 {
 	if (S_ISREG(s->st_mode))
@@ -216,7 +216,7 @@ rvlt(struct stat *s)
 	putchar('\n');
 }
 
-static void
+void
 rvlu(char *p, struct stat *s)
 {
 	char b[255];
