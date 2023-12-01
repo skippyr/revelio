@@ -29,7 +29,6 @@ void rvllnk(char *);
 void rvlmd(struct stat *);
 void rvlp(struct stat *);
 void rvlreg(char *);
-void rvls(struct stat *);
 void rvlt(struct stat *);
 void rvlu(char *, struct stat *);
 
@@ -135,16 +134,6 @@ rvldir(char *p)
 }
 
 void
-rvlreg(char *p)
-{
-	FILE *f = fopen(p, "r");
-	if (!f)
-		die("can't open file \"%s\".", p);
-	for (char c; (c = fgetc(f)) != EOF; putchar(c));
-	fclose(f);
-}
-
-void
 rvlg(char *p, struct stat *s)
 {
 	char b[255];
@@ -192,6 +181,16 @@ rvlp(struct stat *s)
 	for (int i = 0; i < 9; i++)
 		putchar(s->st_mode & p[i] ? c[i < 3 ? i : (i - 3) % 3] : '-');
 	putchar('\n');
+}
+
+void
+rvlreg(char *p)
+{
+	FILE *f = fopen(p, "r");
+	if (!f)
+		die("can't open file \"%s\".", p);
+	for (char c; (c = fgetc(f)) != EOF; putchar(c));
+	fclose(f);
 }
 
 void
