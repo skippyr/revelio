@@ -60,6 +60,10 @@ help(void)
 	     "retrieve from");
 	puts("them.\n");
 	puts("    -c (default)  reveals its contents.");
+	puts("    -t            reveals its type: regular (r), directory (d), "
+	     "symlink (s),");
+	puts("                  character (c), block (b), socket (s) or fifo "
+	     "(f).");
 	puts("    -s            reveals its byte size.");
 	puts("    -hs           reveals its size using a human-readable unit.");
 	puts("    -p            reveals its read (r), write (w) and execution "
