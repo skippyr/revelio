@@ -23,15 +23,15 @@ static void die(char *fmt, ...);
 static void help(void);
 static void rvl(char *p);
 static void rvldir(char *p);
-static void rvlfile(char *p);
-static void rvlgrp(char *p, struct stat *s);
-static void rvlhsize(struct stat *s);
+static void rvlg(char *p, struct stat *s);
+static void rvlhs(struct stat *s);
 static void rvllnk(char *p);
-static void rvlmoddate(struct stat *s);
-static void rvlperms(struct stat *s);
-static void rvlsize(struct stat *s);
-static void rvltype(struct stat *s);
-static void rvlusr(char *p, struct stat *s);
+static void rvlmd(struct stat *s);
+static void rvlp(struct stat *s);
+static void rvlreg(char *p);
+static void rvls(struct stat *s);
+static void rvlt(struct stat *s);
+static void rvlu(char *p, struct stat *s);
 
 int dt_g = DTC, fl_g = 0;
 
@@ -79,8 +79,8 @@ help(void)
 	puts("Use one of these options before paths to change the way symlinks "
 	     "are handled.");
 	puts("The default will be used if none is provided.\n");
-	puts("  -ul (default)  unfollows symlinks.\n");
-	puts("  -fl            follows symlinks.");
+	puts("  -ul (default)  unfollows symlinks.");
+	puts("  -fl            follows symlinks.\n");
 	puts("EXIT CODES");
 	printf("It returns %d on success, and %d otherwise.\n", EXIT_SUCCESS,
 	       EXIT_FAILURE);
@@ -94,7 +94,7 @@ rvl(char *p)
 		die("can't stat \"%s\".\n", p);
 	if (dt_g == DTC) {
 		if (S_ISREG(s.st_mode))
-			rvlfile(p);
+			rvlreg(p);
 		else if (S_ISDIR(s.st_mode))
 			rvldir(p);
 		else if (S_ISLNK(s.st_mode))
@@ -102,28 +102,28 @@ rvl(char *p)
 		else
 			die("can't reveal contents of \"%s\".\n", p);
 	} else if (dt_g == DTT)
-		rvltype(&s);
+		rvlt(&s);
 	else if (dt_g == DTS)
 		printf("%ld\n", s.st_size);
 	else if (dt_g == DTHS)
-		rvlhsize(&s);
+		rvlhs(&s);
 	else if (dt_g == DTP)
-		rvlperms(&s);
+		rvlp(&s);
 	else if (dt_g == DTOP)
 		printf("%o\n",
 		       s.st_mode & (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP |
 				    S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH |
 				    S_IXOTH));
 	else if (dt_g == DTU)
-		rvlusr(p, &s);
+		rvlu(p, &s);
 	else if (dt_g == DTUI)
 		printf("%u\n", s.st_uid);
 	else if (dt_g == DTG)
-		rvlgrp(p, &s);
+		rvlg(p, &s);
 	else if (dt_g == DTGI)
 		printf("%u\n", s.st_gid);
 	else if (dt_g == DTMD)
-		rvlmoddate(&s);
+		rvlmd(&s);
 }
 
 static void
@@ -138,7 +138,7 @@ rvldir(char *p)
 }
 
 static void
-rvlfile(char *p)
+rvlreg(char *p)
 {
 	FILE *f = fopen(p, "r");
 	if (!f)
@@ -148,7 +148,7 @@ rvlfile(char *p)
 }
 
 static void
-rvlgrp(char *p, struct stat *s)
+rvlg(char *p, struct stat *s)
 {
 	char b[255];
 	struct group u, *r;
@@ -158,7 +158,7 @@ rvlgrp(char *p, struct stat *s)
 }
 
 static void
-rvlhsize(struct stat *s)
+rvlhs(struct stat *s)
 {
 	float z, m[] = {1e9, 1e6, 1e3};
 	char p[] = {'G', 'M', 'k'};
@@ -179,7 +179,7 @@ rvllnk(char *p)
 }
 
 static void
-rvlmoddate(struct stat *s)
+rvlmd(struct stat *s)
 {
 	char m[29];
 	strftime(m, sizeof(m),"%a %b %d %T %Z %Y", localtime(&s->st_mtime));
@@ -187,7 +187,7 @@ rvlmoddate(struct stat *s)
 }
 
 static void
-rvlperms(struct stat *s)
+rvlp(struct stat *s)
 {
 	unsigned long p[] = {S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP, S_IWGRP,
 			     S_IXGRP, S_IROTH, S_IWOTH, S_IXOTH};
@@ -198,7 +198,7 @@ rvlperms(struct stat *s)
 }
 
 static void
-rvltype(struct stat *s)
+rvlt(struct stat *s)
 {
 	if (S_ISREG(s->st_mode))
 		putchar('r');
@@ -218,7 +218,7 @@ rvltype(struct stat *s)
 }
 
 static void
-rvlusr(char *p, struct stat *s)
+rvlu(char *p, struct stat *s)
 {
 	char b[255];
 	struct passwd u, *r;
