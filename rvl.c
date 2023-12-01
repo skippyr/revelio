@@ -11,11 +11,11 @@
 #include <unistd.h>
 
 #define NAME "rvl"
-#define PARSEFLAG(f, a) if (!strcmp(argv[i], "-" f)) {a;}
-#define PARSEMFLAG(f, a) PARSEFLAG(f, a; return EXIT_SUCCESS)
-#define PARSENMFLAG(f, a) PARSEFLAG(f, a; continue)
-#define PARSEDTFLAG(f, d) PARSENMFLAG(f, dt_g = d)
-#define PARSELFLAG(f, l) PARSENMFLAG(f, fl_g = l)
+#define FLAG(f, a) if (!strcmp(v[i], "-" f)) {a;}
+#define MFLAG(f, a) FLAG(f, a; return EXIT_SUCCESS)
+#define NFLAG(f, a) FLAG(f, a; continue)
+#define DTFLAG(f, d) NFLAG(f, dt_g = d)
+#define LFLAG(f, l) NFLAG(f, fl_g = l)
 
 enum {DTC, DTT, DTS, DTHS, DTP, DTOP, DTU, DTUI, DTG, DTGI, DTMD};
 
@@ -228,27 +228,27 @@ rvlu(char *p, struct stat *s)
 }
 
 int
-main(int argc, char *argv[])
+main(int c, char *v[])
 {
-	for (int i = 1; i < argc; i++) {
-		PARSEMFLAG("h", help());
-		PARSEMFLAG("v", puts("v16.0.0"));
+	for (int i = 1; i < c; i++) {
+		MFLAG("h", help());
+		MFLAG("v", puts("v16.0.0"));
 	}
-	for (int i = 1; i < argc; i++) {
-		PARSEDTFLAG("c", DTC);
-		PARSEDTFLAG("t", DTT);
-		PARSEDTFLAG("s", DTS);
-		PARSEDTFLAG("hs", DTHS);
-		PARSEDTFLAG("p", DTP);
-		PARSEDTFLAG("op", DTOP);
-		PARSEDTFLAG("u", DTU);
-		PARSEDTFLAG("ui", DTUI);
-		PARSEDTFLAG("g", DTG);
-		PARSEDTFLAG("gi", DTGI);
-		PARSEDTFLAG("md", DTMD);
-		PARSELFLAG("fl", 1);
-		PARSELFLAG("ul", 0);
-		rvl(argv[i]);
+	for (int i = 1; i < c; i++) {
+		DTFLAG("c", DTC);
+		DTFLAG("t", DTT);
+		DTFLAG("s", DTS);
+		DTFLAG("hs", DTHS);
+		DTFLAG("p", DTP);
+		DTFLAG("op", DTOP);
+		DTFLAG("u", DTU);
+		DTFLAG("ui", DTUI);
+		DTFLAG("g", DTG);
+		DTFLAG("gi", DTGI);
+		DTFLAG("md", DTMD);
+		LFLAG("fl", 1);
+		LFLAG("ul", 0);
+		rvl(v[i]);
 	}
 	return EXIT_SUCCESS;
 }
