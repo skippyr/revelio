@@ -19,6 +19,7 @@
 
 enum {DTC, DTT, DTS, DTHS, DTP, DTOP, DTU, DTUI, DTG, DTGI, DTMD};
 
+int alphacmp(const void *, const void *);
 void die(char *, ...);
 void help(void);
 void rvl(char *);
@@ -33,6 +34,12 @@ void rvlt(struct stat *);
 void rvlu(char *, struct stat *);
 
 int dt_g = DTC, fl_g = 0;
+
+int
+alphacmp(const void *a, const void *b)
+{
+	return strcmp(*(char **)a, *(char **)b);
+}
 
 void
 die(char *e, ...)
@@ -128,8 +135,33 @@ rvldir(char *p)
 {
 	DIR *d = opendir(p);
 	if (!d)
-		die("can't open directory \"%s\".", p);
-	for (struct dirent *e; (e = readdir(d)); puts(e->d_name));
+		die("can't open directory \"%s\".\n", p);
+	long unsigned i = 0;
+	for (; readdir(d); i++);
+	i -= 2;
+	if (!i) {
+		closedir(d);
+		return;
+	}
+	char *w[i];
+	i = 0;
+	rewinddir(d);
+	for (struct dirent *e; (e = readdir(d));) {
+		if (!strcmp(e->d_name, ".") || !strcmp(e->d_name, ".."))
+			continue;
+		long unsigned s = strlen(e->d_name) + 1;
+		char *a = malloc(s);
+		if (!a)
+			die("can't alloc memory.\n");
+		strcpy(a, e->d_name);
+		w[i] = a;
+		i++;
+	}
+	qsort(w, i, sizeof(char *), alphacmp);
+	for (long unsigned z = 0; z < i; z++) {
+		puts(w[z]);
+		free(w[z]);
+	}
 	closedir(d);
 }
 
@@ -139,7 +171,7 @@ rvlg(char *p, struct stat *s)
 	char b[255];
 	struct group u, *r;
 	if (getgrgid_r(s->st_gid, &u, b, sizeof(b), &r) || !r)
-		die("can't find group that owns \"%s\".", p);
+		die("can't find group that owns \"%s\".\n", p);
 	puts(u.gr_name);
 }
 
@@ -175,7 +207,7 @@ rvlmd(struct stat *s)
 void
 rvlp(struct stat *s)
 {
-	unsigned long p[] = {S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP, S_IWGRP,
+	long unsigned p[] = {S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP, S_IWGRP,
 			     S_IXGRP, S_IROTH, S_IWOTH, S_IXOTH};
 	char c[] = {'r', 'w', 'x'};
 	for (int i = 0; i < 9; i++)
@@ -188,7 +220,7 @@ rvlreg(char *p)
 {
 	FILE *f = fopen(p, "r");
 	if (!f)
-		die("can't open file \"%s\".", p);
+		die("can't open file \"%s\".\n", p);
 	for (char c; (c = fgetc(f)) != EOF; putchar(c));
 	fclose(f);
 }
@@ -208,7 +240,7 @@ rvlu(char *p, struct stat *s)
 	char b[255];
 	struct passwd u, *r;
 	if (getpwuid_r(s->st_uid, &u, b, sizeof(b), &r) || !r)
-		die("can't find user that owns \"%s\".", p);
+		die("can't find user that owns \"%s\".\n", p);
 	puts(u.pw_name);
 }
 
@@ -217,7 +249,7 @@ main(int c, char **v)
 {
 	for (int i = 1; i < c; i++) {
 		MFLAG("h", help());
-		MFLAG("v", puts("v16.0.2"));
+		MFLAG("v", puts("v16.1.0"));
 	}
 	for (int i = 1; i < c; i++) {
 		DTFLAG("c", DTC);
