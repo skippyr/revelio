@@ -35,15 +35,11 @@ void rvlu(char *, struct stat *);
 
 int dt_g = DTC, fl_g = 0;
 
-int
-alphacmp(const void *a, const void *b)
-{
+int alphacmp(const void *a, const void *b) {
 	return strcmp(*(char **)a, *(char **)b);
 }
 
-void
-die(char *e, ...)
-{
+void die(char *e, ...) {
 	va_list a;
 	va_start(a, e);
 	fprintf(stderr, NAME ": ");
@@ -52,9 +48,7 @@ die(char *e, ...)
 	exit(1);
 }
 
-void
-help(void)
-{
+void help(void) {
 	puts("Usage: " NAME " [OPTIONS | PATHS]...");
 	puts("Reveals info about entries in the file system.\n");
 	puts("META OPTIONS");
@@ -91,9 +85,7 @@ help(void)
 	puts("It returns 0 on success, and 1 otherwise.");
 }
 
-void
-rvl(char *p)
-{
+void rvl(char *p) {
 	struct stat s;
 	if (fl_g ? stat(p, &s) : lstat(p, &s))
 		die("can't stat \"%s\".\n", p);
@@ -130,9 +122,7 @@ rvl(char *p)
 		rvlmd(&s);
 }
 
-void
-rvldir(char *p)
-{
+void rvldir(char *p) {
 	DIR *d = opendir(p);
 	if (!d)
 		die("can't open directory \"%s\".\n", p);
@@ -165,9 +155,7 @@ rvldir(char *p)
 	closedir(d);
 }
 
-void
-rvlg(char *p, struct stat *s)
-{
+void rvlg(char *p, struct stat *s) {
 	char b[255];
 	struct group u, *r;
 	if (getgrgid_r(s->st_gid, &u, b, sizeof(b), &r) || !r)
@@ -175,9 +163,7 @@ rvlg(char *p, struct stat *s)
 	puts(u.gr_name);
 }
 
-void
-rvlhs(struct stat *s)
-{
+void rvlhs(struct stat *s) {
 	float z, m[] = {1e9, 1e6, 1e3};
 	char p[] = {'G', 'M', 'k'};
 	for (int i = 0; i < 3; i++)
@@ -188,25 +174,19 @@ rvlhs(struct stat *s)
 	printf("%ldB\n", s->st_size);
 }
 
-void
-rvllnk(char *p)
-{
+void rvllnk(char *p) {
 	char b[100];
 	b[readlink(p, b, sizeof(b))] = '\0';
 	puts(b);
 }
 
-void
-rvlmd(struct stat *s)
-{
+void rvlmd(struct stat *s) {
 	char m[29];
 	strftime(m, sizeof(m),"%a %b %d %T %Z %Y", localtime(&s->st_mtime));
 	puts(m);
 }
 
-void
-rvlp(struct stat *s)
-{
+void rvlp(struct stat *s) {
 	long unsigned p[] = {S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP, S_IWGRP,
 			     S_IXGRP, S_IROTH, S_IWOTH, S_IXOTH};
 	char c[] = {'r', 'w', 'x'};
@@ -215,9 +195,7 @@ rvlp(struct stat *s)
 	putchar('\n');
 }
 
-void
-rvlreg(char *p)
-{
+void rvlreg(char *p) {
 	FILE *f = fopen(p, "r");
 	if (!f)
 		die("can't open file \"%s\".\n", p);
@@ -225,18 +203,14 @@ rvlreg(char *p)
 	fclose(f);
 }
 
-void
-rvlt(struct stat *s)
-{
+void rvlt(struct stat *s) {
 	putchar(S_ISREG(s->st_mode) ? 'r' : S_ISDIR(s->st_mode) ? 'd' :
 		S_ISLNK(s->st_mode) ? 'l' : S_ISCHR(s->st_mode) ? 'c' :
 		S_ISBLK(s->st_mode) ? 's' : 'f');
 	putchar('\n');
 }
 
-void
-rvlu(char *p, struct stat *s)
-{
+void rvlu(char *p, struct stat *s) {
 	char b[255];
 	struct passwd u, *r;
 	if (getpwuid_r(s->st_uid, &u, b, sizeof(b), &r) || !r)
@@ -244,9 +218,7 @@ rvlu(char *p, struct stat *s)
 	puts(u.pw_name);
 }
 
-int
-main(int c, char **v)
-{
+int main(int c, char **v) {
 	for (int i = 1; i < c; i++) {
 		MFLAG("h", help());
 		MFLAG("v", puts("v16.1.0"));
