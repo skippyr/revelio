@@ -1,0 +1,109 @@
+.TH RVL 1 v16.2.0 RVL
+.SH NAME
+rvl - reveals info about file system entries.
+
+.SH SYNOPSIS
+rvl [\fIOPTION\fP | \fIPATH\fP]...
+
+.SH DESCRIPTION
+It reveals info about each entry PATH(s) given as arguments. Use its OPTION(s)
+before them for custom readings. Mix them together to obtain various results at
+once.
+
+.SH DATA TYPE OPTIONS
+Use these options before entry paths to set the data type to be retrieved. If
+none is used, the one marked as default is considered.
+
+.TP
+.B \-c
+(default) reveal its contents. For files, it will be their contents, and for
+directories, their entries.
+.TP
+.B \-t
+reveals its type: regular (r), directory (d), symlink (l), character (c),
+block (b), socket (s) or fifo (f).
+.TP
+.B \-s
+reveals its byte size.
+.TP
+.B \-hs
+reveals its size using the most convenient unit for a human read.
+.TP
+.B \-p
+reveals its read (r), write (w), execution (x) and lack (-)  permissions for
+user, group and others.
+.TP
+.B \-op
+reveals its permissions in octal base.
+.TP
+.B \-u
+reveals the user that owns it.
+.TP
+.B \-ui
+reveals the UID of the user that owns it.
+.TP
+.B \-g
+reveals the group that owns it.
+.TP
+.B \-gi
+reveals the GID of the group that owns it.
+.TP
+.B \-md
+reveals its last modified date.
+
+.SH SYMLINK OPTIONS
+Use these options before entry paths to set how symlinks are handled. If
+none is used, the one marked as default is considered.
+
+.TP
+.B \-ul
+(default) unfollows symlinks.
+.TP
+.B \-fl
+follows symlinks.
+
+.SH EXAMPLES
+
+# reveals the entries in the current directory.
+.br
+rvl .
+
+# reveals the type of some unknown entries.
+.br
+rvl -t ../entry{1,2}
+
+# reveals the permissions of a file and current directory.
+.br
+rvl -p file.txt -op .
+
+# combine it with wildcards and utilities.
+.br
+rvl -t ~/.*
+.br
+rvl /usr/bin | fmt
+.br
+date --date="$(rvl -md file.conf)" +"%H:%M"
+
+.SH EXIT STATUS
+It returns 0 on success, and 1 otherwise.
+
+.SH SOURCE CODE
+Its source code is available at <https://github.com/skippyr/rvl>.
+
+.SH BUGS
+Report bugs at <https://github.com/skippyr/rvl/issues>.
+
+.SH SEE ALSO
+.BR cat (1),
+.BR dir (1),
+.BR find (1),
+.BR ls (1),
+.BR lsblk (1),
+.BR readlink (1)
+
+.SH COPYRIGHT
+MIT License.
+.br
+Copyright (c) 2023 Sherman Rofeman <skippyr.developer@gmail.com>.
+
+See LICENSE for copyright and license details.
