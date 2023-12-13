@@ -19,6 +19,7 @@ enum { DT_CTTS, DT_TYPE, DT_SIZE, DT_HSIZE, DT_PERMS, DT_OPERMS, DT_USR, DT_UID,
        DT_GRP, DT_GID, DT_MDATE };
 
 static int alphacmp(const void *str0, const void *str1);
+static void *emalloc(size_t len);
 static void die(char *fmt, ...);
 static void rvl(char *path);
 static void rvldir(char *path);
@@ -38,6 +39,15 @@ static int
 alphacmp(const void *str0, const void *str1)
 {
 	return strcmp(*(char **)str0, *(char **)str1);
+}
+
+static void *
+emalloc(size_t len)
+{
+	void *p;
+	if (!(p = malloc(len)))
+		die("can't alloc memory.\n");
+	return p;
 }
 
 static void
@@ -94,37 +104,36 @@ static void
 rvldir(char *path)
 {
 	DIR *d = opendir(path);
-	struct dirent *e;
-	char *ent;
-	unsigned long entlen;
+	char **entnames;
+	char *entname;
 	int i;
 	int z;
+	size_t entlen;
+	struct dirent *e;
 	if (!d)
 		die("can't open directory \"%s\".\n", path);
 	for (i = -2; readdir(d); i++);
-	if (!i) {
-		closedir(d);
-		return;
-	}
-	char *ents[i];
+	if (!i)
+		goto close;
+	entnames = emalloc(sizeof(NULL) * i);
 	i = 0;
 	rewinddir(d);
 	while ((e = readdir(d))) {
 		if (!strcmp(e->d_name, ".") || !strcmp(e->d_name, ".."))
 			continue;
 		entlen = strlen(e->d_name) + 1;
-		ent = malloc(entlen);
-		if (!ent)
-			die("can't alloc memory.\n");
-		strcpy(ent, e->d_name);
-		ents[i] = ent;
+		entname = emalloc(entlen);
+		strcpy(entname, e->d_name);
+		entnames[i] = entname;
 		i++;
 	}
-	qsort(ents, i, sizeof(char *), alphacmp);
+	qsort(entnames, i, sizeof(NULL), alphacmp);
 	for (z = 0; z < i; z++) {
-		printf("%s\n", ents[z]);
-		free(ents[z]);
+		printf("%s\n", entnames[z]);
+		free(entnames[z]);
 	}
+	free(entnames);
+close:
 	closedir(d);
 }
 
