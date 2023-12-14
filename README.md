@@ -1,5 +1,6 @@
 # Reveal (rvl)
-A program that reveals info about file system entries on Linux.
+A program that reveals info about file system entries on Linux, such as:
+contents, type, permissions, ownership and modified date.
 
 ## Requirements
 In order to build it, you will only need a C90 compiler, like `tcc`.
