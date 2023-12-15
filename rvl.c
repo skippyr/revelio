@@ -11,7 +11,10 @@
 #include <unistd.h>
 
 #define PARSEDTFLAG(flag, dtval) PARSEFLAG(flag, dt = dtval; continue);
-#define PARSEFLAG(flag, act) if (!strcmp("-" flag, argv[i])) {act;}
+#define PARSEFLAG(flag, act)\
+	if (!strcmp("-" flag, argv[i])) {\
+		act;\
+	}
 #define PARSELFLAG(flag, isflval) PARSEFLAG(flag, isfl = isflval; continue);
 #define PARSEMETAFLAG(flag, act) PARSEFLAG(flag, act; return 0);
 
