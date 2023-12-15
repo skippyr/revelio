@@ -45,8 +45,9 @@ static void *
 emalloc(size_t len)
 {
 	void *p;
-	if (!(p = malloc(len)))
+	if (!(p = malloc(len))) {
 		die("can't alloc memory.\n");
+	}
 	return p;
 }
 
@@ -65,39 +66,40 @@ static void
 rvl(char *path)
 {
 	struct stat s;
-	if (isfl ? stat(path, &s) : lstat(path, &s))
+	if (isfl ? stat(path, &s) : lstat(path, &s)) {
 		die("can't stat \"%s\".\n", path);
-	if (dt == DT_CTTS && S_ISREG(s.st_mode))
+	} else if (dt == DT_CTTS && S_ISREG(s.st_mode)) {
 		rvlreg(path);
-	else if (dt == DT_CTTS && S_ISDIR(s.st_mode))
+	} else if (dt == DT_CTTS && S_ISDIR(s.st_mode)) {
 		rvldir(path);
-	else if (dt == DT_CTTS && S_ISLNK(s.st_mode))
+	} else if (dt == DT_CTTS && S_ISLNK(s.st_mode)) {
 		rvllnk(path);
-	else if (dt == DT_CTTS)
+	} else if (dt == DT_CTTS) {
 		die("can't reveal contents of \"%s\".\n", path);
-	else if (dt == DT_TYPE)
+	} else if (dt == DT_TYPE) {
 		rvltype(&s);
-	else if (dt == DT_SIZE)
+	} else if (dt == DT_SIZE) {
 		printf("%ld\n", s.st_size);
-	else if (dt == DT_HSIZE)
+	} else if (dt == DT_HSIZE) {
 		rvlhsize(&s);
-	else if (dt == DT_PERMS)
+	} else if (dt == DT_PERMS) {
 		rvlperms(&s);
-	else if (dt == DT_OPERMS)
+	} else if (dt == DT_OPERMS) {
 		printf("%o\n",
 		       s.st_mode & (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP |
 				    S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH |
 				    S_IXOTH));
-	else if (dt == DT_USR)
+	} else if (dt == DT_USR) {
 		rvlusr(path, &s);
-	else if (dt == DT_UID)
+	} else if (dt == DT_UID) {
 		printf("%u\n", s.st_uid);
-	else if (dt == DT_GRP)
+	} else if (dt == DT_GRP) {
 		rvlgrp(path, &s);
-	else if (dt == DT_GID)
+	} else if (dt == DT_GID) {
 		printf("%u\n", s.st_gid);
-	else if (dt == DT_MDATE)
+	} else if (dt == DT_MDATE) {
 		rvlmdate(&s);
+	}
 }
 
 static void
@@ -110,17 +112,20 @@ rvldir(char *path)
 	int z;
 	size_t entlen;
 	struct dirent *e;
-	if (!d)
+	if (!d) {
 		die("can't open directory \"%s\".\n", path);
+	}
 	for (i = -2; readdir(d); i++);
-	if (!i)
+	if (!i) {
 		goto close;
+	}
 	entnames = emalloc(sizeof(NULL) * i);
 	i = 0;
 	rewinddir(d);
 	while ((e = readdir(d))) {
-		if (!strcmp(e->d_name, ".") || !strcmp(e->d_name, ".."))
+		if (!strcmp(e->d_name, ".") || !strcmp(e->d_name, "..")) {
 			continue;
+		}
 		entlen = strlen(e->d_name) + 1;
 		entname = emalloc(entlen);
 		strcpy(entname, e->d_name);
@@ -143,8 +148,9 @@ rvlgrp(char *path, struct stat *s)
 	char buf[255];
 	struct group *res;
 	struct group grp;
-	if (getgrgid_r(s->st_gid, &grp, buf, sizeof(buf), &res) || !res)
+	if (getgrgid_r(s->st_gid, &grp, buf, sizeof(buf), &res) || !res) {
 		die("can't find group that owns \"%s\".\n", path);
+	}
 	printf("%s\n", grp.gr_name);
 }
 
@@ -155,11 +161,12 @@ rvlhsize(struct stat *s)
 	float mult[] = {1e9, 1e6, 1e3};
 	float size;
 	int i;
-	for (i = 0; i < 3; i++)
+	for (i = 0; i < 3; i++) {
 		if ((size = s->st_size / mult[i]) >= 1) {
 			printf("%.1f%cB\n", size, pref[i]);
 			return;
 		}
+	}
 	printf("%ldB\n", s->st_size);
 }
 
@@ -187,9 +194,10 @@ rvlperms(struct stat *s)
 				     S_IWGRP, S_IXGRP, S_IROTH, S_IWOTH,
 				     S_IXOTH};
 	int i;
-	for (i = 0; i < 9; i++)
+	for (i = 0; i < 9; i++) {
 		putchar(s->st_mode & permflags[i] ?
 			permchars[i < 3 ? i : (i - 3) % 3] : '-');
+	}
 	putchar('\n');
 }
 
@@ -198,8 +206,9 @@ rvlreg(char *path)
 {
 	FILE *f = fopen(path, "r");
 	char c;
-	if (!f)
+	if (!f) {
 		die("can't open file \"%s\".\n", path);
+	}
 	for (; (c = fgetc(f)) != EOF; putchar(c));
 	fclose(f);
 }
@@ -218,8 +227,9 @@ rvlusr(char *path, struct stat *s)
 	char buf[255];
 	struct passwd *res;
 	struct passwd usr;
-	if (getpwuid_r(s->st_uid, &usr, buf, sizeof(buf), &res) || !res)
+	if (getpwuid_r(s->st_uid, &usr, buf, sizeof(buf), &res) || !res) {
 		die("can't find user that owns \"%s\".\n", path);
+	}
 	printf("%s\n", usr.pw_name);
 }
 
