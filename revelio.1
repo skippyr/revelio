@@ -1,23 +1,22 @@
-.TH RVL 1 v16.2.1 RVL
+.TH REVELIO 1 v17.0.0 REVELIO
 .SH NAME
-rvl - reveals info about file system entries.
+revelio - reveals info about file system entries.
 
 .SH SYNOPSIS
-rvl [\fIOPTION\fP | \fIPATH\fP]...
+revelio [\fIOPTION\fP | \fIPATH\fP]...
 
 .SH DESCRIPTION
-It reveals info about each entry PATH(s) given as arguments. Use its OPTION(s)
-before them for custom readings. Mix them together to obtain various results at
-once.
+Reveals one or multiple info types about the entry \fIPATH\fP(s) given as
+arguments based on the \fIOPTION\fP(s) placed before each of them.
 
-.SH DATA TYPE OPTIONS
-Use these options before entry paths to set the data type to be retrieved. If
+.SH INFO TYPE OPTIONS
+Use these options before entry paths to set the info type to be retrieved. If
 none is used, the one marked as default is considered.
 
 .TP
 .B \-c
 (default) reveal its contents. For files, it will be their contents; For
-directories, their entries; and for unfollowed symlinks, what it points to.
+directories, their entries; and for unfollowed symlinks, what they point to.
 .TP
 .B \-t
 reveals its type: regular (r), directory (d), symlink (l), character (c),
@@ -66,32 +65,32 @@ follows symlinks.
 
 # reveals the entries in the current directory.
 .br
-rvl .
+revelio .
 
 # reveals the type of some unknown entries.
 .br
-rvl -t ../entry{1,2}
+revelio -t ../entry{1,2}
 
 # reveals the permissions of a file and current directory.
 .br
-rvl -p file.txt -op .
+revelio -p file.txt -op .
 
 # combine it with wildcards and utilities.
 .br
-rvl -t ~/.*
+revelio -t ~/.*
 .br
-rvl /usr/bin | fmt
+revelio /usr/bin | fmt
 .br
-date --date="$(rvl -md file.conf)" +"%H:%M"
+date --date="$(revelio -md file.conf)" +"%H:%M"
 
 .SH EXIT STATUS
 It returns 0 on success, and 1 otherwise.
 
 .SH SOURCE CODE
-Its source code is available at <https://github.com/skippyr/rvl>.
+Its source code is available at <https://github.com/skippyr/revelio>.
 
 .SH BUGS
-Report bugs at <https://github.com/skippyr/rvl/issues>.
+Report bugs at <https://github.com/skippyr/revelio/issues>.
 
 .SH SEE ALSO
 .BR cat (1),

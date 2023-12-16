@@ -10,7 +10,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#define PARSEDTFLAG(flag, dtval) PARSEFLAG(flag, dt = dtval; continue);
+#define PARSEITFLAG(flag, itval) PARSEFLAG(flag, it = itval; continue);
 #define PARSEFLAG(flag, act)\
 	if (!strcmp("-" flag, argv[i])) {\
 		act;\
@@ -18,24 +18,24 @@
 #define PARSELFLAG(flag, isflval) PARSEFLAG(flag, isfl = isflval; continue);
 #define PARSEMETAFLAG(flag, act) PARSEFLAG(flag, act; return 0);
 
-enum {DT_CTTS, DT_TYPE, DT_SIZE, DT_HSIZE, DT_PERMS, DT_OPERMS, DT_USR, DT_UID,
-      DT_GRP, DT_GID, DT_MDATE};
+enum {IT_CTTS, IT_TYPE, IT_SIZE, IT_HSIZE, IT_PERMS, IT_OPERMS, IT_USR, IT_UID,
+      IT_GRP, IT_GID, IT_MDATE};
 
 static int alphacmp(const void *str0, const void *str1);
 static void *emalloc(size_t len);
 static void die(char *fmt, ...);
-static void rvl(char *path);
-static void rvldir(char *path);
-static void rvlgrp(char *path, struct stat *s);
-static void rvlhsize(struct stat *s);
-static void rvllnk(char *path);
-static void rvlmdate(struct stat *s);
-static void rvlperms(struct stat *s);
-static void rvlreg(char *path);
-static void rvltype(struct stat *s);
-static void rvlusr(char *path, struct stat *s);
+static void reveal(char *path);
+static void revealdir(char *path);
+static void revealgrp(char *path, struct stat *s);
+static void revealhsize(struct stat *s);
+static void reveallnk(char *path);
+static void revealmdate(struct stat *s);
+static void revealperms(struct stat *s);
+static void revealreg(char *path);
+static void revealtype(struct stat *s);
+static void revealusr(char *path, struct stat *s);
 
-static int dt = DT_CTTS;
+static int it = IT_CTTS;
 static int isfl = 0;
 
 static int
@@ -59,54 +59,54 @@ die(char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	fprintf(stderr, "rvl: ");
+	fprintf(stderr, "revelio: ");
 	vfprintf(stderr, fmt, args);
 	va_end(args);
 	exit(1);
 }
 
 static void
-rvl(char *path)
+reveal(char *path)
 {
 	struct stat s;
 	if (isfl ? stat(path, &s) : lstat(path, &s)) {
 		die("can't stat \"%s\".\n", path);
-	} else if (dt == DT_CTTS && S_ISREG(s.st_mode)) {
-		rvlreg(path);
-	} else if (dt == DT_CTTS && S_ISDIR(s.st_mode)) {
-		rvldir(path);
-	} else if (dt == DT_CTTS && S_ISLNK(s.st_mode)) {
-		rvllnk(path);
-	} else if (dt == DT_CTTS) {
+	} else if (it == IT_CTTS && S_ISREG(s.st_mode)) {
+		revealreg(path);
+	} else if (it == IT_CTTS && S_ISDIR(s.st_mode)) {
+		revealdir(path);
+	} else if (it == IT_CTTS && S_ISLNK(s.st_mode)) {
+		reveallnk(path);
+	} else if (it == IT_CTTS) {
 		die("can't reveal contents of \"%s\".\n", path);
-	} else if (dt == DT_TYPE) {
-		rvltype(&s);
-	} else if (dt == DT_SIZE) {
+	} else if (it == IT_TYPE) {
+		revealtype(&s);
+	} else if (it == IT_SIZE) {
 		printf("%ld\n", s.st_size);
-	} else if (dt == DT_HSIZE) {
-		rvlhsize(&s);
-	} else if (dt == DT_PERMS) {
-		rvlperms(&s);
-	} else if (dt == DT_OPERMS) {
+	} else if (it == IT_HSIZE) {
+		revealhsize(&s);
+	} else if (it == IT_PERMS) {
+		revealperms(&s);
+	} else if (it == IT_OPERMS) {
 		printf("%o\n",
 		       s.st_mode & (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP |
 				    S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH |
 				    S_IXOTH));
-	} else if (dt == DT_USR) {
-		rvlusr(path, &s);
-	} else if (dt == DT_UID) {
+	} else if (it == IT_USR) {
+		revealusr(path, &s);
+	} else if (it == IT_UID) {
 		printf("%u\n", s.st_uid);
-	} else if (dt == DT_GRP) {
-		rvlgrp(path, &s);
-	} else if (dt == DT_GID) {
+	} else if (it == IT_GRP) {
+		revealgrp(path, &s);
+	} else if (it == IT_GID) {
 		printf("%u\n", s.st_gid);
-	} else if (dt == DT_MDATE) {
-		rvlmdate(&s);
+	} else if (it == IT_MDATE) {
+		revealmdate(&s);
 	}
 }
 
 static void
-rvldir(char *path)
+revealdir(char *path)
 {
 	DIR *d = opendir(path);
 	char **entnames;
@@ -146,7 +146,7 @@ close:
 }
 
 static void
-rvlgrp(char *path, struct stat *s)
+revealgrp(char *path, struct stat *s)
 {
 	char buf[255];
 	struct group *res;
@@ -158,7 +158,7 @@ rvlgrp(char *path, struct stat *s)
 }
 
 static void
-rvlhsize(struct stat *s)
+revealhsize(struct stat *s)
 {
 	char pref[] = {'G', 'M', 'k'};
 	float mult[] = {1e9, 1e6, 1e3};
@@ -174,7 +174,7 @@ rvlhsize(struct stat *s)
 }
 
 static void
-rvllnk(char *path)
+reveallnk(char *path)
 {
 	char buf[100];
 	buf[readlink(path, buf, sizeof(buf))] = 0;
@@ -182,7 +182,7 @@ rvllnk(char *path)
 }
 
 static void
-rvlmdate(struct stat *s)
+revealmdate(struct stat *s)
 {
 	char buf[29];
 	strftime(buf, sizeof(buf),"%a %b %d %T %Z %Y", localtime(&s->st_mtime));
@@ -190,7 +190,7 @@ rvlmdate(struct stat *s)
 }
 
 static void
-rvlperms(struct stat *s)
+revealperms(struct stat *s)
 {
 	char permchars[] = {'r', 'w', 'x'};
 	unsigned long permflags[] = {S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP,
@@ -205,7 +205,7 @@ rvlperms(struct stat *s)
 }
 
 static void
-rvlreg(char *path)
+revealreg(char *path)
 {
 	FILE *f = fopen(path, "r");
 	char c;
@@ -217,7 +217,7 @@ rvlreg(char *path)
 }
 
 static void
-rvltype(struct stat *s)
+revealtype(struct stat *s)
 {
 	printf("%c\n", S_ISREG(s->st_mode) ? 'r' : S_ISDIR(s->st_mode) ? 'd' :
 	       S_ISLNK(s->st_mode) ? 'l' : S_ISCHR(s->st_mode) ? 'c' :
@@ -225,7 +225,7 @@ rvltype(struct stat *s)
 }
 
 static void
-rvlusr(char *path, struct stat *s)
+revealusr(char *path, struct stat *s)
 {
 	char buf[255];
 	struct passwd *res;
@@ -241,20 +241,20 @@ main(int argc, char *argv[])
 {
 	int i;
 	for (i = 1; i < argc; i++) {
-		PARSEDTFLAG("c", DT_CTTS);
-		PARSEDTFLAG("t", DT_TYPE);
-		PARSEDTFLAG("s", DT_SIZE);
-		PARSEDTFLAG("hs", DT_HSIZE);
-		PARSEDTFLAG("p", DT_PERMS);
-		PARSEDTFLAG("op", DT_OPERMS);
-		PARSEDTFLAG("u", DT_USR);
-		PARSEDTFLAG("ui", DT_UID);
-		PARSEDTFLAG("g", DT_GRP);
-		PARSEDTFLAG("gi", DT_GID);
-		PARSEDTFLAG("md", DT_MDATE);
+		PARSEITFLAG("c", IT_CTTS);
+		PARSEITFLAG("t", IT_TYPE);
+		PARSEITFLAG("s", IT_SIZE);
+		PARSEITFLAG("hs", IT_HSIZE);
+		PARSEITFLAG("p", IT_PERMS);
+		PARSEITFLAG("op", IT_OPERMS);
+		PARSEITFLAG("u", IT_USR);
+		PARSEITFLAG("ui", IT_UID);
+		PARSEITFLAG("g", IT_GRP);
+		PARSEITFLAG("gi", IT_GID);
+		PARSEITFLAG("md", IT_MDATE);
 		PARSELFLAG("ul", 0);
 		PARSELFLAG("fl", 1);
-		rvl(argv[i]);
+		reveal(argv[i]);
 	}
 	return 0;
 }

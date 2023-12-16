@@ -1,23 +1,23 @@
-# Reveal (rvl)
+# revelio
 A program that reveals info about file system entries on Linux, such as:
 contents, type, permissions, ownership and modified date.
 
 ## Requirements
-In order to build it, you will only need a C90 compiler, like `tcc`.
+In order to build it, you will only need a C compiler, like `tcc`.
 
 ## Installation
-- Compile the file `rvl.c`.
+- Compile the file `revelio.c`.
 
 ```bash
 mkdir -p ~/.local/bin
-tcc -o ~/.local/bin/rvl rvl.c
+tcc -o ~/.local/bin/revelio revelio.c
 ```
 
-- Install the manual page `rvl.1`.
+- Install the manual page `revelio.1`.
 
 ```bash
 mkdir -p ~/.local/share/man/man1
-cp rvl.1 ~/.local/share/man/man1
+cp revelio.1 ~/.local/share/man/man1
 ```
 
 If necessary, add the `~/.local/bin` and `~/.local/share/man/man1` directories
@@ -33,7 +33,7 @@ export MANPATH=${MANPATH}:~/.local/share/man/man1
 Once installed, you can read its manual.
 
 ```bash
-man rvl.1
+man revelio.1
 ```
 
 ## Copyright
