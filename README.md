@@ -1,9 +1,9 @@
 # revelio
-A program that reveals info about file system entries on Linux, such as:
+A program that reveals info about file system entries on Linux, such as: their
 contents, type, permissions, ownership and modified date.
 
 ## Requirements
-In order to build it, you will only need a C compiler, like `tcc`.
+In order to build it, you will only need a C99 compiler, like `tcc`.
 
 ## Installation
 - Compile the file `revelio.c`.

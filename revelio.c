@@ -1,4 +1,3 @@
-/* See LICENSE file for copyright and license details. */
 #define _POSIX_C_SOURCE 200809L
 #include <dirent.h>
 #include <grp.h>
@@ -49,9 +48,8 @@ static void *
 emalloc(size_t len)
 {
 	void *p;
-	if (!(p = malloc(len))) {
+	if (!(p = malloc(len)))
 		die("can't alloc memory.\n");
-	}
 	return p;
 }
 
@@ -70,40 +68,39 @@ static void
 reveal(char *path)
 {
 	struct stat s;
-	if (isfl ? stat(path, &s) : lstat(path, &s)) {
+	if (isfl ? stat(path, &s) : lstat(path, &s))
 		die("can't stat \"%s\".\n", path);
-	} else if (it == IT_CTTS && S_ISREG(s.st_mode)) {
+	else if (it == IT_CTTS && S_ISREG(s.st_mode))
 		revealreg(path);
-	} else if (it == IT_CTTS && S_ISDIR(s.st_mode)) {
+	else if (it == IT_CTTS && S_ISDIR(s.st_mode))
 		revealdir(path);
-	} else if (it == IT_CTTS && S_ISLNK(s.st_mode)) {
+	else if (it == IT_CTTS && S_ISLNK(s.st_mode))
 		reveallnk(path);
-	} else if (it == IT_CTTS) {
+	else if (it == IT_CTTS)
 		die("can't reveal contents of \"%s\".\n", path);
-	} else if (it == IT_TYPE) {
+	else if (it == IT_TYPE)
 		revealtype(&s);
-	} else if (it == IT_SIZE) {
+	else if (it == IT_SIZE)
 		printf("%ld\n", s.st_size);
-	} else if (it == IT_HSIZE) {
+	else if (it == IT_HSIZE)
 		revealhsize(&s);
-	} else if (it == IT_PERMS) {
+	else if (it == IT_PERMS)
 		revealperms(&s);
-	} else if (it == IT_OPERMS) {
+	else if (it == IT_OPERMS)
 		printf("%o\n",
 		       s.st_mode & (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP |
 				    S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH |
 				    S_IXOTH));
-	} else if (it == IT_USR) {
+	else if (it == IT_USR)
 		revealusr(path, &s);
-	} else if (it == IT_UID) {
+	else if (it == IT_UID)
 		printf("%u\n", s.st_uid);
-	} else if (it == IT_GRP) {
+	else if (it == IT_GRP)
 		revealgrp(path, &s);
-	} else if (it == IT_GID) {
+	else if (it == IT_GID)
 		printf("%u\n", s.st_gid);
-	} else if (it == IT_MDATE) {
+	else if (it == IT_MDATE)
 		revealmdate(&s);
-	}
 }
 
 static void
@@ -116,20 +113,17 @@ revealdir(char *path)
 	int z;
 	size_t entlen;
 	struct dirent *e;
-	if (!d) {
+	if (!d)
 		die("can't open directory \"%s\".\n", path);
-	}
 	for (i = -2; readdir(d); i++);
-	if (!i) {
+	if (!i)
 		goto close;
-	}
 	entnames = emalloc(sizeof(NULL) * i);
 	i = 0;
 	rewinddir(d);
 	while ((e = readdir(d))) {
-		if (!strcmp(e->d_name, ".") || !strcmp(e->d_name, "..")) {
+		if (!strcmp(e->d_name, ".") || !strcmp(e->d_name, ".."))
 			continue;
-		}
 		entlen = strlen(e->d_name) + 1;
 		entname = emalloc(entlen);
 		strcpy(entname, e->d_name);
@@ -152,9 +146,8 @@ revealgrp(char *path, struct stat *s)
 	char buf[255];
 	struct group *res;
 	struct group grp;
-	if (getgrgid_r(s->st_gid, &grp, buf, sizeof(buf), &res) || !res) {
+	if (getgrgid_r(s->st_gid, &grp, buf, sizeof(buf), &res) || !res)
 		die("can't find group that owns \"%s\".\n", path);
-	}
 	printf("%s\n", grp.gr_name);
 }
 
@@ -165,12 +158,11 @@ revealhsize(struct stat *s)
 	float mult[] = {1e9, 1e6, 1e3};
 	float size;
 	int i;
-	for (i = 0; i < 3; i++) {
+	for (i = 0; i < 3; i++)
 		if ((size = s->st_size / mult[i]) >= 1) {
 			printf("%.1f%cB\n", size, pref[i]);
 			return;
 		}
-	}
 	printf("%ldB\n", s->st_size);
 }
 
@@ -198,10 +190,9 @@ revealperms(struct stat *s)
 				     S_IWGRP, S_IXGRP, S_IROTH, S_IWOTH,
 				     S_IXOTH};
 	int i;
-	for (i = 0; i < 9; i++) {
+	for (i = 0; i < 9; i++)
 		putchar(s->st_mode & permflags[i] ?
 			permchars[i < 3 ? i : (i - 3) % 3] : '-');
-	}
 	putchar('\n');
 }
 
@@ -210,9 +201,8 @@ revealreg(char *path)
 {
 	FILE *f = fopen(path, "r");
 	char c;
-	if (!f) {
+	if (!f)
 		die("can't open file \"%s\".\n", path);
-	}
 	for (; (c = fgetc(f)) != EOF; putchar(c));
 	fclose(f);
 }
@@ -231,9 +221,8 @@ revealusr(char *path, struct stat *s)
 	char buf[255];
 	struct passwd *res;
 	struct passwd usr;
-	if (getpwuid_r(s->st_uid, &usr, buf, sizeof(buf), &res) || !res) {
+	if (getpwuid_r(s->st_uid, &usr, buf, sizeof(buf), &res) || !res)
 		die("can't find user that owns \"%s\".\n", path);
-	}
 	printf("%s\n", usr.pw_name);
 }
 
