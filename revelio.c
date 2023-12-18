@@ -125,8 +125,7 @@ revealdir(char *path)
 		if (!strcmp(e->d_name, ".") || !strcmp(e->d_name, ".."))
 			continue;
 		entname = emalloc(strlen(e->d_name) + 1);
-		strcpy(entname, e->d_name);
-		entnames[i] = entname;
+		entnames[i] = strcpy(entname, e->d_name);
 		i++;
 	}
 	qsort(entnames, i, sizeof(NULL), alphacmp);
