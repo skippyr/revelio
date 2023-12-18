@@ -112,7 +112,6 @@ revealdir(char *path)
 	char *entname;
 	int i;
 	int z;
-	size_t entlen;
 	struct dirent *e;
 	if (!d)
 		die("can't open directory \"%s\".\n", path);
@@ -125,8 +124,7 @@ revealdir(char *path)
 	while ((e = readdir(d))) {
 		if (!strcmp(e->d_name, ".") || !strcmp(e->d_name, ".."))
 			continue;
-		entlen = strlen(e->d_name) + 1;
-		entname = emalloc(entlen);
+		entname = emalloc(strlen(e->d_name) + 1);
 		strcpy(entname, e->d_name);
 		entnames[i] = entname;
 		i++;
