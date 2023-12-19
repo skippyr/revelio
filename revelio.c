@@ -19,8 +19,8 @@
 #define PARSELFLAG(flag, isflval) PARSEFLAG(flag, isfl = isflval; continue);
 #define PARSEMETAFLAG(flag, act) PARSEFLAG(flag, act; return 0);
 
-enum {ITCTTS, ITTYPE, ITSIZE, ITHSIZE, ITPERMS, ITOPERMS, ITUSR, ITUID, ITGRP,
-      ITGID, ITMDATE};
+enum {ItCtts, ItType, ItSize, ItHSize, ItPerms, ItOPerms, ItUsr, ItUid, ItGrp,
+      ItGid, ItMDate};
 
 static int alphacmp(const void *str0, const void *str1);
 static void *emalloc(size_t len);
@@ -36,7 +36,7 @@ static void revealreg(char *path);
 static void revealtype(struct stat *s);
 static void revealusr(char *path, struct stat *s);
 
-static int it = ITCTTS;
+static int it = ItCtts;
 static int isfl = 0;
 
 static int
@@ -71,36 +71,36 @@ reveal(char *path)
 	struct stat s;
 	if (isfl ? stat(path, &s) : lstat(path, &s))
 		die("can't stat \"%s\".\n", path);
-	else if (it == ITCTTS && S_ISREG(s.st_mode))
+	else if (it == ItCtts && S_ISREG(s.st_mode))
 		revealreg(path);
-	else if (it == ITCTTS && S_ISDIR(s.st_mode))
+	else if (it == ItCtts && S_ISDIR(s.st_mode))
 		revealdir(path);
-	else if (it == ITCTTS && S_ISLNK(s.st_mode))
+	else if (it == ItCtts && S_ISLNK(s.st_mode))
 		reveallnk(path);
-	else if (it == ITCTTS)
+	else if (it == ItCtts)
 		die("can't reveal contents of \"%s\".\n", path);
-	else if (it == ITTYPE)
+	else if (it == ItType)
 		revealtype(&s);
-	else if (it == ITSIZE)
+	else if (it == ItSize)
 		printf("%ld\n", s.st_size);
-	else if (it == ITHSIZE)
+	else if (it == ItHSize)
 		revealhsize(&s);
-	else if (it == ITPERMS)
+	else if (it == ItPerms)
 		revealperms(&s);
-	else if (it == ITOPERMS)
+	else if (it == ItOPerms)
 		printf("%o\n",
 		       s.st_mode & (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP |
 				    S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH |
 				    S_IXOTH));
-	else if (it == ITUSR)
+	else if (it == ItUsr)
 		revealusr(path, &s);
-	else if (it == ITUID)
+	else if (it == ItUid)
 		printf("%u\n", s.st_uid);
-	else if (it == ITGRP)
+	else if (it == ItGrp)
 		revealgrp(path, &s);
-	else if (it == ITGID)
+	else if (it == ItGid)
 		printf("%u\n", s.st_gid);
-	else if (it == ITMDATE)
+	else if (it == ItMDate)
 		revealmdate(&s);
 }
 
@@ -230,17 +230,17 @@ main(int argc, char **argv)
 {
 	int i;
 	for (i = 1; i < argc; i++) {
-		PARSEITFLAG("c", ITCTTS);
-		PARSEITFLAG("t", ITTYPE);
-		PARSEITFLAG("s", ITSIZE);
-		PARSEITFLAG("hs", ITHSIZE);
-		PARSEITFLAG("p", ITPERMS);
-		PARSEITFLAG("op", ITOPERMS);
-		PARSEITFLAG("u", ITUSR);
-		PARSEITFLAG("ui", ITUID);
-		PARSEITFLAG("g", ITGRP);
-		PARSEITFLAG("gi", ITGID);
-		PARSEITFLAG("md", ITMDATE);
+		PARSEITFLAG("c", ItCtts);
+		PARSEITFLAG("t", ItType);
+		PARSEITFLAG("s", ItSize);
+		PARSEITFLAG("hs", ItHSize);
+		PARSEITFLAG("p", ItPerms);
+		PARSEITFLAG("op", ItOPerms);
+		PARSEITFLAG("u", ItUsr);
+		PARSEITFLAG("ui", ItUid);
+		PARSEITFLAG("g", ItGrp);
+		PARSEITFLAG("gi", ItGid);
+		PARSEITFLAG("md", ItMDate);
 		PARSELFLAG("ul", 0);
 		PARSELFLAG("fl", 1);
 		reveal(argv[i]);
