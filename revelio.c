@@ -19,8 +19,8 @@
 #define PARSELFLAG(flag, isflval) PARSEFLAG(flag, isfl = isflval; continue);
 #define PARSEMETAFLAG(flag, act) PARSEFLAG(flag, act; return 0);
 
-enum {ItCtts, ItType, ItSize, ItHSize, ItPerms, ItOPerms, ItUsr, ItUid, ItGrp,
-      ItGid, ItMDate};
+enum { ItCtts, ItType, ItSize, ItHSize, ItPerms, ItOPerms, ItUsr, ItUid, ItGrp,
+       ItGid, ItMDate };
 
 static int alphacmp(const void *str0, const void *str1);
 static void *emalloc(size_t len);
@@ -152,8 +152,8 @@ revealgrp(char *path, struct stat *s)
 static void
 revealhsize(struct stat *s)
 {
-	char pref[] = {'G', 'M', 'k'};
-	float mult[] = {1e9, 1e6, 1e3};
+	char pref[] = { 'G', 'M', 'k' };
+	float mult[] = { 1e9, 1e6, 1e3 };
 	float size;
 	int i;
 	for (i = 0; i < 3; i++) {
@@ -184,10 +184,10 @@ revealmdate(struct stat *s)
 static void
 revealperms(struct stat *s)
 {
-	char permchars[] = {'r', 'w', 'x'};
-	unsigned long permflags[] = {S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP,
-				     S_IWGRP, S_IXGRP, S_IROTH, S_IWOTH,
-				     S_IXOTH};
+	char permchars[] = { 'r', 'w', 'x' };
+	unsigned long permflags[] = { S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP,
+				      S_IWGRP, S_IXGRP, S_IROTH, S_IWOTH,
+				      S_IXOTH };
 	int i;
 	for (i = 0; i < 9; i++)
 		putchar(s->st_mode & permflags[i] ?
