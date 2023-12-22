@@ -5,7 +5,7 @@ all: revelio
 clean:
 	rm -f revelio
 
-install: revelio
+install: all
 	mkdir -p $(BINPATH) $(MAN1PATH)
 	mv revelio $(BINPATH)
 	sed 's/MANDATE/$(VERSION)/' revelio.1 > $(MAN1PATH)/revelio.1
