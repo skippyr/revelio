@@ -4,4 +4,4 @@ CFLAGS:=-std=c99 -pedantic -Os -Wall
 SHELL:=/bin/sh
 LOCALPATH:=/usr/local
 BINPATH:=$(LOCALPATH)/bin
-MAN1PATH:=${LOCALPATH}/man/man1
+MAN1PATH:=$(LOCALPATH)/man/man1
