@@ -3,36 +3,28 @@ A program that reveals info about file system entries on Linux, such as: their
 contents, type, permissions, ownership and modified date.
 
 ## Requirements
-In order to build it, you will only need a C99 compiler, like `tcc`.
+In order to build it, you will only need a C99 compiler, like `gcc`, and `make`.
 
-## Installation
-- Compile the file `revelio.c`.
+## Install
+Edit the file `config.mk` to match your needs. Then, run the following command
+to install it (use `sudo` if necessary):
 
-```bash
-mkdir -p ~/.local/bin
-tcc -o ~/.local/bin/revelio revelio.c
+```sh
+make install
 ```
 
-- Install the manual page `revelio.1`.
+## Uninstall
+If you want to uninstall it, run the following command (use `sudo` if
+necessary):
 
-```bash
-mkdir -p ~/.local/share/man/man1
-cp revelio.1 ~/.local/share/man/man1
-```
-
-If necessary, add the `~/.local/bin` and `~/.local/share/man/man1` directories
-to your system `PATH` and `MANPATH` environment variables, respectively, in
-order to be able to access their files directly.
-
-```bash
-export PATH=${PATH}:~/.local/bin
-export MANPATH=${MANPATH}:~/.local/share/man/man1
+```sh
+make uninstall
 ```
 
 ## Documentation
 Once installed, you can read its manual.
 
-```bash
+```sh
 man revelio.1
 ```
 

@@ -1,15 +1,19 @@
-.TH revelio 1 v17.0.0
+.TH revelio 1 MANDATE
 .SH NAME
-revelio - reveals info about file system entries.
+.PP
+revelio - it reveals info about file system entries.
 
 .SH SYNOPSIS
+.PP
 revelio [\fIOPTION\fP | \fIPATH\fP]...
 
 .SH DESCRIPTION
-Reveals one or multiple info types about the entry \fIPATH\fP(s) given as
+.PP
+It reveals one or multiple info types about the entry \fIPATH\fP(s) given as
 arguments based on the \fIOPTION\fP(s) placed before each of them.
 
 .SH INFO TYPE OPTIONS
+.PP
 Use these options before entry paths to set the info type to be retrieved. If
 none is used, the one marked as default is considered.
 
@@ -51,6 +55,7 @@ reveals the GID of the group that owns it.
 reveals its last modified date.
 
 .SH SYMLINK OPTIONS
+.PP
 Use these options before entry paths to set how symlinks are handled. If
 none is used, the one marked as default is considered.
 
@@ -62,19 +67,22 @@ none is used, the one marked as default is considered.
 follows symlinks.
 
 .SH EXAMPLES
-
+.PP
 # reveals the entries in the current directory.
 .br
 revelio .
 
+.PP
 # reveals the type of some unknown entries.
 .br
 revelio -t ../entry{1,2}
 
+.PP
 # reveals the permissions of a file and current directory.
 .br
 revelio -p file.txt -op .
 
+.PP
 # combine it with wildcards and utilities.
 .br
 revelio -t ~/.*
@@ -84,25 +92,17 @@ revelio /usr/bin | fmt
 date --date="$(revelio -md file.conf)" +"%H:%M"
 
 .SH EXIT STATUS
+.PP
 It returns 0 on success, and 1 otherwise.
 
 .SH SOURCE CODE
+.PP
 Its source code is available at <https://github.com/skippyr/revelio>.
 
 .SH BUGS
+.PP
 Report bugs at <https://github.com/skippyr/revelio/issues>.
 
-.SH SEE ALSO
-.BR cat (1),
-.BR dir (1),
-.BR find (1),
-.BR ls (1),
-.BR lsblk (1),
-.BR readlink (1)
-
 .SH COPYRIGHT
-MIT License.
-.br
-Copyright (c) 2023 Sherman Rofeman <skippyr.developer@gmail.com>.
-
+.PP
 See LICENSE for copyright and license details.
