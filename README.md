@@ -28,5 +28,13 @@ Once installed, you can read its manual.
 man revelio.1
 ```
 
+## Bugs
+Report bugs at its [issues page](https://github.com/skippyr/revelio/issues).
+
+## Patches
+Send patches to be reviewed through its [pull requests page](https://github.com/skippyr/revelio/pulls).
+
+All contributions must remain under its same license.
+
 ## Copyright
 See `LICENSE` for copyright and license details.
