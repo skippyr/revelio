@@ -184,14 +184,14 @@ revealmdate(struct stat *s)
 static void
 revealperms(struct stat *s)
 {
-	char permchars[] = { 'r', 'w', 'x' };
-	unsigned long permflags[] = { S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP,
+	char chars[] = { 'r', 'w', 'x' };
+	unsigned long int flags[] = { S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP,
 				      S_IWGRP, S_IXGRP, S_IROTH, S_IWOTH,
 				      S_IXOTH };
 	int i;
 	for (i = 0; i < 9; i++)
-		putchar(s->st_mode & permflags[i] ?
-			permchars[i < 3 ? i : (i - 3) % 3] : '-');
+		putchar(s->st_mode & flags[i] ?
+			chars[i < 3 ? i : (i - 3) % 3] : '-');
 	putchar('\n');
 }
 
