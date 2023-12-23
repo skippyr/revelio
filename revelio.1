@@ -68,28 +68,17 @@ follows symlinks.
 
 .SH EXAMPLES
 .PP
-# reveals the entries in the current directory.
-.br
-revelio .
-
+$ revelio .
 .PP
-# reveals the type of some unknown entries.
-.br
-revelio -t ../entry{1,2}
-
+$ revelio -t ../entry{1,2}
 .PP
-# reveals the permissions of a file and current directory.
-.br
-revelio -p file.txt -op .
-
+$ revelio -p file.txt -op .
 .PP
-# combine it with wildcards and utilities.
-.br
-revelio -t ~/.*
-.br
-revelio /usr/bin | fmt
-.br
-date --date="$(revelio -md file.conf)" +"%H:%M"
+$ revelio -t ~/.*
+.PP
+$ revelio /usr/bin | fmt
+.PP
+$ date --date="$(revelio -md file.conf)" +"%H:%M"
 
 .SH EXIT STATUS
 .PP
