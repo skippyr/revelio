@@ -110,9 +110,9 @@ revealdir(char *path)
 	DIR *d = opendir(path);
 	char **entnames;
 	char *entname;
+	struct dirent *e;
 	unsigned short int i;
 	unsigned short int z;
-	struct dirent *e;
 	if (!d)
 		die("can't open directory \"%s\".\n", path);
 	for (i = 0; readdir(d); i++);
@@ -200,7 +200,7 @@ static void
 revealreg(char *path)
 {
 	FILE *f = fopen(path, "r");
-	char c;
+	int c;
 	if (!f)
 		die("can't open file \"%s\".\n", path);
 	for (; (c = fgetc(f)) != EOF; putchar(c));
