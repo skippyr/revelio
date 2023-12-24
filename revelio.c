@@ -37,7 +37,7 @@ static void revealtype(struct stat *s);
 static void revealusr(char *path, struct stat *s);
 
 static int it = ItCtts;
-static int isfl = 0;
+static unsigned char isfl = 0;
 
 static int
 alphacmp(const void *str0, const void *str1)
@@ -110,12 +110,13 @@ revealdir(char *path)
 	DIR *d = opendir(path);
 	char **entnames;
 	char *entname;
-	int i;
-	int z;
+	unsigned short int i;
+	unsigned short int z;
 	struct dirent *e;
 	if (!d)
 		die("can't open directory \"%s\".\n", path);
-	for (i = -2; readdir(d); i++);
+	for (i = 0; readdir(d); i++);
+	i -= 2;
 	if (!i)
 		goto close;
 	entnames = emalloc(sizeof(NULL) * i);
@@ -155,7 +156,7 @@ revealhsize(struct stat *s)
 	char pref[] = { 'G', 'M', 'k' };
 	float mult[] = { 1e9, 1e6, 1e3 };
 	float size;
-	int i;
+	unsigned char i;
 	for (i = 0; i < 3; i++) {
 		if ((size = s->st_size / mult[i]) >= 1) {
 			printf("%.1f%cB\n", size, pref[i]);
@@ -188,7 +189,7 @@ revealperms(struct stat *s)
 	unsigned long int flags[] = { S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP,
 				      S_IWGRP, S_IXGRP, S_IROTH, S_IWOTH,
 				      S_IXOTH };
-	int i;
+	unsigned char i;
 	for (i = 0; i < 9; i++)
 		putchar(s->st_mode & flags[i] ?
 			chars[i < 3 ? i : (i - 3) % 3] : '-');
@@ -228,7 +229,7 @@ revealusr(char *path, struct stat *s)
 int
 main(int argc, char **argv)
 {
-	int i;
+	unsigned short int i;
 	for (i = 1; i < argc; i++) {
 		PARSEITFLAG("c", ItCtts);
 		PARSEITFLAG("t", ItType);
