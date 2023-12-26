@@ -1,16 +1,17 @@
 include config.mk
 
-all: revelio
+all: build/revelio
 
 clean:
-	rm -f revelio
+	rm -rf build
 
 install: all
 	mkdir -p ${BINPATH} ${MAN1PATH}
-	mv revelio ${BINPATH}
-	sed 's/MANDATE/${VERSION}/' revelio.1 > ${MAN1PATH}/revelio.1
+	sed 's/MANDATE/${VERSION}/' man/revelio.1 > ${MAN1PATH}/revelio.1
+	cp build/revelio ${BINPATH}
 
-revelio: revelio.c
+build/revelio: src/revelio.c
+	mkdir -p build
 	${CC} ${CFLAGS} -o${@} ${^}
 
 uninstall:
